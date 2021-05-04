@@ -38,8 +38,7 @@ typedef unsigned int uint;
 #define RETRO_ANDROID  (5)
 #define RETRO_WP7      (6)
 // Custom Platforms start here
-#define RETRO_VITA (7)
-#define RETRO_UWP  (8)
+#define RETRO_UWP  (7)
 
 // Platform types (Game manages platform-specific code such as HUD position using this rather than the above)
 #define RETRO_STANDARD (0)
@@ -70,29 +69,23 @@ typedef unsigned int uint;
 #else
 #error "Unknown Apple platform"
 #endif
-#elif defined __vita__
-#define RETRO_PLATFORM (RETRO_VITA)
 #else
 #define RETRO_PLATFORM (RETRO_WIN) // Default
 #endif
 
-#if RETRO_PLATFORM == RETRO_VITA
-#define BASE_PATH            "ux0:data/SonicCD/"
-#define DEFAULT_SCREEN_XSIZE 480
-#define DEFAULT_FULLSCREEN   true
-#elif RETRO_PLATFORM == RETRO_UWP
+#if RETRO_PLATFORM == RETRO_UWP
 #define BASE_PATH            ""
-#define DEFAULT_SCREEN_XSIZE 424
+#define DEFAULT_SCREEN_XSIZE 320
 #define DEFAULT_FULLSCREEN   false
 #else
 #define BASE_PATH            ""
 #define RETRO_USING_MOUSE
 #define RETRO_USING_TOUCH
-#define DEFAULT_SCREEN_XSIZE 424
+#define DEFAULT_SCREEN_XSIZE 320
 #define DEFAULT_FULLSCREEN   false
 #endif
 
-#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS || RETRO_PLATFORM == RETRO_VITA                        \
+#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS                        \
     || RETRO_PLATFORM == RETRO_UWP
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (1)
@@ -116,9 +109,7 @@ typedef unsigned int uint;
 #else
 
 // use *this* macro to determine what platform the game thinks its running on (since only the first 7 platforms are supported natively by scripts)
-#if RETRO_PLATFORM == RETRO_VITA
-#define RETRO_GAMEPLATFORMID (RETRO_WIN)
-#elif RETRO_PLATFORM == RETRO_UWP
+#if RETRO_PLATFORM == RETRO_UWP
 #define RETRO_GAMEPLATFORMID (UAP_GetRetroGamePlatformId())
 #else
 #error Unspecified RETRO_GAMEPLATFORMID
@@ -204,7 +195,6 @@ extern bool engineDebugMode;
 #include "Player.hpp"
 #include "Palette.hpp"
 #include "Drawing.hpp"
-#include "Scene3D.hpp"
 #include "Collision.hpp"
 #include "Scene.hpp"
 #include "Script.hpp"

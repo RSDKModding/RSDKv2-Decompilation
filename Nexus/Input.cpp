@@ -275,29 +275,23 @@ void ProcessInput()
     else if (inputType == 1)
         inputDevice[INPUT_ANY].setReleased();
 
-#ifdef RETRO_USING_MOUSE
-    if (SDL_GetNumTouchFingers(SDL_GetTouchDevice(RETRO_TOUCH_DEVICE)) <= 0) { // Touch always takes priority over mouse
-#endif                                                                         //! RETRO_USING_SDL2
-        int mx = 0, my = 0;
-        SDL_GetMouseState(&mx, &my);
+    int mx = 0, my = 0;
+    SDL_GetMouseState(&mx, &my);
 
-        if ((mx == lastMouseX && my == lastMouseY)) {
-            ++mouseHideTimer;
-            if (mouseHideTimer == 120) {
-                SDL_ShowCursor(false);
-            }
+    if ((mx == lastMouseX && my == lastMouseY)) {
+        ++mouseHideTimer;
+        if (mouseHideTimer == 120) {
+            SDL_ShowCursor(false);
         }
-        else {
-            if (mouseHideTimer >= 120)
-                SDL_ShowCursor(true);
-            mouseHideTimer = 0;
-        }
-
-        lastMouseX = mx;
-        lastMouseY = my;
-#if RETRO_USING_SDL2
     }
-#endif //! RETRO_USING_MOUSE
+    else {
+        if (mouseHideTimer >= 120)
+            SDL_ShowCursor(true);
+        mouseHideTimer = 0;
+    }
+
+    lastMouseX = mx;
+    lastMouseY = my;
 
 #elif RETRO_USING_SDL1
     if (SDL_NumJoysticks() > 0) {

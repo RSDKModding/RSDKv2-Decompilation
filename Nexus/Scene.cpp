@@ -93,7 +93,7 @@ void InitFirstStage()
     activePlayer = 0;
     ClearGraphicsData();
     ClearAnimationData();
-    activePalette = fullPalette[0];
+    fullPalette = fullPalette[0];
     LoadPalette("MasterPalette.act", 0, 0, 0, 256);
     stageMode         = STAGEMODE_LOAD;
     Engine.gameMode   = ENGINE_MAINGAME;
