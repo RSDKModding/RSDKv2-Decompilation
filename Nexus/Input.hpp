@@ -48,12 +48,6 @@ extern InputData keyDown;
 
 extern bool anyPress;
 
-extern int touchDown[8];
-extern int touchX[8];
-extern int touchY[8];
-extern int touchID[8];
-extern int touches;
-
 #if !RETRO_USE_ORIGINAL_CODE
 extern InputButton inputDevice[INPUT_MAX];
 extern int inputType;
@@ -98,7 +92,5 @@ void ProcessInput();
 
 void CheckKeyPress(InputData *input, byte Flags);
 void CheckKeyDown(InputData *input, byte Flags);
-
-void QueueHapticEffect(int hapticID);
 
 #endif // !INPUT_H

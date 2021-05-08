@@ -8,12 +8,6 @@ InputData keyDown  = InputData();
 
 bool anyPress = false;
 
-int touchDown[8];
-int touchX[8];
-int touchY[8];
-int touchID[8];
-int touches = 0;
-
 #if !RETRO_USE_ORIGINAL_CODE
 #include <algorithm>
 #include <vector>
@@ -404,11 +398,4 @@ void CheckKeyDown(InputData *input, byte flags)
         input->C = inputDevice[INPUT_BUTTONC].hold;
     if (flags & 0x80)
         input->start = inputDevice[INPUT_START].hold;
-}
-
-void QueueHapticEffect(int hapticID)
-{
-    if (Engine.hapticsEnabled) {
-        //Haptic ID seems to be the ID for "Universal Haptic Layer"'s haptic effect library
-    }
 }

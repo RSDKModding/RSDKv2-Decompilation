@@ -11,8 +11,6 @@ struct Entity {
     int values[8];
     int scale;
     int rotation;
-    int animationTimer;
-    int animationSpeed;
     byte type;
     byte propertyValue;
     byte state;
@@ -20,30 +18,22 @@ struct Entity {
     byte drawOrder;
     byte direction;
     byte inkEffect;
-    byte alpha;
-    byte animation;
-    byte prevAnimation;
     byte frame;
 };
 
 enum ObjectTypes {
-    OBJ_TYPE_BLANKOBJECT = 0 //0 is always blank obj
+    OBJ_TYPE_BLANKOBJECT = 0, //0 is always blank obj
+    OBJ_TYPE_PLAYER = 1, //1 is always player obj
 };
 
 enum ObjectPriority {
-    PRIORITY_ACTIVE_BOUNDS,
-    PRIORITY_ACTIVE,
-    PRIORITY_ACTIVE_PAUSED,
-    PRIORITY_ACTIVE_XBOUNDS,
-    PRIORITY_ACTIVE_BOUNDS_REMOVE,
-    PRIORITY_INACTIVE,
+    PRIORITY_BOUNDS,
+    PRIORITY_ALWAYS,
 };
 
 extern int objectLoop;
 extern int curObjectType;
 extern Entity objectEntityList[ENTITY_COUNT];
-
-extern char typeNames[OBJECT_COUNT][0x40];
 
 extern int OBJECT_BORDER_X1;
 extern int OBJECT_BORDER_X2;

@@ -89,8 +89,6 @@ struct TileLayer {
     int XPos;
     int YPos;
     int ZPos;
-    int deformationOffset;
-    int deformationOffsetW;
     byte type;
     byte width;
     byte height;
@@ -101,7 +99,7 @@ struct LineScroll {
     int scrollSpeed[PARALLAX_COUNT];
     int scrollPos[PARALLAX_COUNT];
     int linePos[PARALLAX_COUNT];
-    int deform[PARALLAX_COUNT];
+    byte deform[PARALLAX_COUNT];
     byte entryCount;
 };
 
@@ -191,7 +189,6 @@ extern byte tilesetGFXData[TILESET_SIZE];
 extern ushort tile3DFloorBuffer[0x13334];
 extern bool drawStageGFXHQ;
 
-void InitFirstStage();
 void ProcessStage();
 
 void ResetBackgroundSettings();

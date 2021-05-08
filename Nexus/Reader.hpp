@@ -41,15 +41,11 @@ struct FileInfo {
     int readPos;
     int bufferPosition;
     int virtualFileOffset;
-    byte eStringPosA;
-    byte eStringPosB;
-    byte eStringNo;
-    byte eNybbleSwap;
     FileIO *cFileHandle;
     byte isMod;
 };
 
-extern char rsdkName[0x400];
+extern char binFileName[0x400];
 
 extern char fileName[0x100];
 extern byte fileBuffer[0x2000];
@@ -59,12 +55,6 @@ extern int readPos;
 extern int readSize;
 extern int bufferPosition;
 extern int virtualFileOffset;
-extern byte eStringPosA;
-extern byte eStringPosB;
-extern byte eStringNo;
-extern byte eNybbleSwap;
-extern char encryptionStringA[21];
-extern char encryptionStringB[13];
 extern byte isModdedFile;
 
 extern FileIO *cFileHandle;
@@ -81,7 +71,7 @@ inline void CopyFilePath(char *dest, const char *src)
             dest[i] = '\\';
     }
 }
-bool CheckRSDKFile(const char *filePath);
+bool CheckBinFile(const char *filePath);
 
 bool LoadFile(const char *filePath, FileInfo *fileInfo);
 inline bool CloseFile()
@@ -119,10 +109,6 @@ inline void GetFileInfo(FileInfo *fileInfo)
     fileInfo->fileSize          = fileSize;
     fileInfo->vFileSize         = vFileSize;
     fileInfo->virtualFileOffset = virtualFileOffset;
-    fileInfo->eStringPosA       = eStringPosA;
-    fileInfo->eStringPosB       = eStringPosB;
-    fileInfo->eStringNo         = eStringNo;
-    fileInfo->eNybbleSwap       = eNybbleSwap;
     fileInfo->isMod             = isModdedFile;
 }
 void SetFileInfo(FileInfo *fileInfo);

@@ -80,28 +80,6 @@ CollisionMasks collisionMasks[2];
 byte tilesetGFXData[TILESET_SIZE];
 
 ushort tile3DFloorBuffer[0x13334];
-bool drawStageGFXHQ = false;
-
-void InitFirstStage()
-{
-    xScrollOffset = 0;
-    yScrollOffset = 0;
-    StopMusic();
-    StopAllSfx();
-    ReleaseStageSfx();
-    fadeMode     = 0;
-    activePlayer = 0;
-    ClearGraphicsData();
-    ClearAnimationData();
-    fullPalette = fullPalette[0];
-    LoadPalette("MasterPalette.act", 0, 0, 0, 256);
-    stageMode         = STAGEMODE_LOAD;
-    Engine.gameMode   = ENGINE_MAINGAME;
-    //activeStageList   = 0;
-    //stageListPosition = 0;
-    activeStageList   = Engine.startList;
-    stageListPosition = Engine.startStage;
-}
 
 void ProcessStage(void)
 {
@@ -109,7 +87,6 @@ void ProcessStage(void)
     switch (stageMode) {
         case STAGEMODE_LOAD: // Startup
             fadeMode = 0;
-            SetActivePalette(0, 0, 256);
 
             cameraEnabled = 1;
             cameraTarget  = -1;
@@ -124,14 +101,12 @@ void ProcessStage(void)
             cameraShakeX  = 0;
             cameraShakeY  = 0;
 
-            vertexCount = 0;
-            faceCount   = 0;
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 MEM_ZERO(playerList[i]);
                 playerList[i].visible            = 1;
                 playerList[i].gravity            = 1; // Air
                 playerList[i].tileCollisions     = true;
-                playerList[i].objectInteractions = true;
+                playerList[i].objectInteraction = true;
             }
             pauseEnabled      = false;
             timeEnabled       = false;
@@ -151,7 +126,6 @@ void ProcessStage(void)
 
             if (paletteMode > 0) {
                 paletteMode = 0;
-                SetActivePalette(0, 0, 256);
             }
 
             lastXSize = -1;
@@ -213,7 +187,6 @@ void ProcessStage(void)
 
             if (paletteMode > 0) {
                 paletteMode = 0;
-                SetActivePalette(0, 0, 256);
             }
             lastXSize = -1;
             lastYSize = -1;
@@ -261,7 +234,7 @@ void LoadStageFiles(void)
     if (!CheckCurrentStageFolder(stageListPosition)) {
         printLog("Loading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][stageListPosition].name);
         ReleaseStageSfx();
-        LoadPalette("MasterPalette.act", 0, 0, 0, 256);
+        LoadPalette("MasterPalette.act", 0, 256);
         ClearScriptData();
         for (int i = SPRITESHEETS_MAX; i > 0; i--) RemoveGraphicsFile((char *)"", i - 1);
 
@@ -287,25 +260,14 @@ void LoadStageFiles(void)
                 SetObjectTypeName(strBuffer, i + scriptID);
             }
 
-            if (Engine.usingBytecode && !forceUseScripts) {
+            for (byte i = 0; i < globalObjectCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
-                LoadBytecode(4, scriptID);
-                scriptID += globalObjectCount;
+                ParseScriptFile(strBuffer, scriptID++);
                 SetFileInfo(&infoStore);
-            }
-            else {
-                for (byte i = 0; i < globalObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
-                    GetFileInfo(&infoStore);
-                    CloseFile();
-                    ParseScriptFile(strBuffer, scriptID++);
-                    SetFileInfo(&infoStore);
-                    if (Engine.gameMode == ENGINE_SCRIPTERROR)
-                        return;
-                }
             }
             CloseFile();
         }
@@ -315,7 +277,7 @@ void LoadStageFiles(void)
             for (int i = 96; i < 128; ++i) {
                 byte clr[3];
                 FileRead(&clr, 3);
-                SetPaletteEntry(-1, i, clr[0], clr[1], clr[2]);
+                SetPaletteEntry(i, clr[0], clr[1], clr[2]);
             }
 
             byte stageObjectCount = 0;
@@ -326,29 +288,15 @@ void LoadStageFiles(void)
                 strBuffer[fileBuffer2] = 0;
                 SetObjectTypeName(strBuffer, scriptID + i);
             }
-            if (Engine.usingBytecode && !forceUseScripts) {
-                for (byte i = 0; i < stageObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
-                }
+
+            for (byte i = 0; i < stageObjectCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
-                LoadBytecode(activeStageList, scriptID);
+                ParseScriptFile(strBuffer, scriptID + i);
                 SetFileInfo(&infoStore);
-            }
-            else {
-                for (byte i = 0; i < stageObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
-                    GetFileInfo(&infoStore);
-                    CloseFile();
-                    ParseScriptFile(strBuffer, scriptID + i);
-                    SetFileInfo(&infoStore);
-                    if (Engine.gameMode == ENGINE_SCRIPTERROR)
-                        return;
-                }
             }
 
             FileRead(&fileBuffer2, 1);
@@ -381,31 +329,9 @@ void LoadStageFiles(void)
     LoadStageChunks();
     for (int i = 0; i < TRACK_COUNT; ++i) SetMusicTrack((char *)"", i, 0, 0);
     for (int i = 0; i < ENTITY_COUNT; ++i) {
-        objectEntityList[i].type           = 0;
-        objectEntityList[i].direction      = 0;
-        objectEntityList[i].animation      = 0;
-        objectEntityList[i].prevAnimation  = 0;
-        objectEntityList[i].animationSpeed = 0;
-        objectEntityList[i].animationTimer = 0;
-        objectEntityList[i].frame          = 0;
-        objectEntityList[i].priority       = 0;
-        objectEntityList[i].direction      = 0;
-        objectEntityList[i].rotation       = 0;
-        objectEntityList[i].state          = 0;
-        objectEntityList[i].propertyValue  = 0;
-        objectEntityList[i].XPos           = 0;
-        objectEntityList[i].YPos           = 0;
+        MEM_ZERO(objectEntityList[i]);
         objectEntityList[i].drawOrder      = 3;
         objectEntityList[i].scale          = 512;
-        objectEntityList[i].inkEffect      = 0;
-        objectEntityList[i].values[0]      = 0;
-        objectEntityList[i].values[1]      = 0;
-        objectEntityList[i].values[2]      = 0;
-        objectEntityList[i].values[3]      = 0;
-        objectEntityList[i].values[4]      = 0;
-        objectEntityList[i].values[5]      = 0;
-        objectEntityList[i].values[6]      = 0;
-        objectEntityList[i].values[7]      = 0;
     }
     LoadActLayout();
     Init3DFloorBuffer(0);
@@ -527,9 +453,7 @@ void LoadActLayout()
 void LoadStageBackground()
 {
     for (int i = 0; i < LAYER_COUNT; ++i) {
-        stageLayouts[i].type               = LAYER_NOSCROLL;
-        stageLayouts[i].deformationOffset  = 0;
-        stageLayouts[i].deformationOffsetW = 0;
+        stageLayouts[i].type = LAYER_NOSCROLL;
     }
     for (int i = 0; i < PARALLAX_COUNT; ++i) {
         hParallax.scrollPos[i] = 0;
@@ -544,9 +468,7 @@ void LoadStageBackground()
         FileRead(&hParallax.entryCount, 1);
         for (int i = 0; i < hParallax.entryCount; ++i) {
             FileRead(&fileBuffer, 1);
-            hParallax.parallaxFactor[i] = fileBuffer << 8;
-            FileRead(&fileBuffer, 1);
-            hParallax.parallaxFactor[i] += fileBuffer;
+            hParallax.parallaxFactor[i] = fileBuffer;
 
             FileRead(&fileBuffer, 1);
             hParallax.scrollSpeed[i] = fileBuffer << 10;
@@ -559,9 +481,7 @@ void LoadStageBackground()
         FileRead(&vParallax.entryCount, 1);
         for (int i = 0; i < vParallax.entryCount; ++i) {
             FileRead(&fileBuffer, 1);
-            vParallax.parallaxFactor[i] = fileBuffer << 8;
-            FileRead(&fileBuffer, 1);
-            vParallax.parallaxFactor[i] += fileBuffer;
+            vParallax.parallaxFactor[i] = fileBuffer;
 
             FileRead(&fileBuffer, 1);
             vParallax.scrollSpeed[i] = fileBuffer << 10;
@@ -579,9 +499,7 @@ void LoadStageBackground()
             FileRead(&fileBuffer, 1);
             stageLayouts[i].type = fileBuffer;
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].parallaxFactor = fileBuffer << 8;
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].parallaxFactor += fileBuffer;
+            stageLayouts[i].parallaxFactor = fileBuffer;
             FileRead(&fileBuffer, 1);
             stageLayouts[i].scrollSpeed = fileBuffer << 10;
             stageLayouts[i].scrollPos   = 0;
@@ -857,7 +775,7 @@ void LoadStageGIFFile(int stageID)
             for (int c = 0; c < 0x80; ++c) FileRead(clr, 3);
             for (int c = 0x80; c < 0x100; ++c) {
                 FileRead(clr, 3);
-                SetPaletteEntry(-1, c, clr[0], clr[1], clr[2]);
+                SetPaletteEntry(c, clr[0], clr[1], clr[2]);
             }
         }
 
@@ -907,7 +825,7 @@ void LoadStageGFXFile(int stageID)
         for (int i = 0; i < 0x80; ++i) FileRead(&clr, 3); // Palette
         for (int c = 0x80; c < 0x100; ++c) {
             FileRead(clr, 3);
-            SetPaletteEntry(-1, c, clr[0], clr[1], clr[2]);
+            SetPaletteEntry(c, clr[0], clr[1], clr[2]);
         }
 
         byte *gfxData = tilesetGFXData;
@@ -942,67 +860,12 @@ void LoadStageGFXFile(int stageID)
 void ResetBackgroundSettings()
 {
     for (int i = 0; i < LAYER_COUNT; ++i) {
-        stageLayouts[i].deformationOffset  = 0;
-        stageLayouts[i].deformationOffsetW = 0;
         stageLayouts[i].scrollPos          = 0;
     }
 
     for (int i = 0; i < PARALLAX_COUNT; ++i) {
         hParallax.scrollPos[i] = 0;
         vParallax.scrollPos[i] = 0;
-    }
-
-    for (int i = 0; i < DEFORM_COUNT; ++i) {
-        bgDeformationData0[i] = 0;
-        bgDeformationData1[i] = 0;
-        bgDeformationData2[i] = 0;
-        bgDeformationData3[i] = 0;
-    }
-}
-
-void SetLayerDeformation(int selectedDef, int waveLength, int waveWidth, int waveType, int YPos, int waveSize)
-{
-    int *deformPtr = nullptr;
-    switch (selectedDef) {
-        case DEFORM_FG: deformPtr = bgDeformationData0; break;
-        case DEFORM_FG_WATER: deformPtr = bgDeformationData1; break;
-        case DEFORM_BG: deformPtr = bgDeformationData2; break;
-        case DEFORM_BG_WATER: deformPtr = bgDeformationData3; break;
-        default: break;
-    }
-
-    int id = 0;
-    if (waveType == 1) {
-        id     = YPos;
-        for (int i = 0; i < waveSize; ++i) {
-            deformPtr[id] = waveWidth * sinVal512[(i << 9) / waveLength & 0x1FF] >> 9;
-            ++id;
-        }
-    }
-    else {
-        for (int i = 0; i < 0x200 * 0x100; i += 0x200) {
-            int val       = waveWidth * sinVal512[i / waveLength & 0x1FF] >> 9;
-            deformPtr[id] = val;
-            if (deformPtr[id] >= waveWidth)
-                deformPtr[id] = waveWidth - 1;
-            ++id;
-        }
-    }
-
-    switch (selectedDef) {
-        case DEFORM_FG:
-            for (int i = DEFORM_STORE; i < DEFORM_COUNT; ++i) bgDeformationData0[i] = bgDeformationData0[i - DEFORM_STORE];
-            break;
-        case DEFORM_FG_WATER:
-            for (int i = DEFORM_STORE; i < DEFORM_COUNT; ++i) bgDeformationData1[i] = bgDeformationData1[i - DEFORM_STORE];
-            break;
-        case DEFORM_BG:
-            for (int i = DEFORM_STORE; i < DEFORM_COUNT; ++i) bgDeformationData2[i] = bgDeformationData2[i - DEFORM_STORE];
-            break;
-        case DEFORM_BG_WATER:
-            for (int i = DEFORM_STORE; i < DEFORM_COUNT; ++i) bgDeformationData3[i] = bgDeformationData3[i - DEFORM_STORE];
-            break;
-        default: break;
     }
 }
 
@@ -1266,7 +1129,7 @@ void SetPlayerScreenPositionCDStyle(Player *player)
         }
     }
     if (!player->gravity) {
-        if (player->boundEntity->direction) {
+        if (player->direction) {
             if (cameraStyle == 3 || player->speed < -0x5F5C2)
                 cameraLagStyle = 2;
             else

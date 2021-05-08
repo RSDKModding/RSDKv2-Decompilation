@@ -1,7 +1,7 @@
 #include "RetroEngine.hpp"
 #include <string>
 
-char rsdkName[0x400];
+char binFileName[0x400];
 
 char fileName[0x100];
 byte fileBuffer[0x2000];
@@ -11,55 +11,28 @@ int readPos;
 int readSize;
 int bufferPosition;
 int virtualFileOffset;
-byte eStringPosA;
-byte eStringPosB;
-byte eStringNo;
-byte eNybbleSwap;
-char encryptionStringA[] = { "4RaS9D7KaEbxcp2o5r6t" };
-char encryptionStringB[] = { "3tRaUxLmEaSn" };
-byte isModdedFile        = false;
+byte isModdedFile = false;
 
 FileIO *cFileHandle = nullptr;
 
-bool CheckRSDKFile(const char *filePath)
+bool CheckBinFile(const char *filePath)
 {
     FileInfo info;
 
-    Engine.usingDataFile = false;
+    Engine.usingBinFile       = false;
     Engine.usingDataFileStore = false;
-    Engine.usingBytecode = false;
 
     cFileHandle = fOpen(filePath, "rb");
     if (cFileHandle) {
-        Engine.usingDataFile = true;
-        StrCopy(rsdkName, filePath);
+        Engine.usingBinFile = true;
+        StrCopy(binFileName, filePath);
         fClose(cFileHandle);
         cFileHandle = NULL;
-        if (LoadFile("Data/Scripts/ByteCode/GlobalCode.bin", &info)) {
-            Engine.usingBytecode = true;
-            Engine.bytecodeMode  = BYTECODE_MOBILE;
-            CloseFile();
-        }
-        else if (LoadFile("Data/Scripts/ByteCode/GS000.bin", &info)) {
-            Engine.usingBytecode = true;
-            Engine.bytecodeMode  = BYTECODE_PC;
-            CloseFile();
-        }
         return true;
     }
     else {
-        Engine.usingDataFile = false;
-        cFileHandle = NULL;
-        if (LoadFile("Data/Scripts/ByteCode/GlobalCode.bin", &info)) {
-            Engine.usingBytecode = true;
-            Engine.bytecodeMode  = BYTECODE_MOBILE;
-            CloseFile();
-        }
-        else if (LoadFile("Data/Scripts/ByteCode/GS000.bin", &info)) {
-            Engine.usingBytecode = true;
-            Engine.bytecodeMode  = BYTECODE_PC;
-            CloseFile();
-        }
+        Engine.usingBinFile = false;
+        cFileHandle         = NULL;
         return false;
     }
 
@@ -86,10 +59,10 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     StrCopy(filePathBuf, filePath);
 
     if (Engine.forceFolder)
-        Engine.usingDataFile = Engine.usingDataFileStore;
+        Engine.usingBinFile = Engine.usingDataFileStore;
     Engine.forceFolder = false;
 
-    Engine.usingDataFileStore = Engine.usingDataFile;
+    Engine.usingDataFileStore = Engine.usingBinFile;
 
     fileInfo->isMod = false;
     isModdedFile    = false;
@@ -98,10 +71,10 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(filePathBuf);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
-                Engine.forceFolder   = true;
-                Engine.usingDataFile = false;
-                fileInfo->isMod      = true;
-                isModdedFile         = true;
+                Engine.forceFolder  = true;
+                Engine.usingBinFile = false;
+                fileInfo->isMod     = true;
+                isModdedFile        = true;
                 break;
             }
         }
@@ -110,11 +83,11 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     if (forceUseScripts && !Engine.forceFolder) {
         if (std::string(filePathBuf).rfind("Data/Scripts/", 0) == 0 && ends_with(std::string(filePathBuf), "txt")) {
             // is a script, since those dont exist normally, load them from "scripts/"
-            Engine.forceFolder   = true;
-            Engine.usingDataFile = false;
-            fileInfo->isMod      = true;
-            isModdedFile         = true;
-            std::string fStr     = std::string(filePathBuf);
+            Engine.forceFolder  = true;
+            Engine.usingBinFile = false;
+            fileInfo->isMod     = true;
+            isModdedFile        = true;
+            std::string fStr    = std::string(filePathBuf);
             fStr.erase(fStr.begin(), fStr.begin() + 5); // remove "Data/"
             StrCopy(filePathBuf, fStr.c_str());
         }
@@ -123,8 +96,8 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     StrCopy(fileInfo->fileName, filePathBuf);
     StrCopy(fileName, filePathBuf);
 
-    if (Engine.usingDataFile && !Engine.forceFolder) {
-        cFileHandle = fOpen(rsdkName, "rb");
+    if (Engine.usingBinFile && !Engine.forceFolder) {
+        cFileHandle = fOpen(binFileName, "rb");
         fSeek(cFileHandle, 0, SEEK_END);
         fileSize       = (int)fTell(cFileHandle);
         bufferPosition = 0;
@@ -139,10 +112,6 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos           = readPos;
         fileInfo->fileSize          = vFileSize;
         fileInfo->virtualFileOffset = virtualFileOffset;
-        fileInfo->eStringNo         = eStringNo;
-        fileInfo->eStringPosB       = eStringPosB;
-        fileInfo->eStringPosA       = eStringPosA;
-        fileInfo->eNybbleSwap       = eNybbleSwap;
         fileInfo->bufferPosition    = bufferPosition;
     }
     else {
@@ -156,13 +125,9 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         fileInfo->fileSize = (int)fTell(cFileHandle);
         fileSize           = fileInfo->fileSize;
         fSeek(cFileHandle, 0, SEEK_SET);
-        readPos = 0;
+        readPos                     = 0;
         fileInfo->readPos           = readPos;
         fileInfo->virtualFileOffset = 0;
-        fileInfo->eStringNo         = 0;
-        fileInfo->eStringPosB       = 0;
-        fileInfo->eStringPosA       = 0;
-        fileInfo->eNybbleSwap       = 0;
         fileInfo->bufferPosition    = 0;
     }
     bufferPosition = 0;
@@ -203,10 +168,10 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     fullFilename[fNamePos] = 0;
 
     fSeek(cFileHandle, 0, SEEK_SET);
-    Engine.usingDataFile = false;
-    bufferPosition       = 0;
-    readSize             = 0;
-    readPos              = 0;
+    Engine.usingBinFile = false;
+    bufferPosition      = 0;
+    readSize            = 0;
+    readPos             = 0;
 
     FileRead(&fileBuffer, 1);
     headerSize = fileBuffer;
@@ -222,8 +187,8 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     FileRead(&fileBuffer, 1);
     dirCount += fileBuffer << 8;
 
-    i          = 0;
-    fileOffset = 0;
+    i                  = 0;
+    fileOffset         = 0;
     int nextFileOffset = 0;
     while (i < dirCount) {
         FileRead(&fileBuffer, 1);
@@ -243,10 +208,10 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             FileRead(&fileBuffer, 1);
             fileOffset += fileBuffer << 24;
 
-            //Grab info for next dir to know when we've found an error
-            //Ignore dir name we dont care
+            // Grab info for next dir to know when we've found an error
+            // Ignore dir name we dont care
             if (i == dirCount - 1) {
-                nextFileOffset = fileSize - headerSize; //There is no next dir, so just make this the EOF
+                nextFileOffset = fileSize - headerSize; // There is no next dir, so just make this the EOF
             }
             else {
                 FileRead(&fileBuffer, 1);
@@ -279,7 +244,7 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     }
 
     if (fileOffset == -1) {
-        Engine.usingDataFile = true;
+        Engine.usingBinFile = true;
         return false;
     }
     else {
@@ -327,9 +292,9 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
                 virtualFileOffset += j;
             }
 
-            //No File has been found (next file would be in a new dir)
+            // No File has been found (next file would be in a new dir)
             if (virtualFileOffset >= nextFileOffset + headerSize) {
-                Engine.usingDataFile = true;
+                Engine.usingBinFile = true;
                 return false;
             }
             fSeek(cFileHandle, virtualFileOffset, SEEK_SET);
@@ -337,14 +302,10 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             readSize       = 0;
             readPos        = virtualFileOffset;
         }
-        eStringNo            = (vFileSize & 0x1FCu) >> 2;
-        eStringPosB          = (eStringNo % 9) + 1;
-        eStringPosA          = (eStringNo % eStringPosB) + 1;
-        eNybbleSwap          = false;
-        Engine.usingDataFile = true;
+        Engine.usingBinFile = true;
         return true;
     }
-    //Engine.usingDataFile = true;
+    // Engine.usingBinFile = true;
     return false;
 }
 
@@ -353,42 +314,13 @@ void FileRead(void *dest, int size)
     byte *data = (byte *)dest;
 
     if (readPos <= fileSize) {
-        if (Engine.usingDataFile && !Engine.forceFolder) {
+        if (Engine.usingBinFile && !Engine.forceFolder) {
             while (size > 0) {
                 if (bufferPosition == readSize)
                     FillFileBuffer();
 
-                *data = encryptionStringB[eStringPosB] ^ eStringNo ^ fileBuffer[bufferPosition++];
-                if (eNybbleSwap)
-                    *data = 16 * (*data & 0xF) + ((signed int)*data >> 4);
-                *data ^= encryptionStringA[eStringPosA++];
-                ++eStringPosB;
-                if (eStringPosA <= 19 || eStringPosB <= 11) {
-                    if (eStringPosA > 19) {
-                        eStringPosA = 1;
-                        eNybbleSwap ^= 1u;
-                    }
-                    if (eStringPosB > 11) {
-                        eStringPosB = 1;
-                        eNybbleSwap ^= 1u;
-                    }
-                }
-                else {
-                    ++eStringNo;
-                    eStringNo &= 0x7Fu;
-                    if (eNybbleSwap) {
-                        eNybbleSwap = 0;
-                        eStringPosA = (eStringNo % 12) + 6;
-                        eStringPosB = (eStringNo % 5) + 4;
-                    }
-                    else {
-                        eNybbleSwap = 1;
-                        eStringPosA = (eStringNo % 15) + 3;
-                        eStringPosB = (eStringNo % 7) + 1;
-                    }
-                }
-                ++data;
-                --size;
+                *data++ = fileBuffer[bufferPosition++] ^ 0xFF;
+                size--;
             }
         }
         else {
@@ -407,15 +339,15 @@ void SetFileInfo(FileInfo *fileInfo)
 {
     Engine.forceFolder = false;
     if (!fileInfo->isMod) {
-        Engine.usingDataFile = Engine.usingDataFileStore;
+        Engine.usingBinFile = Engine.usingDataFileStore;
     }
     else {
-        Engine.forceFolder   = true;
+        Engine.forceFolder = true;
     }
 
     isModdedFile = fileInfo->isMod;
-    if (Engine.usingDataFile && !Engine.forceFolder) {
-        cFileHandle       = fOpen(rsdkName, "rb");
+    if (Engine.usingBinFile && !Engine.forceFolder) {
+        cFileHandle       = fOpen(binFileName, "rb");
         virtualFileOffset = fileInfo->virtualFileOffset;
         vFileSize         = fileInfo->fileSize;
         fSeek(cFileHandle, 0, SEEK_END);
@@ -424,10 +356,6 @@ void SetFileInfo(FileInfo *fileInfo)
         fSeek(cFileHandle, readPos, SEEK_SET);
         FillFileBuffer();
         bufferPosition = fileInfo->bufferPosition;
-        eStringPosA    = fileInfo->eStringPosA;
-        eStringPosB    = fileInfo->eStringPosB;
-        eStringNo      = fileInfo->eStringNo;
-        eNybbleSwap    = fileInfo->eNybbleSwap;
     }
     else {
         StrCopy(fileName, fileInfo->fileName);
@@ -438,16 +366,12 @@ void SetFileInfo(FileInfo *fileInfo)
         fSeek(cFileHandle, readPos, SEEK_SET);
         FillFileBuffer();
         bufferPosition = fileInfo->bufferPosition;
-        eStringPosA    = 0;
-        eStringPosB    = 0;
-        eStringNo      = 0;
-        eNybbleSwap    = 0;
     }
 }
 
 size_t GetFilePosition()
 {
-    if (Engine.usingDataFile)
+    if (Engine.usingBinFile)
         return bufferPosition + readPos - readSize - virtualFileOffset;
     else
         return bufferPosition + readPos - readSize;
@@ -455,41 +379,8 @@ size_t GetFilePosition()
 
 void SetFilePosition(int newPos)
 {
-    if (Engine.usingDataFile) {
-        readPos     = virtualFileOffset + newPos;
-        eStringNo   = (vFileSize & 0x1FCu) >> 2;
-        eStringPosB = (eStringNo % 9) + 1;
-        eStringPosA = (eStringNo % eStringPosB) + 1;
-        eNybbleSwap = false;
-        while (newPos) {
-            ++eStringPosA;
-            ++eStringPosB;
-            if (eStringPosA <= 19 || eStringPosB <= 11) {
-                if (eStringPosA > 19) {
-                    eStringPosA = 1;
-                    eNybbleSwap ^= 1u;
-                }
-                if (eStringPosB > 11) {
-                    eStringPosB = 1;
-                    eNybbleSwap ^= 1u;
-                }
-            }
-            else {
-                ++eStringNo;
-                eStringNo &= 0x7Fu;
-                if (eNybbleSwap) {
-                    eNybbleSwap = false;
-                    eStringPosA = (eStringNo % 12) + 6;
-                    eStringPosB = (eStringNo % 5) + 4;
-                }
-                else {
-                    eNybbleSwap = true;
-                    eStringPosA = (eStringNo % 15) + 3;
-                    eStringPosB = (eStringNo % 7) + 1;
-                }
-            }
-            --newPos;
-        }
+    if (Engine.usingBinFile) {
+        readPos = virtualFileOffset + newPos;
     }
     else {
         readPos = newPos;
@@ -500,7 +391,7 @@ void SetFilePosition(int newPos)
 
 bool ReachedEndOfFile()
 {
-    if (Engine.usingDataFile)
+    if (Engine.usingBinFile)
         return bufferPosition + readPos - readSize - virtualFileOffset >= vFileSize;
     else
         return bufferPosition + readPos - readSize >= fileSize;
@@ -517,10 +408,10 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     StrCopy(filePathBuf, filePath);
 
     if (Engine.forceFolder)
-        Engine.usingDataFile = Engine.usingDataFileStore;
+        Engine.usingBinFile = Engine.usingDataFileStore;
     Engine.forceFolder = false;
 
-    Engine.usingDataFileStore = Engine.usingDataFile;
+    Engine.usingDataFileStore = Engine.usingBinFile;
 
     fileInfo->isMod = false;
     isModdedFile    = false;
@@ -529,10 +420,10 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(filePathBuf);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
-                Engine.forceFolder   = true;
-                Engine.usingDataFile = false;
-                fileInfo->isMod      = true;
-                isModdedFile         = true;
+                Engine.forceFolder  = true;
+                Engine.usingBinFile = false;
+                fileInfo->isMod     = true;
+                isModdedFile        = true;
                 break;
             }
         }
@@ -540,11 +431,11 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     if (forceUseScripts && !Engine.forceFolder) {
         if (std::string(filePathBuf).rfind("Data/Scripts/", 0) == 0 && ends_with(std::string(filePathBuf), "txt")) {
             // is a script, since those dont exist normally, load them from "scripts/"
-            Engine.forceFolder   = true;
-            Engine.usingDataFile = false;
-            fileInfo->isMod      = true;
-            isModdedFile         = true;
-            std::string fStr     = std::string(filePathBuf);
+            Engine.forceFolder  = true;
+            Engine.usingBinFile = false;
+            fileInfo->isMod     = true;
+            isModdedFile        = true;
+            std::string fStr    = std::string(filePathBuf);
             fStr.erase(fStr.begin(), fStr.begin() + 5); // remove "Data/"
             StrCopy(filePathBuf, fStr.c_str());
         }
@@ -552,12 +443,12 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
 
     StrCopy(fileInfo->fileName, filePathBuf);
 
-    if (Engine.usingDataFile && !Engine.forceFolder) {
-        fileInfo->cFileHandle = fOpen(rsdkName, "rb");
+    if (Engine.usingBinFile && !Engine.forceFolder) {
+        fileInfo->cFileHandle = fOpen(binFileName, "rb");
         fSeek(fileInfo->cFileHandle, 0, SEEK_END);
         fileInfo->fileSize       = (int)fTell(fileInfo->cFileHandle);
         fileInfo->bufferPosition = 0;
-        //readSize       = 0;
+        // readSize       = 0;
         fileInfo->readPos = 0;
         if (!ParseVirtualFileSystem2(fileInfo)) {
             fClose(fileInfo->cFileHandle);
@@ -579,14 +470,9 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         readPos                     = 0;
         fileInfo->readPos           = readPos;
         fileInfo->virtualFileOffset = 0;
-        fileInfo->eStringNo         = 0;
-        fileInfo->eStringPosB       = 0;
-        fileInfo->eStringPosA       = 0;
-        fileInfo->eNybbleSwap       = 0;
         fileInfo->bufferPosition    = 0;
     }
     fileInfo->bufferPosition = 0;
-    //fileInfo->readSize       = 0;
 
     printLog("Loaded File '%s'", filePathBuf);
 
@@ -605,7 +491,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     int i           = 0;
     byte fileBuffer = 0;
 
-    int j             = 0;
+    int j                       = 0;
     fileInfo->virtualFileOffset = 0;
     for (int i = 0; fileInfo->fileName[i]; i++) {
         if (fileInfo->fileName[i] == '/') {
@@ -623,10 +509,10 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     fullFilename[fNamePos] = 0;
 
     fSeek(fileInfo->cFileHandle, 0, SEEK_SET);
-    Engine.usingDataFile = false;
-    fileInfo->bufferPosition       = 0;
-    //readSize             = 0;
-    fileInfo->readPos              = 0;
+    Engine.usingBinFile      = false;
+    fileInfo->bufferPosition = 0;
+    // readSize             = 0;
+    fileInfo->readPos = 0;
 
     FileRead2(fileInfo, &fileBuffer, 1);
     headerSize = fileBuffer;
@@ -699,16 +585,16 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     }
 
     if (fileOffset == -1) {
-        Engine.usingDataFile = true;
+        Engine.usingBinFile = true;
         return false;
     }
     else {
         fSeek(fileInfo->cFileHandle, fileOffset + headerSize, SEEK_SET);
-        fileInfo->bufferPosition    = 0;
-        //readSize          = 0;
+        fileInfo->bufferPosition = 0;
+        // readSize          = 0;
         fileInfo->readPos           = 0;
         fileInfo->virtualFileOffset = fileOffset + headerSize;
-        i                 = 0;
+        i                           = 0;
         while (i < 1) {
             FileRead2(fileInfo, &fileBuffer, 1);
             ++fileInfo->virtualFileOffset;
@@ -749,22 +635,18 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
 
             // No File has been found (next file would be in a new dir)
             if (fileInfo->virtualFileOffset >= nextFileOffset + headerSize) {
-                Engine.usingDataFile = true;
+                Engine.usingBinFile = true;
                 return false;
             }
             fSeek(fileInfo->cFileHandle, fileInfo->virtualFileOffset, SEEK_SET);
             fileInfo->bufferPosition = 0;
-            //readSize       = 0;
+            // readSize       = 0;
             fileInfo->readPos = fileInfo->virtualFileOffset;
         }
-        fileInfo->eStringNo            = (fileInfo->vFileSize & 0x1FCu) >> 2;
-        fileInfo->eStringPosB          = (fileInfo->eStringNo % 9) + 1;
-        fileInfo->eStringPosA          = (fileInfo->eStringNo % fileInfo->eStringPosB) + 1;
-        fileInfo->eNybbleSwap          = false;
-        Engine.usingDataFile = true;
+        Engine.usingBinFile = true;
         return true;
     }
-    // Engine.usingDataFile = true;
+    // Engine.usingBinFile = true;
     return false;
 }
 
@@ -775,7 +657,7 @@ size_t FileRead2(FileInfo *info, void *dest, int size)
     memset(data, 0, size);
 
     if (rPos <= info->fileSize) {
-        if (Engine.usingDataFile && !Engine.forceFolder) {
+        if (Engine.usingBinFile && !Engine.forceFolder) {
             int rSize = 0;
             if (rPos + size <= info->fileSize)
                 rSize = size;
@@ -787,38 +669,11 @@ size_t FileRead2(FileInfo *info, void *dest, int size)
             info->bufferPosition = 0;
 
             while (size > 0) {
-                *data = encryptionStringB[info->eStringPosB] ^ info->eStringNo ^ *data;
-                if (info->eNybbleSwap)
-                    *data = 16 * (*data & 0xF) + (*data >> 4);
-                *data ^= encryptionStringA[info->eStringPosA++];
-                ++info->eStringPosB;
-                if (info->eStringPosA <= 19 || info->eStringPosB <= 11) {
-                    if (info->eStringPosA > 19) {
-                        info->eStringPosA = 1;
-                        info->eNybbleSwap ^= 1u;
-                    }
-                    if (info->eStringPosB > 11) {
-                        info->eStringPosB = 1;
-                        info->eNybbleSwap ^= 1u;
-                    }
-                }
-                else {
-                    ++info->eStringNo;
-                    info->eStringNo &= 0x7Fu;
-                    if (info->eNybbleSwap) {
-                        info->eNybbleSwap = false;
-                        info->eStringPosA = (info->eStringNo % 12) + 6;
-                        info->eStringPosB = (info->eStringNo % 5) + 4;
-                    }
-                    else {
-                        info->eNybbleSwap = true;
-                        info->eStringPosA = (info->eStringNo % 15) + 3;
-                        info->eStringPosB = (info->eStringNo % 7) + 1;
-                    }
-                }
-                ++data;
+                *data ^= 0xFF;
+                data++;
                 --size;
             }
+
             return result;
         }
         else {
@@ -837,9 +692,9 @@ size_t FileRead2(FileInfo *info, void *dest, int size)
     return 0;
 }
 
-size_t GetFilePosition2(FileInfo* info)
+size_t GetFilePosition2(FileInfo *info)
 {
-    if (Engine.usingDataFile)
+    if (Engine.usingBinFile)
         return info->bufferPosition + info->readPos - info->virtualFileOffset;
     else
         return info->bufferPosition + info->readPos;
@@ -847,41 +702,8 @@ size_t GetFilePosition2(FileInfo* info)
 
 void SetFilePosition2(FileInfo *info, int newPos)
 {
-    if (Engine.usingDataFile) {
-        info->readPos     = info->virtualFileOffset + newPos;
-        info->eStringNo   = (info->vFileSize & 0x1FCu) >> 2;
-        info->eStringPosB = (info->eStringNo % 9) + 1;
-        info->eStringPosA = (info->eStringNo % info->eStringPosB) + 1;
-        info->eNybbleSwap = false;
-        while (newPos) {
-            ++info->eStringPosA;
-            ++info->eStringPosB;
-            if (info->eStringPosA <= 19 || info->eStringPosB <= 11) {
-                if (info->eStringPosA > 19) {
-                    info->eStringPosA = 1;
-                    info->eNybbleSwap ^= 1u;
-                }
-                if (info->eStringPosB > 11) {
-                    info->eStringPosB = 1;
-                    info->eNybbleSwap ^= 1u;
-                }
-            }
-            else {
-                ++info->eStringNo;
-                info->eStringNo &= 0x7Fu;
-                if (info->eNybbleSwap) {
-                    info->eNybbleSwap = false;
-                    info->eStringPosA = (info->eStringNo % 12) + 6;
-                    info->eStringPosB = (info->eStringNo % 5) + 4;
-                }
-                else {
-                    info->eNybbleSwap = true;
-                    info->eStringPosA = (info->eStringNo % 15) + 3;
-                    info->eStringPosB = (info->eStringNo % 7) + 1;
-                }
-            }
-            --newPos;
-        }
+    if (Engine.usingBinFile) {
+        info->readPos = info->virtualFileOffset + newPos;
     }
     else {
         info->readPos = newPos;

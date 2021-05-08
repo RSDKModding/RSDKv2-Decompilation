@@ -1,7 +1,5 @@
 #include "RetroEngine.hpp"
 
-int touchTimer = 0;
-
 void initDevMenu()
 {
     drawStageGFXHQ = false;
@@ -11,70 +9,48 @@ void initDevMenu()
     StopAllSfx();
     ReleaseStageSfx();
     fadeMode        = 0;
-    playerListPos   = 0;
-    Engine.gameMode = ENGINE_DEVMENU;
-    ClearGraphicsData();
-    ClearAnimationData();
-    LoadPalette("MasterPalette.act", 0, 0, 0, 256);
-    SetActivePalette(0, 0, 256);
-    textMenuSurfaceNo = 0;
-    LoadGIFFile("Data/Game/SystemText.gif", 0);
-    SetPaletteEntry(-1, 0xF0, 0x00, 0x00, 0x00);
-    SetPaletteEntry(-1, 0xFF, 0xFF, 0xFF, 0xFF);
-    stageMode = DEVMENU_MAIN;
-    SetupTextMenu(&gameMenu[0], 0);
-    AddTextMenuEntry(&gameMenu[0], "RETRO ENGINE DEV MENU");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    char version[0x80];
-    StrCopy(version, Engine.gameWindowText);
-    StrAdd(version, " Version");
-    AddTextMenuEntry(&gameMenu[0], version);
-    AddTextMenuEntry(&gameMenu[0], Engine.gameVersion);
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], "START GAME");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], "STAGE SELECT");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], "MODS");
-    AddTextMenuEntry(&gameMenu[0], " ");
-    AddTextMenuEntry(&gameMenu[0], "EXIT GAME");
-    gameMenu[0].alignment        = 2;
-    gameMenu[0].selectionCount   = 2;
-    gameMenu[0].selection1       = 0;
-    gameMenu[0].selection2       = 9;
-    gameMenu[1].visibleRowCount  = 0;
-    gameMenu[1].visibleRowOffset = 0;
-}
-void initErrorMessage()
-{
-    drawStageGFXHQ = false;
-    xScrollOffset = 0;
-    yScrollOffset = 0;
-    StopMusic();
-    StopAllSfx();
-    ReleaseStageSfx();
-    fadeMode        = 0;
-    playerListPos   = 0;
-    Engine.gameMode = ENGINE_DEVMENU;
-    ClearGraphicsData();
-    ClearAnimationData();
-    LoadPalette("MasterPalette.act", 0, 0, 0, 256);
-    SetActivePalette(0, 0, 256);
-    textMenuSurfaceNo = 0;
-    LoadGIFFile("Data/Game/SystemText.gif", 0);
-    SetPaletteEntry(-1, 0xF0, 0x00, 0x00, 0x00);
-    SetPaletteEntry(-1, 0xFF, 0xFF, 0xFF, 0xFF);
-    gameMenu[0].alignment        = 2;
-    gameMenu[0].selectionCount   = 1;
-    gameMenu[0].selection1       = 0;
-    gameMenu[1].visibleRowCount  = 0;
-    gameMenu[1].visibleRowOffset = 0;
-    stageMode                    = DEVMENU_SCRIPTERROR;
-    touchTimer                   = 0;
+
+    if (Engine.usingBinFile) {
+        ClearGraphicsData();
+        for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
+        LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+        LoadPlayerFromList(0, 0);
+        activeStageList   = 0;
+        stageMode         = 0;
+        Engine.gameMode   = ENGINE_MAINGAME;
+        stageListPosition = 0;
+    }
+    else {
+        playerListPos   = 0;
+        Engine.gameMode = ENGINE_DEVMENU;
+        ClearGraphicsData();
+        ClearAnimationData();
+        LoadPalette("MasterPalette.act", 0, 256);
+        textMenuSurfaceNo = 0;
+        LoadGIFFile("Data/Game/SystemText.gif", 0);
+        SetPaletteEntry(0xF0, 0x00, 0x00, 0x00);
+        SetPaletteEntry(0xFF, 0xFF, 0xFF, 0xFF);
+        SetupTextMenu(&gameMenu[0], 0);
+        AddTextMenuEntry(&gameMenu[0], "RETRO SONIC DEFAULT MENU");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], " ");
+        AddTextMenuEntry(&gameMenu[0], "1 PLAYER");
+        AddTextMenuEntry(&gameMenu[0], " ");
+#if RETRO_USE_MOD_LOADER
+        AddTextMenuEntry(&gameMenu[0], "MODS");
+        AddTextMenuEntry(&gameMenu[0], " ");
+#endif
+        AddTextMenuEntry(&gameMenu[0], "QUIT");
+        stageMode                  = DEVMENU_MAIN;
+        gameMenu[0].alignment      = 2;
+        gameMenu[0].selectionCount = 2;
+        gameMenu[0].selection1     = 0;
+        gameMenu[0].selection2     = 7;
+    }
 }
 void processStageSelect()
 {
@@ -86,45 +62,6 @@ void processStageSelect()
     CheckKeyDown(&keyDown, 0xFF);
     CheckKeyPress(&keyPress, 0xFF);
 
-//#if defined RETRO_USING_MOUSE || defined RETRO_USING_TOUCH
-    DrawSprite(32, 0x42, 16, 16, 78, 240, textMenuSurfaceNo);
-    DrawSprite(32, 0xB2, 16, 16, 95, 240, textMenuSurfaceNo);
-    DrawSprite(SCREEN_XSIZE - 32, SCREEN_YSIZE - 32, 16, 16, 112, 240, textMenuSurfaceNo);
-//#endif
-
-    if (!keyDown.start && !keyDown.up && !keyDown.down) {
-        if (touches > 0) {
-            if (touchDown[0] && !(touchTimer % 8)) {
-                if (touchX[0] < SCREEN_CENTERX) {
-                    if (touchY[0] >= SCREEN_CENTERY) {
-                        if (!keyDown.down)
-                            keyPress.down = true;
-                        keyDown.down = true;
-                    }
-                    else {
-                        if (!keyDown.up)
-                            keyPress.up = true;
-                        keyDown.up = true;
-                    }
-                }
-                else if (touchX[0] > SCREEN_CENTERX) {
-                    if (touchY[0] > SCREEN_CENTERY) {
-                        if (!keyDown.start)
-                            keyPress.start = true;
-                        keyDown.start = true;
-                    }
-                    else {
-                        if (!keyDown.B)
-                            keyPress.B = true;
-                        keyDown.B = true;
-                    }
-                }
-            }
-        }
-    }
-
-    touchTimer++;
-
     switch (stageMode) {
         case DEVMENU_MAIN: // Main Menu
         {
@@ -134,23 +71,14 @@ void processStageSelect()
             if (keyPress.up)
                 gameMenu[0].selection2 -= 2;
 
-            if (gameMenu[0].selection2 > 15)
-                gameMenu[0].selection2 = 9;
-            if (gameMenu[0].selection2 < 9)
-                gameMenu[0].selection2 = 15;
+            if (gameMenu[0].selection2 > (RETRO_USE_MOD_LOADER ? 11 : 9))
+                gameMenu[0].selection2 = 7;
+            if (gameMenu[0].selection2 < 7)
+                gameMenu[0].selection2 = (RETRO_USE_MOD_LOADER ? 11 : 9);
 
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX, 72);
             if (keyPress.start || keyPress.A) {
-                if (gameMenu[0].selection2 == 9) {
-                    ClearGraphicsData();
-                    ClearAnimationData();
-                    LoadPalette("MasterPalette.act", 0, 0, 0, 256);
-                    activeStageList   = 0;
-                    stageMode         = STAGEMODE_LOAD;
-                    Engine.gameMode   = ENGINE_MAINGAME;
-                    stageListPosition = 0;
-                }
-                else if (gameMenu[0].selection2 == 11) {
+                if (gameMenu[0].selection2 == 7) {
                     SetupTextMenu(&gameMenu[0], 0);
                     AddTextMenuEntry(&gameMenu[0], "SELECT A PLAYER");
                     SetupTextMenu(&gameMenu[1], 0);
@@ -160,7 +88,8 @@ void processStageSelect()
                     gameMenu[1].selection1     = 0;
                     stageMode                  = DEVMENU_PLAYERSEL;
                 }
-                else if (gameMenu[0].selection2 == 13) {
+#if RETRO_USE_MOD_LOADER
+                else if (gameMenu[0].selection2 == 9) {
                     SetupTextMenu(&gameMenu[0], 0);
                     AddTextMenuEntry(&gameMenu[0], "MOD LIST");
                     SetupTextMenu(&gameMenu[1], 0);
@@ -176,25 +105,20 @@ void processStageSelect()
                     gameMenu[1].alignment      = 1;
                     gameMenu[1].selectionCount = 3;
                     gameMenu[1].selection1     = 0;
-                    if (gameMenu[1].rowCount > 18)
-                        gameMenu[1].visibleRowCount = 18;
-                    else
-                        gameMenu[1].visibleRowCount = 0;
 
                     gameMenu[0].alignment        = 2;
                     gameMenu[0].selectionCount   = 1;
-                    gameMenu[1].timer            = 0;
-                    gameMenu[1].visibleRowOffset = 0;
                     stageMode                  = DEVMENU_MODMENU;
                 }
-                else if (gameMenu[0].selection2 == 15) {
+#endif
+                else {
                     Engine.running = false;
                 }
             }
             else if (keyPress.B) {
                 ClearGraphicsData();
                 ClearAnimationData();
-                LoadPalette("MasterPalette.act", 0, 0, 0, 256);
+                LoadPalette("MasterPalette.act", 0, 256);
                 activeStageList   = 0;
                 stageMode         = STAGEMODE_LOAD;
                 Engine.gameMode   = ENGINE_MAINGAME;
@@ -236,31 +160,25 @@ void processStageSelect()
             else if (keyPress.B) {
                 stageMode = DEVMENU_MAIN;
                 SetupTextMenu(&gameMenu[0], 0);
-                AddTextMenuEntry(&gameMenu[0], "RETRO ENGINE DEV MENU");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                char version[0x80];
-                StrCopy(version, Engine.gameWindowText);
-                StrAdd(version, " Version");
-                AddTextMenuEntry(&gameMenu[0], version);
-                AddTextMenuEntry(&gameMenu[0], Engine.gameVersion);
+                AddTextMenuEntry(&gameMenu[0], "RETRO SONIC DEFAULT MENU");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "START GAME");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "STAGE SELECT");
+                AddTextMenuEntry(&gameMenu[0], "1 PLAYER");
                 AddTextMenuEntry(&gameMenu[0], " ");
+#if RETRO_USE_MOD_LOADER
                 AddTextMenuEntry(&gameMenu[0], "MODS");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "EXIT GAME");
+#endif
+                AddTextMenuEntry(&gameMenu[0], "QUIT");
+                stageMode                    = DEVMENU_MAIN;
                 gameMenu[0].alignment        = 2;
                 gameMenu[0].selectionCount   = 2;
                 gameMenu[0].selection1       = 0;
-                gameMenu[0].selection2       = 9;
-                gameMenu[1].visibleRowCount  = 0;
-                gameMenu[1].visibleRowOffset = 0;
+                gameMenu[0].selection2       = 7;
             }
             break;
         }
@@ -311,15 +229,9 @@ void processStageSelect()
                 gameMenu[1].alignment      = 1;
                 gameMenu[1].selectionCount = 3;
                 gameMenu[1].selection1     = 0;
-                if (gameMenu[1].rowCount > 18)
-                    gameMenu[1].visibleRowCount = 18;
-                else
-                    gameMenu[1].visibleRowCount = 0;
 
                 gameMenu[0].alignment        = 2;
                 gameMenu[0].selectionCount   = 1;
-                gameMenu[1].timer            = 0;
-                gameMenu[1].visibleRowOffset = 0;
                 stageMode                  = DEVMENU_STAGESEL;
             }
             else if (keyPress.B) {
@@ -330,7 +242,6 @@ void processStageSelect()
                 gameMenu[0].alignment      = 2;
                 gameMenu[1].alignment      = 0;
                 gameMenu[1].selectionCount  = 1;
-                gameMenu[1].visibleRowCount = 0;
                 gameMenu[1].selection1     = playerListPos;
                 stageMode                  = DEVMENU_PLAYERSEL;
             }
@@ -338,45 +249,14 @@ void processStageSelect()
         }
         case DEVMENU_STAGESEL: // Selecting Stage
         {
-            if (keyDown.down) {
-                gameMenu[1].timer += 1;
-                if (gameMenu[1].timer > 8) {
-                    gameMenu[1].timer = 0;
-                    keyPress.down     = true;
-                }
-            }
-            else {
-                if (keyDown.up) {
-                    gameMenu[1].timer -= 1;
-                    if (gameMenu[1].timer < -8) {
-                        gameMenu[1].timer = 0;
-                        keyPress.up       = true;
-                    }
-                }
-                else {
-                    gameMenu[1].timer = 0;
-                }
-            }
-            if (keyPress.down) {
-                gameMenu[1].selection1++;
-                if (gameMenu[1].selection1 - gameMenu[1].visibleRowOffset >= gameMenu[1].visibleRowCount) {
-                    gameMenu[1].visibleRowOffset += 1;
-                }
-            }
-            if (keyPress.up) {
-                gameMenu[1].selection1--;
-                if (gameMenu[1].selection1 - gameMenu[1].visibleRowOffset < 0) {
-                    gameMenu[1].visibleRowOffset -= 1;
-                }
-            }
-            if (gameMenu[1].selection1 == gameMenu[1].rowCount) {
-                gameMenu[1].selection1       = 0;
-                gameMenu[1].visibleRowOffset = 0;
-            }
-            if (gameMenu[1].selection1 < 0) {
-                gameMenu[1].selection1       = gameMenu[1].rowCount - 1;
-                gameMenu[1].visibleRowOffset = gameMenu[1].rowCount - gameMenu[1].visibleRowCount;
-            }
+            if (keyPress.down == 1)
+                ++gameMenu[1].selection1;
+            if (keyPress.up == 1)
+                --gameMenu[1].selection1;
+            if (gameMenu[1].selection1 == gameMenu[1].rowCount)
+                gameMenu[1].selection1 = 0;
+            if (gameMenu[1].selection1 < 0)
+                gameMenu[1].selection1 = gameMenu[1].rowCount - 1;
 
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX - 4, 40);
             DrawTextMenu(&gameMenu[1], SCREEN_CENTERX + 100, 64);
@@ -406,96 +286,16 @@ void processStageSelect()
             }
             break;
         }
-        case DEVMENU_SCRIPTERROR: // Script Error
-        {
-            DrawTextMenu(&gameMenu[0], SCREEN_CENTERX, 72);
-            if (keyPress.start || keyPress.A) {
-                stageMode = DEVMENU_MAIN;
-                SetupTextMenu(&gameMenu[0], 0);
-                AddTextMenuEntry(&gameMenu[0], "RETRO ENGINE DEV MENU");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                char version[0x80];
-                StrCopy(version, Engine.gameWindowText);
-                StrAdd(version, " Version");
-                AddTextMenuEntry(&gameMenu[0], version);
-                AddTextMenuEntry(&gameMenu[0], Engine.gameVersion);
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "START GAME");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "STAGE SELECT");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "MODS");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "EXIT GAME");
-                gameMenu[0].alignment        = 2;
-                gameMenu[0].selectionCount   = 2;
-                gameMenu[0].selection1       = 0;
-                gameMenu[0].selection2       = 9;
-                gameMenu[1].visibleRowCount  = 0;
-                gameMenu[1].visibleRowOffset = 0;
-            }
-            else if (keyPress.B) {
-                ClearGraphicsData();
-                ClearAnimationData();
-                LoadPalette("MasterPalette.act", 0, 0, 0, 256);
-                activeStageList   = 0;
-                stageMode         = DEVMENU_MAIN;
-                Engine.gameMode   = ENGINE_MAINGAME;
-                stageListPosition = 0;
-            }
-            else if (keyPress.C) {
-                ClearGraphicsData();
-                ClearAnimationData();
-                stageMode       = STAGEMODE_LOAD;
-                Engine.gameMode = ENGINE_MAINGAME;
-            }
-            break;
-        }
         case DEVMENU_MODMENU: // Mod Menu
         {
-            if (keyDown.down) {
-                gameMenu[1].timer += 1;
-                if (gameMenu[1].timer > 8) {
-                    gameMenu[1].timer = 0;
-                    keyPress.down     = true;
-                }
-            }
-            else {
-                if (keyDown.up) {
-                    gameMenu[1].timer -= 1;
-                    if (gameMenu[1].timer < -8) {
-                        gameMenu[1].timer = 0;
-                        keyPress.up       = true;
-                    }
-                }
-                else {
-                    gameMenu[1].timer = 0;
-                }
-            }
-            if (keyPress.down) {
-                gameMenu[1].selection1++;
-                if (gameMenu[1].selection1 - gameMenu[1].visibleRowOffset >= gameMenu[1].visibleRowCount) {
-                    gameMenu[1].visibleRowOffset += 1;
-                }
-            }
-            if (keyPress.up) {
-                gameMenu[1].selection1--;
-                if (gameMenu[1].selection1 - gameMenu[1].visibleRowOffset < 0) {
-                    gameMenu[1].visibleRowOffset -= 1;
-                }
-            }
-            if (gameMenu[1].selection1 >= gameMenu[1].rowCount) {
-                gameMenu[1].selection1       = 0;
-                gameMenu[1].visibleRowOffset = 0;
-            }
-            if (gameMenu[1].selection1 < 0) {
-                gameMenu[1].selection1       = gameMenu[1].rowCount - 1;
-                gameMenu[1].visibleRowOffset = gameMenu[1].rowCount - gameMenu[1].visibleRowCount;
-            }
+            if (keyPress.down == 1)
+                ++gameMenu[1].selection1;
+            if (keyPress.up == 1)
+                --gameMenu[1].selection1;
+            if (gameMenu[1].selection1 == gameMenu[1].rowCount)
+                gameMenu[1].selection1 = 0;
+            if (gameMenu[1].selection1 < 0)
+                gameMenu[1].selection1 = gameMenu[1].rowCount - 1;
 
             char buffer[0x100];
             if (keyPress.A || keyPress.start || keyPress.left || keyPress.right) {
@@ -509,31 +309,25 @@ void processStageSelect()
             if (keyPress.B) {
                 stageMode = DEVMENU_MAIN;
                 SetupTextMenu(&gameMenu[0], 0);
-                AddTextMenuEntry(&gameMenu[0], "RETRO ENGINE DEV MENU");
-                AddTextMenuEntry(&gameMenu[0], " ");
-                char version[0x80];
-                StrCopy(version, Engine.gameWindowText);
-                StrAdd(version, " Version");
-                AddTextMenuEntry(&gameMenu[0], version);
-                AddTextMenuEntry(&gameMenu[0], Engine.gameVersion);
+                AddTextMenuEntry(&gameMenu[0], "RETRO SONIC DEFAULT MENU");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "START GAME");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "STAGE SELECT");
+                AddTextMenuEntry(&gameMenu[0], "1 PLAYER");
                 AddTextMenuEntry(&gameMenu[0], " ");
+#if RETRO_USE_MOD_LOADER
                 AddTextMenuEntry(&gameMenu[0], "MODS");
                 AddTextMenuEntry(&gameMenu[0], " ");
-                AddTextMenuEntry(&gameMenu[0], "EXIT GAME");
-                gameMenu[0].alignment        = 2;
-                gameMenu[0].selectionCount   = 2;
-                gameMenu[0].selection1       = 0;
-                gameMenu[0].selection2       = 9;
-                gameMenu[1].visibleRowCount  = 0;
-                gameMenu[1].visibleRowOffset = 0;
+#endif
+                AddTextMenuEntry(&gameMenu[0], "QUIT");
+                stageMode                  = DEVMENU_MAIN;
+                gameMenu[0].alignment      = 2;
+                gameMenu[0].selectionCount = 2;
+                gameMenu[0].selection1     = 0;
+                gameMenu[0].selection2     = 7;
 
                 //Reload entire engine
                 Engine.LoadGameConfig("Data/Game/GameConfig.bin");

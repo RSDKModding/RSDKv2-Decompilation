@@ -23,7 +23,7 @@ int jumpTableDataPos    = 0;
 int jumpTableDataOffset = 0;
 
 #define ALIAS_COUNT       (0x80)
-#define COMMONALIAS_COUNT (15)
+#define COMMONALIAS_COUNT (14)
 int aliasCount = 0;
 int lineID     = 0;
 
@@ -292,8 +292,7 @@ AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
                             AliasInfo("false", "0"),
                             AliasInfo("FX_SCALE", "0"),
                             AliasInfo("FX_ROTATE", "1"),
-                            AliasInfo("FX_ROTOZOOM", "2"),
-                            AliasInfo("FX_INK", "3"),
+                            AliasInfo("FX_INK", "2"),
                             AliasInfo("PRESENTATION_STAGE", "0"),
                             AliasInfo("REGULAR_STAGE", "1"),
                             AliasInfo("BONUS_STAGE", "2"),
@@ -308,9 +307,6 @@ AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
 const char scriptEvaluationTokens[][0x4] = {
     "=", "+=", "-=", "++", "--", "*=", "/=", ">>=", "<<=", "&=", "|=", "^=", "==", ">", ">=", "<", "<=", "!="
 };
-
-int scriptFunctionCount = 0;
-char scriptFunctionNames[FUNCTION_COUNT][0x20];
 
 enum ScriptReadModes { READMODE_NORMAL = 0, READMODE_STRING = 1, READMODE_COMMENTLINE = 2, READMODE_ENDLINE = 3, READMODE_EOF = 4 };
 enum ScriptParseModes { PARSEMODE_SCOPELESS = 0, PARSEMODE_PLATFORMSKIP = 1, PARSEMODE_FUNCTION = 2, PARSEMODE_SWITCHREAD = 3, PARSEMODE_ERROR = 0xFF };
@@ -720,12 +716,7 @@ void ConvertFunctionText(char *text)
         }
     }
     if (opcode <= 0) {
-        SetupTextMenu(&gameMenu[0], 0);
-        AddTextMenuEntry(&gameMenu[0], "SCRIPT PARSING FAILED");
-        AddTextMenuEntry(&gameMenu[0], " ");
-        AddTextMenuEntry(&gameMenu[0], "OPCODE NOT FOUND");
-        AddTextMenuEntry(&gameMenu[0], funcName);
-        Engine.gameMode = ENGINE_SCRIPTERROR;
+        //error lol
     }
     else {
         scriptData[scriptDataPos++] = opcode;
@@ -797,24 +788,6 @@ void ConvertFunctionText(char *text)
                     StrCopy(funcName, "Global");
                     strBuffer[0] = 0;
                     AppendIntegerToString(strBuffer, v);
-                }
-            }
-            // Eg: TempValue0 = Function1
-            for (int f = 0; f < scriptFunctionCount; ++f) {
-                if (StrComp(funcName, scriptFunctionNames[f])) {
-                    funcName[0] = 0;
-                    AppendIntegerToString(funcName, f);
-                }
-            }
-            // Eg: TempValue0 = TypeName[PlayerObject]
-            if (StrComp(funcName, "TypeName")) {
-                funcName[0] = 0;
-                AppendIntegerToString(funcName, 0);
-                for (int o = 0; o < OBJECT_COUNT; ++o) {
-                    if (StrComp(strBuffer, typeNames[o])) {
-                        funcName[0] = 0;
-                        AppendIntegerToString(funcName, o);
-                    }
                 }
             }
             if (ConvertStringToInteger(funcName, &value)) {
@@ -892,18 +865,8 @@ void ConvertFunctionText(char *text)
                         value = i;
                 }
 
-                if (value == -1 && Engine.gameMode != ENGINE_SCRIPTERROR) {
-                    SetupTextMenu(&gameMenu[0], 0);
-                    AddTextMenuEntry(&gameMenu[0], "SCRIPT PARSING FAILED");
-                    AddTextMenuEntry(&gameMenu[0], " ");
-                    AddTextMenuEntry(&gameMenu[0], "OPERAND NOT FOUND");
-                    AddTextMenuEntry(&gameMenu[0], funcName);
-                    AddTextMenuEntry(&gameMenu[0], " ");
-                    AddTextMenuEntry(&gameMenu[0], "LINE NUMBER");
-                    funcName[0] = 0;
-                    AppendIntegerToString(funcName, lineID);
-                    AddTextMenuEntry(&gameMenu[0], funcName);
-                    Engine.gameMode = ENGINE_SCRIPTERROR;
+                if (value == -1) {
+                    //error
                     value           = 0;
                 }
                 scriptData[scriptDataPos++] = value;
@@ -1168,7 +1131,6 @@ void ParseScriptFile(char *scriptName, int scriptID)
     StrAdd(scriptPath, scriptName);
     FileInfo info;
     if (LoadFile(scriptPath, &info)) {
-        objectScriptList[scriptID].mobile = true; // all parsed scripts will use the updated format, old format support is purely for pc bytecode
         int readMode                      = READMODE_NORMAL;
         int parseMode                     = PARSEMODE_SCOPELESS;
         char prevChar                     = 0;
@@ -1257,58 +1219,27 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         scriptDataOffset                                    = scriptDataPos;
                         jumpTableDataOffset                                 = jumpTableDataPos;
                     }
-                    if (FindStringToken(scriptText, "function", 1)) {
-                        if (FindStringToken(scriptText, "function", 1) == 1) {
-                            char funcName[0x20];
-                            for (textPos = 9; scriptText[textPos]; ++textPos) funcName[textPos - 9] = scriptText[textPos];
-                            funcName[textPos - 9] = 0;
-                            int funcID             = -1;
-                            for (int f = 0; f < scriptFunctionCount; ++f) {
-                                if (StrComp(funcName, scriptFunctionNames[f]))
-                                    funcID = f;
-                            }
-                            if (scriptFunctionCount < FUNCTION_COUNT && funcID == -1) {
-                                StrCopy(scriptFunctionNames[scriptFunctionCount++], funcName);
-                            }
-                            parseMode = PARSEMODE_SCOPELESS;
-                        }
+                    if (StrComp(scriptText, "subPlayerMain")) {
+                        parseMode                                        = PARSEMODE_FUNCTION;
+                        //objectScriptList[scriptID].subMain.scriptCodePtr = scriptDataPos;
+                        //objectScriptList[scriptID].subMain.jumpTablePtr  = jumpTableDataPos;
+                        scriptDataOffset                                 = scriptDataPos;
+                        jumpTableDataOffset                              = jumpTableDataPos;
                     }
-                    else {
-                        char funcName[0x20];
-                        for (textPos = 8; scriptText[textPos]; ++textPos) funcName[textPos - 8] = scriptText[textPos];
-                        funcName[textPos - 8] = 0;
-                        int funcID             = -1;
-                        for (int f = 0; f < scriptFunctionCount; ++f) {
-                            if (StrComp(funcName, scriptFunctionNames[f]))
-                                funcID = f;
+                    if (FindStringToken(scriptText, "subPlayerState", 1)) {
+                        char stateName[0x20];
+                        for (textPos = 14; scriptText[textPos]; ++textPos) stateName[textPos - 9] = scriptText[textPos];
+                        stateName[textPos - 9] = 0;
+                        for (int a = 0; a < aliasCount; ++a) {
+                            if (StrComp(stateName, aliases[a].name))
+                                StrCopy(stateName, aliases[a].value);
                         }
-                        if (funcID <= -1) {
-                            if (scriptFunctionCount >= FUNCTION_COUNT) {
-                                parseMode = PARSEMODE_SCOPELESS;
-                            }
-                            else {
-                                StrCopy(scriptFunctionNames[scriptFunctionCount], funcName);
-                                functionScriptList[scriptFunctionCount].scriptCodePtr = scriptDataPos;
-                                functionScriptList[scriptFunctionCount].jumpTablePtr  = jumpTableDataPos;
-                                scriptDataOffset                                      = scriptDataPos;
-                                jumpTableDataOffset                                   = jumpTableDataPos;
-                                parseMode                                             = PARSEMODE_FUNCTION;
-                                ++scriptFunctionCount;
-                            }
-                        }
-                        else {
-                            StrCopy(scriptFunctionNames[funcID], funcName);
-                            functionScriptList[funcID].scriptCodePtr = scriptDataPos;
-                            functionScriptList[funcID].jumpTablePtr               = jumpTableDataPos;
-                            scriptDataOffset                                      = scriptDataPos;
-                            jumpTableDataOffset                                   = jumpTableDataPos;
-                            parseMode                                             = PARSEMODE_FUNCTION;
-                        }
+                        parseMode = PARSEMODE_FUNCTION;
                     }
                     break;
                 case PARSEMODE_PLATFORMSKIP:
                     ++lineID;
-                    if (!FindStringToken(scriptText, "#endplatform", 1))
+                    if (!FindStringToken(scriptText, "{", 1))
                         parseMode = PARSEMODE_FUNCTION;
                     break;
                 case PARSEMODE_FUNCTION:
@@ -1318,24 +1249,16 @@ void ParseScriptFile(char *scriptName, int scriptID)
                             scriptData[scriptDataPos++] = FUNC_END;
                             parseMode                   = PARSEMODE_SCOPELESS;
                         }
-                        else if (FindStringToken(scriptText, "#platform:", 1)) { //layed out like ass, but this means "if we did not find "#platform:"
-                            if (FindStringToken(scriptText, "#endplatform", 1) == -1) { //if we did NOT find "#endplatform"
-                                ConvertIfWhileStatement(scriptText);
-                                if (ConvertSwitchStatement(scriptText)) {
-                                    parseMode    = PARSEMODE_SWITCHREAD;
-                                    info.readPos = (int)GetFilePosition();
-                                    switchDeep   = 0;
-                                }
-                                ConvertArithmaticSyntax(scriptText);
-                                if (!ReadSwitchCase(scriptText)) {
-                                    ConvertFunctionText(scriptText);
-                                    if (Engine.gameMode == ENGINE_SCRIPTERROR) {
-                                        AddTextMenuEntry(&gameMenu[0], " ");
-                                        AddTextMenuEntry(&gameMenu[0], "ERROR IN");
-                                        AddTextMenuEntry(&gameMenu[0], scriptName);
-                                        parseMode = PARSEMODE_ERROR;
-                                    }
-                                }
+                        else  { 
+                            ConvertIfWhileStatement(scriptText);
+                            if (ConvertSwitchStatement(scriptText)) {
+                                parseMode    = PARSEMODE_SWITCHREAD;
+                                info.readPos = (int)GetFilePosition();
+                                switchDeep   = 0;
+                            }
+                            ConvertArithmaticSyntax(scriptText);
+                            if (!ReadSwitchCase(scriptText)) {
+                                ConvertFunctionText(scriptText);
                             }
                         }
                     }
@@ -1383,8 +1306,6 @@ void ClearScriptData()
     jumpTableDataPos    = 0;
     jumpTableDataOffset = 0;
 
-    scriptFunctionCount = 0;
-
     aliasCount = COMMONALIAS_COUNT;
     lineID = 0;
 
@@ -1392,8 +1313,8 @@ void ClearScriptData()
     ClearAnimationData();
 
     for (int p = 0; p < PLAYER_COUNT; ++p) {
-        playerList[p].animationFile = GetDefaultAnimationRef();
-        playerList[p].boundEntity   = &objectEntityList[p];
+        //playerList[p].animationFile = GetDefaultAnimationRef();
+        //playerList[p].boundEntity   = &objectEntityList[p];
     }
 
     for (int o = 0; o < OBJECT_COUNT; ++o) {
@@ -1406,19 +1327,14 @@ void ClearScriptData()
         scriptInfo->subDraw.jumpTablePtr               = JUMPTABLE_COUNT - 1;
         scriptInfo->subStartup.scriptCodePtr           = SCRIPTDATA_COUNT - 1;
         scriptInfo->subStartup.jumpTablePtr            = JUMPTABLE_COUNT - 1;
-        scriptInfo->frameListOffset                    = 0;
+        scriptInfo->frameStartPtr                    = scriptFrames;
         scriptInfo->spriteSheetID                      = 0;
-        scriptInfo->animFile                           = GetDefaultAnimationRef();
-        scriptInfo->mobile                             = true;
-        typeNames[o][0]                                = 0;
     }
 
     for (int f = 0; f < FUNCTION_COUNT; ++f) {
         functionScriptList[f].scriptCodePtr = SCRIPTDATA_COUNT - 1;
         functionScriptList[f].jumpTablePtr  = JUMPTABLE_COUNT - 1;
     }
-
-    SetObjectTypeName((char *)"Blank Object", 0);
 }
 
 void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
@@ -1578,7 +1494,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERSTATE: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->state;
+                        scriptEng.operands[i] = playerList[activePlayer].state;
                         break;
                     }
                     case VAR_PLAYERCONTROLMODE: {
@@ -1682,103 +1598,75 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERTOPSPEED: {
-                        scriptEng.operands[i] = playerList[activePlayer].topSpeed;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.topSpeed;
                         break;
                     }
                     case VAR_PLAYERACCELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].acceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.acceleration;
                         break;
                     }
                     case VAR_PLAYERDECELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].deceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.deceleration;
                         break;
                     }
                     case VAR_PLAYERAIRACCELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].airAcceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.airAcceleration;
                         break;
                     }
                     case VAR_PLAYERAIRDECELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].airDeceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.airDeceleration;
                         break;
                     }
                     case VAR_PLAYERGRAVITYSTRENGTH: {
-                        scriptEng.operands[i] = playerList[activePlayer].gravityStrength;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.gravityStrength;
                         break;
                     }
                     case VAR_PLAYERJUMPSTRENGTH: {
-                        scriptEng.operands[i] = playerList[activePlayer].jumpStrength;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.jumpStrength;
                         break;
                     }
                     case VAR_PLAYERROLLINGACCELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].rollingAcceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingAcceleration;
                         break;
                     }
                     case VAR_PLAYERROLLINGDECELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].rollingDeceleration;
+                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingDeceleration;
                         break;
                     }
                     case VAR_PLAYERENTITYNO: {
-                        scriptEng.operands[i] = playerList[activePlayer].entityNo;
+                        scriptEng.operands[i] = activePlayer;
                         break;
                     }
                     case VAR_PLAYERCOLLISIONLEFT: {
-                        AnimationFile *animFile = playerList[activePlayer].animationFile;
-                        Player *plr             = &playerList[activePlayer];
-                        if (animFile) {
-                            int h = animFrames[animationList[animFile->aniListOffset + plr->boundEntity->animation].frameListOffset
-                                               + plr->boundEntity->frame]
-                                        .hitboxID;
-
-                            scriptEng.operands[i] = hitboxList[animFile->hitboxListOffset + h].left[0];
-                        }
-                        else {
-                            scriptEng.operands[i] = 0;
-                        }
+                        Hitbox *hitbox = &hitboxList[playerScriptList[activePlayer]
+                                                         .animations[playerList[activePlayer].animation]
+                                                         .frames[playerList[activePlayer].frame]
+                                                         .hitboxID];
+                        scriptEng.operands[i]   = hitbox->left[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONTOP: {
-                        AnimationFile *animFile = playerList[activePlayer].animationFile;
-                        Player *plr             = &playerList[activePlayer];
-                        if (animFile) {
-                            int h = animFrames[animationList[animFile->aniListOffset + plr->boundEntity->animation].frameListOffset
-                                               + plr->boundEntity->frame]
-                                        .hitboxID;
-
-                            scriptEng.operands[i] = hitboxList[animFile->hitboxListOffset + h].top[0];
-                        }
-                        else {
-                            scriptEng.operands[i] = 0;
-                        }
+                        Hitbox *hitbox        = &hitboxList[playerScriptList[activePlayer]
+                                                         .animations[playerList[activePlayer].animation]
+                                                         .frames[playerList[activePlayer].frame]
+                                                         .hitboxID];
+                        scriptEng.operands[i] = hitbox->top[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONRIGHT: {
-                        AnimationFile *animFile = playerList[activePlayer].animationFile;
-                        Player *plr             = &playerList[activePlayer];
-                        if (animFile) {
-                            int h = animFrames[animationList[animFile->aniListOffset + plr->boundEntity->animation].frameListOffset
-                                               + plr->boundEntity->frame]
-                                        .hitboxID;
-
-                            scriptEng.operands[i] = hitboxList[animFile->hitboxListOffset + h].right[0];
-                        }
-                        else {
-                            scriptEng.operands[i] = 0;
-                        }
+                        Hitbox *hitbox        = &hitboxList[playerScriptList[activePlayer]
+                                                         .animations[playerList[activePlayer].animation]
+                                                         .frames[playerList[activePlayer].frame]
+                                                         .hitboxID];
+                        scriptEng.operands[i] = hitbox->right[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONBOTTOM: {
-                        AnimationFile *animFile = playerList[activePlayer].animationFile;
-                        Player *plr             = &playerList[activePlayer];
-                        if (animFile) {
-                            int h = animFrames[animationList[animFile->aniListOffset + plr->boundEntity->animation].frameListOffset
-                                               + plr->boundEntity->frame]
-                                        .hitboxID;
-
-                            scriptEng.operands[i] = hitboxList[animFile->hitboxListOffset + h].bottom[0];
-                        }
-                        else {
-                            scriptEng.operands[i] = 0;
-                        }
+                        Hitbox *hitbox        = &hitboxList[playerScriptList[activePlayer]
+                                                         .animations[playerList[activePlayer].animation]
+                                                         .frames[playerList[activePlayer].frame]
+                                                         .hitboxID];
+                        scriptEng.operands[i] = hitbox->bottom[0];
                         break;
                     }
                     case VAR_PLAYERFLAILING: {
@@ -1794,7 +1682,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
-                        scriptEng.operands[i] = playerList[activePlayer].objectInteractions;
+                        scriptEng.operands[i] = playerList[activePlayer].objectInteraction;
                         break;
                     }
                     case VAR_PLAYERVISIBLE: {
@@ -1802,23 +1690,23 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERROTATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->rotation;
+                        scriptEng.operands[i] = playerList[activePlayer].rotation;
                         break;
                     }
                     case VAR_PLAYERDIRECTION: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->direction;
+                        scriptEng.operands[i] = playerList[activePlayer].direction;
                         break;
                     }
                     case VAR_PLAYERFRAME: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->frame;
+                        scriptEng.operands[i] = playerList[activePlayer].frame;
                         break;
                     }
                     case VAR_PLAYERANIMATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->animation;
+                        scriptEng.operands[i] = playerList[activePlayer].animation;
                         break;
                     }
                     case VAR_PLAYERANIMATIONSPEED: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->animationSpeed;
+                        scriptEng.operands[i] = playerList[activePlayer].animationSpeed;
                         break;
                     }
                     case VAR_STAGEACTIVELIST: scriptEng.operands[i] = activeStageList; break;
@@ -2092,26 +1980,22 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             case FUNC_DRAWSPRITE:
                 opcodeSize  = 0;
-                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + scriptEng.operands[0]];
+                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
                 DrawSprite((entity->XPos >> 16) - xScrollOffset + spriteFrame->pivotX, (entity->YPos >> 16) - yScrollOffset + spriteFrame->pivotY,
                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                 break;
             case FUNC_DRAWSPRITEXY:
                 opcodeSize  = 0;
-                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + scriptEng.operands[0]];
+                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
                 DrawSprite((scriptEng.operands[1] >> 16) - xScrollOffset + spriteFrame->pivotX,
                            (scriptEng.operands[2] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width, spriteFrame->height,
                            spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                 break;
             case FUNC_DRAWSPRITESCREENXY:
                 opcodeSize  = 0;
-                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + scriptEng.operands[0]];
+                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
                 DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY, spriteFrame->width,
                            spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                break;
-            case FUNC_DRAWTINTRECT:
-                opcodeSize = 0;
-                DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
                 break;
             case FUNC_DRAWNUMBERS: {
                 opcodeSize = 0;
@@ -2119,7 +2003,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 if (scriptEng.operands[6]) {
                     while (scriptEng.operands[4] > 0) {
                         int frameID = scriptEng.operands[3] % i / (i / 10) + scriptEng.operands[0];
-                        spriteFrame = &scriptFrames[scriptInfo->frameListOffset + frameID];
+                        spriteFrame = &scriptInfo->frameStartPtr[frameID];
                         DrawSprite(spriteFrame->pivotX + scriptEng.operands[1], spriteFrame->pivotY + scriptEng.operands[2], spriteFrame->width,
                                    spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                         scriptEng.operands[1] -= scriptEng.operands[5];
@@ -2134,7 +2018,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     while (scriptEng.operands[4] > 0) {
                         if (extra >= i) {
                             int frameID = scriptEng.operands[3] % i / (i / 10) + scriptEng.operands[0];
-                            spriteFrame = &scriptFrames[scriptInfo->frameListOffset + frameID];
+                            spriteFrame = &scriptInfo->frameStartPtr[frameID];
                             DrawSprite(spriteFrame->pivotX + scriptEng.operands[1], spriteFrame->pivotY + scriptEng.operands[2], spriteFrame->width,
                                        spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                         }
@@ -2164,7 +2048,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                 scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                             }
                             else {
-                                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + character];
+                                spriteFrame = &scriptInfo->frameStartPtr[character];
                                 character += scriptEng.operands[0];
                                 DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
                                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
@@ -2188,7 +2072,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                     scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                                 }
                                 else {
-                                    spriteFrame = &scriptFrames[scriptInfo->frameListOffset + character];
+                                    spriteFrame = &scriptInfo->frameStartPtr[character];
                                     character += scriptEng.operands[0];
                                     DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
                                                spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
@@ -2216,7 +2100,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                 scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                             }
                             else {
-                                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + character];
+                                spriteFrame = &scriptInfo->frameStartPtr[character];
                                 character += scriptEng.operands[0];
                                 DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
                                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
@@ -2239,7 +2123,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                 scriptEng.operands[1] = scriptEng.operands[1] + scriptEng.operands[5] + scriptEng.operands[6];
                             }
                             else {
-                                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + character];
+                                spriteFrame = &scriptInfo->frameStartPtr[character];
                                 character += scriptEng.operands[0];
                                 DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
                                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
@@ -2275,7 +2159,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             } 
             case FUNC_LOADPALETTE:
                 opcodeSize = 0;
-                LoadPalette(scriptText, scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4]);
+                LoadPalette(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
                 break;
             case FUNC_ROTATEPALETTE:
                 opcodeSize = 0;
@@ -2291,7 +2175,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             case FUNC_DRAWSPRITEFX:
                 opcodeSize  = 0;
-                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + scriptEng.operands[0]];
+                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
                 switch (scriptEng.operands[1]) {
                     default: break;
                     case FX_SCALE:
@@ -2306,12 +2190,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                           spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
                                           scriptInfo->spriteSheetID);
                         break;
-                    case FX_ROTOZOOM:
-                        DrawSpriteRotozoom(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
-                                           (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
-                                           spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
-                                           entity->scale, scriptInfo->spriteSheetID);
-                        break;
                     case FX_INK:
                         switch (entity->inkEffect) {
                             case INK_NONE:
@@ -2324,28 +2202,10 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                                   (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
                                                   spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                                 break;
-                            case INK_ALPHA:
-                                DrawAlphaBlendedSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                       (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                       spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, entity->alpha,
-                                                       scriptInfo->spriteSheetID);
-                                break;
-                            case INK_ADD:
-                                DrawAdditiveBlendedSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                          (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                          spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, entity->alpha,
-                                                          scriptInfo->spriteSheetID);
-                                break;
-                            case INK_SUB:
-                                DrawSubtractiveBlendedSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                             (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                             spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, entity->alpha,
-                                                             scriptInfo->spriteSheetID);
-                                break;
                         }
                         break;
                     case FX_TINT:
-                        if (entity->inkEffect == INK_ALPHA) {
+                        if (entity->inkEffect == 2) {
                             DrawScaledTintMask(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
                                                (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
                                                entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX,
@@ -2358,38 +2218,11 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                              scriptInfo->spriteSheetID);
                         }
                         break;
-                    case FX_FLIP:
-                        switch (entity->direction) {
-                            default:
-                            case FLIP_NONE:
-                                DrawSpriteFlipped((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                  (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                  spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_NONE, scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_X:
-                                DrawSpriteFlipped((scriptEng.operands[2] >> 16) - xScrollOffset - spriteFrame->width - spriteFrame->pivotX,
-                                                  (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                  spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_X, scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_Y:
-                                DrawSpriteFlipped((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                  (scriptEng.operands[3] >> 16) - yScrollOffset - spriteFrame->height - spriteFrame->pivotY,
-                                                  spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_Y,
-                                                  scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_XY:
-                                DrawSpriteFlipped((scriptEng.operands[2] >> 16) - xScrollOffset - spriteFrame->width - spriteFrame->pivotX,
-                                                  (scriptEng.operands[3] >> 16) - yScrollOffset - spriteFrame->height - spriteFrame->pivotY,
-                                                  spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_XY,
-                                                  scriptInfo->spriteSheetID);
-                                break;
-                        }
-                        break;
                 }
                 break;
             case FUNC_DRAWSPRITESCREENFX:
                 opcodeSize  = 0;
-                spriteFrame = &scriptFrames[scriptInfo->frameListOffset + scriptEng.operands[0]];
+                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
                 switch (scriptEng.operands[1]) {
                     default: break;
                     case FX_SCALE:
@@ -2402,11 +2235,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                           spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
                                           scriptInfo->spriteSheetID);
                         break;
-                    case FX_ROTOZOOM:
-                        DrawSpriteRotozoom(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
-                                           -spriteFrame->pivotY, spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height,
-                                           entity->rotation, entity->scale, scriptInfo->spriteSheetID);
-                        break;
                     case FX_INK:
                         switch (entity->inkEffect) {
                             case INK_NONE:
@@ -2417,21 +2245,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                 DrawBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
                                                   spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
                                                   scriptInfo->spriteSheetID);
-                                break;
-                            case INK_ALPHA:
-                                DrawAlphaBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                                       spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, entity->alpha,
-                                                       scriptInfo->spriteSheetID);
-                                break;
-                            case INK_ADD:
-                                DrawAdditiveBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                                          spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                                          entity->alpha, scriptInfo->spriteSheetID);
-                                break;
-                            case INK_SUB:
-                                DrawSubtractiveBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                                             spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                                             entity->alpha, scriptInfo->spriteSheetID);
                                 break;
                         }
                         break;
@@ -2445,31 +2258,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             DrawSpriteScaled(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
                                              -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
                                              spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                        }
-                        break;
-                    case FX_FLIP:
-                        switch (entity->direction) {
-                            default:
-                            case FLIP_NONE:
-                                DrawSpriteFlipped(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                                  spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_NONE,
-                                                  scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_X:
-                                DrawSpriteFlipped(scriptEng.operands[2] - spriteFrame->width - spriteFrame->pivotX,
-                                                  scriptEng.operands[3] + spriteFrame->pivotY, spriteFrame->width, spriteFrame->height,
-                                                  spriteFrame->sprX, spriteFrame->sprY, FLIP_X, scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_Y:
-                                DrawSpriteFlipped(scriptEng.operands[2] + spriteFrame->pivotX,
-                                                  scriptEng.operands[3] - spriteFrame->height - spriteFrame->pivotY, spriteFrame->width,
-                                                  spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_Y, scriptInfo->spriteSheetID);
-                                break;
-                            case FLIP_XY:
-                                DrawSpriteFlipped(scriptEng.operands[2] - spriteFrame->width - spriteFrame->pivotX,
-                                                  scriptEng.operands[3] - spriteFrame->height - spriteFrame->pivotY, spriteFrame->width,
-                                                  spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, FLIP_XY, scriptInfo->spriteSheetID);
-                                break;
                         }
                         break;
                 }
@@ -2500,10 +2288,9 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 opcodeSize = 0;
                 stageMode  = STAGEMODE_LOAD;
                 break;
-            case FUNC_DRAWRECT:
+            case FUNC_DRAWTINTRECT:
                 opcodeSize = 0;
-                DrawRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
-                              scriptEng.operands[5], scriptEng.operands[6], scriptEng.operands[7]);
+                DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
                 break;
             case FUNC_RESETOBJECTENTITY: {
                 opcodeSize            = 0;
@@ -2514,7 +2301,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 newEnt->YPos          = scriptEng.operands[4];
                 newEnt->direction     = FLIP_NONE;
                 newEnt->frame         = 0;
-                newEnt->priority      = PRIORITY_ACTIVE_BOUNDS;
+                newEnt->priority      = PRIORITY_BOUNDS;
                 newEnt->rotation      = 0;
                 newEnt->state         = 0;
                 newEnt->drawOrder     = 3;
@@ -2544,22 +2331,9 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         BoxCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
                                      entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
                         break;
-                    case C_BOX2:
-                        // case C_PLATFORM: // if pc ver, there's no box2
-                        if (!scriptInfo->mobile) {
-                            PlatformCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
-                                              entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
-                        }
-                        else {
-                            BoxCollision2(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
-                                          entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
-                        }
-                        break;
                     case C_PLATFORM:
-                        if (scriptInfo->mobile) {
-                            PlatformCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
-                                              entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
-                        }
+                        PlatformCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
+                                          entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
                         break;
                 }
                 break;
@@ -2574,17 +2348,12 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 temp->YPos           = scriptEng.operands[3];
                 temp->direction      = FLIP_NONE;
                 temp->frame          = 0;
-                temp->priority       = PRIORITY_ACTIVE;
+                temp->priority       = PRIORITY_ALWAYS;
                 temp->rotation       = 0;
                 temp->state          = 0;
                 temp->drawOrder      = 3;
                 temp->scale          = 512;
                 temp->inkEffect      = INK_NONE;
-                temp->alpha          = 0;
-                temp->animation      = 0;
-                temp->prevAnimation  = 0;
-                temp->animationSpeed = 0;
-                temp->animationTimer = 0;
                 temp->values[0]      = 0;
                 temp->values[1]      = 0;
                 temp->values[2]      = 0;
@@ -2594,7 +2363,13 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 temp->values[6]      = 0;
                 temp->values[7]      = 0;
                 break;
-            }
+            }                   
+            case FUNC_DEFAULTGROUNDMOVEMENT: DefaultGroundMovement(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTAIRMOVEMENT: DefaultAirMovement(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTROLLINGMOVEMENT: DefaultRollingMovement(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTGRAVITYTRUE: DefaultGravityTrue(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTGRAVITYFALSE: DefaultGravityFalse(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTJUMPACTION: DefaultJumpAction(&playerList[activePlayer]); break;
             case FUNC_SETMUSICTRACK:
                 opcodeSize = 0;
                 if (scriptEng.operands[2] <= 1)
@@ -2799,7 +2574,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     }
                     case VAR_OBJECTOUTOFBOUNDS: break;
                     case VAR_PLAYERSTATE: {
-                        playerList[activePlayer].boundEntity->state = scriptEng.operands[i];
+                        playerList[activePlayer].state = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCONTROLMODE: {
@@ -2903,39 +2678,39 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERTOPSPEED: {
-                        playerList[activePlayer].topSpeed = scriptEng.operands[i];
+                        playerList[activePlayer].stats.topSpeed = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERACCELERATION: {
-                        playerList[activePlayer].acceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.acceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERDECELERATION: {
-                        playerList[activePlayer].deceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.deceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERAIRACCELERATION: {
-                        playerList[activePlayer].airAcceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.airAcceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERAIRDECELERATION: {
-                        playerList[activePlayer].airDeceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.airDeceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERGRAVITYSTRENGTH: {
-                        playerList[activePlayer].gravityStrength = scriptEng.operands[i];
+                        playerList[activePlayer].stats.gravityStrength = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERJUMPSTRENGTH: {
-                        playerList[activePlayer].jumpStrength = scriptEng.operands[i];
+                        playerList[activePlayer].stats.jumpStrength = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROLLINGACCELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].rollingAcceleration = scriptEng.operands[i];
+                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingAcceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROLLINGDECELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].rollingDeceleration = scriptEng.operands[i];
+                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingDeceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERENTITYNO: break;
@@ -2956,7 +2731,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
-                        scriptEng.operands[i] = playerList[activePlayer].objectInteractions = scriptEng.operands[i];
+                        scriptEng.operands[i] = playerList[activePlayer].objectInteraction = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERVISIBLE: {
@@ -2964,15 +2739,15 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERROTATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->rotation = scriptEng.operands[i];
+                        scriptEng.operands[i] = playerList[activePlayer].rotation = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERFRAME: {
-                        playerList[activePlayer].boundEntity->frame = scriptEng.operands[i];
+                        playerList[activePlayer].frame = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERANIMATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].boundEntity->animation = scriptEng.operands[i];
+                        scriptEng.operands[i] = playerList[activePlayer].animation = scriptEng.operands[i];
                         break;
                     }
                     case VAR_STAGEACTIVELIST: activeStageList = scriptEng.operands[i]; break;

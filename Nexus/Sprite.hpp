@@ -8,7 +8,6 @@ int LoadBMPFile(const char *filePath, byte sheetID);
 int LoadGIFFile(const char *filePath, byte sheetID);
 int LoadGFXFile(const char *filePath, byte sheetID);
 int LoadRSVFile(const char *filePath, byte sheetID);
-int LoadPVRFile(const char *filePath, byte sheetID);
 
 void ReadGifPictureData(int width, int height, bool interlaced, byte *gfxData, int offset);
 

@@ -14,15 +14,13 @@ struct ScriptPtr {
 };
 
 struct ObjectScript {
-    int frameCount;
-    int spriteSheetID;
+    byte frameCount;
+    byte spriteSheetID;
     ScriptPtr subMain;
     ScriptPtr subPlayerInteraction;
     ScriptPtr subDraw;
     ScriptPtr subStartup;
-    int frameListOffset;
-    AnimationFile* animFile;
-    bool mobile; //flag for detecting mobile/updated bytecode
+    SpriteFrame* frameStartPtr;
 };
 
 struct ScriptEngine {
@@ -43,9 +41,6 @@ extern int jumpTableData[JUMPTABLE_COUNT];
 extern int jumpTableStack[JUMPSTACK_COUNT];
 extern int functionStack[FUNCSTACK_COUNT];
 
-extern int scriptCodePos; //Bytecode file readpos
-extern int jumpTablePos;  //Bytecode file readpos
-
 extern int jumpTableStackPos;
 extern int functionStackPos;
 
@@ -56,9 +51,6 @@ extern int scriptDataPos;
 extern int scriptDataOffset;
 extern int jumpTableDataPos;
 extern int jumpTableDataOffset;
-
-extern int scriptFunctionCount;
-extern char scriptFunctionNames[FUNCTION_COUNT][0x20];
 
 extern int aliasCount;
 extern int lineID;

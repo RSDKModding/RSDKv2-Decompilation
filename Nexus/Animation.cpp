@@ -1,32 +1,28 @@
 #include "RetroEngine.hpp"
 
-AnimationFile animationFileList[ANIFILE_COUNT];
-int animationFileCount = 0;
-
 SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
 int scriptFrameCount = 0;
 
 SpriteFrame animFrames[SPRITEFRAME_COUNT];
-int animFrameCount = 0;
-SpriteAnimation animationList[ANIMATION_COUNT];
-int animationCount = 0;
 Hitbox hitboxList[HITBOX_COUNT];
-int hitboxCount = 0;
 
-void LoadAnimationFile(const char *filePath)
+void LoadPlayerAnimation(const char *filePath, int playerID)
 {
     FileInfo info;
     if (LoadFile(filePath, &info)) {
         byte fileBuffer = 0;
         char strBuf[0x21];
-        byte sheetIDs[0x18];
+        byte sheetIDs[4];
         sheetIDs[0] = 0;
 
-        byte sheetCount = 0;
-        FileRead(&sheetCount, 1); // Sheet Count
+        FileRead(&fileBuffer, 1);
+        FileRead(&fileBuffer, 1);
+        FileRead(&fileBuffer, 1);
+        FileRead(&fileBuffer, 1);
+        FileRead(&fileBuffer, 1);
 
         //Read & load each spritesheet
-        for (int s = 0; s < sheetCount; ++s) {
+        for (int s = 0; s < 4; ++s) {
             FileRead(&fileBuffer, 1);
             if (fileBuffer) {
                 int i = 0;
@@ -34,31 +30,32 @@ void LoadAnimationFile(const char *filePath)
                 strBuf[i] = 0;
                 GetFileInfo(&info);
                 CloseFile();
-                sheetIDs[s] = AddGraphicsFile(strBuf);
+
+                RemoveGraphicsFile("", i + 4 * playerID + 16);
+                switch (strBuf[strlen(strBuf) - 3]) {
+                    case 'f': sheetIDs[s] = LoadGIFFile(strBuf, i + 4 * playerID + 16); break;
+                    case 'p': sheetIDs[s] = LoadBMPFile(strBuf, i + 4 * playerID + 16); break;
+                    case 'x': sheetIDs[s] = LoadGFXFile(strBuf, i + 4 * playerID + 16); break;
+                }
+
                 SetFileInfo(&info);
             }
         }
 
         byte animCount = 0;
         FileRead(&animCount, 1);
-        AnimationFile *animFile = &animationFileList[animationFileCount];
-        animFile->animCount     = animCount;
-        animFile->aniListOffset = animationCount;
 
         //Read animations
+        int frameID = playerID << 10;
         for (int a = 0; a < animCount; ++a) {
-            SpriteAnimation *anim = &animationList[animationCount++];
-            anim->frameListOffset = animFrameCount;
-            FileRead(&fileBuffer, 1);
-            FileRead(anim->name, fileBuffer);
-            anim->name[fileBuffer] = 0;
+            SpriteAnimation *anim = &playerScriptList[playerID].animations[a];
             FileRead(&anim->frameCount, 1);
             FileRead(&anim->speed, 1);
             FileRead(&anim->loopPoint, 1);
-            FileRead(&anim->rotationFlag, 1);
+            anim->frames = &animFrames[frameID];
 
             for (int j = 0; j < anim->frameCount; ++j) {
-                SpriteFrame *frame = &animFrames[animFrameCount++];
+                SpriteFrame *frame = &animFrames[frameID++];
                 FileRead(&frame->sheetID, 1);
                 frame->sheetID = sheetIDs[frame->sheetID];
                 FileRead(&frame->hitboxID, 1);
@@ -77,16 +74,13 @@ void LoadAnimationFile(const char *filePath)
                 FileRead(&buffer, 1);
                 frame->pivotY = buffer;
             }
-            // 90 Degree (Extra rotation Frames) rotation
-            if (anim->rotationFlag == ROTFLAG_STATICFRAMES)
-                anim->frameCount >>= 1;
         }
 
         //Read Hitboxes
-        animFile->hitboxListOffset = hitboxCount;
         FileRead(&fileBuffer, 1);
+        int hitboxID = playerID << 3;
         for (int i = 0; i < fileBuffer; ++i) {
-            Hitbox *hitbox = &hitboxList[hitboxCount++];
+            Hitbox *hitbox = &hitboxList[hitboxID++];
             for (int d = 0; d < HITBOX_DIR_COUNT; ++d) {
                 FileRead(&hitbox->left[d], 1);
                 FileRead(&hitbox->top[d], 1);
@@ -94,6 +88,9 @@ void LoadAnimationFile(const char *filePath)
                 FileRead(&hitbox->bottom[d], 1);
             }
         }
+        playerScriptList[playerID].startWalkSpeed  = playerScriptList[playerID].animations[5].speed - 20;
+        playerScriptList[playerID].startRunSpeed   = playerScriptList[playerID].animations[6].speed;
+        playerScriptList[playerID].startJumpSpeed  = playerScriptList[playerID].animations[10].speed - 48;
 
         CloseFile();
     }
@@ -103,61 +100,6 @@ void ClearAnimationData()
     for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(scriptFrames[f]);
     for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
     for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(hitboxList[h]);
-    for (int a = 0; a < ANIMATION_COUNT; ++a) MEM_ZERO(animationList[a]);
-    for (int a = 0; a < ANIFILE_COUNT; ++a) MEM_ZERO(animationFileList[a]);
 
     scriptFrameCount   = 0;
-    animFrameCount     = 0;
-    animationCount     = 0;
-    animationFileCount = 0;
-    hitboxCount        = 0;
-}
-
-AnimationFile *AddAnimationFile(const char *filePath)
-{
-    char path[0x80];
-    StrCopy(path, "Data/Animations/");
-    StrAdd(path, filePath);
-
-    //If matching anim is found return that, otherwise load a new anim
-    for (int a = 0; a < 0x100; ++a) {
-        if (StrLength(animationFileList[a].fileName) <= 0) {
-            StrCopy(animationFileList[a].fileName, filePath);
-            LoadAnimationFile(path);
-            ++animationFileCount;
-            return &animationFileList[a];
-        }
-        if (StrComp(animationFileList[a].fileName, filePath))
-            return &animationFileList[a];
-    }
-    return NULL;
-}
-
-void ProcessObjectAnimation(void *objScr, void *ent)
-{
-    ObjectScript *objectScript = (ObjectScript *)objScr;
-    Entity *entity             = (Entity *)ent;
-    SpriteAnimation *sprAnim           = &animationList[objectScript->animFile->aniListOffset + entity->animation];
-
-    if (entity->animationSpeed <= 0) {
-        entity->animationTimer += sprAnim->speed;
-    }
-    else {
-        if (entity->animationSpeed > 0xF0)
-            entity->animationSpeed = 0xF0;
-        entity->animationTimer += entity->animationSpeed;
-    }
-    if (entity->animation != entity->prevAnimation) {
-        entity->prevAnimation  = entity->animation;
-        entity->frame          = 0;
-        entity->animationTimer = 0;
-        entity->animationSpeed = 0;
-    }
-    if (entity->animationTimer > 0xEF) {
-        entity->animationTimer -= 0xF0;
-        ++entity->frame;
-    }
-
-    if (entity->frame >= sprAnim->frameCount)
-        entity->frame = sprAnim->loopPoint;
 }

@@ -214,14 +214,14 @@ void RetroEngine::Init()
     StrCopy(dest, BASE_PATH);
     StrAdd(dest, Engine.dataFile);
 #endif
-    CheckRSDKFile(dest);
+    CheckBinFile(dest);
 
     gameMode = ENGINE_EXITGAME;
     running  = false;
     if (LoadGameConfig("Data/Game/GameConfig.bin")) {
         if (InitRenderDevice()) {
             if (InitAudioPlayback()) {
-                InitFirstStage();
+                initDevMenu();
                 ClearScriptData();
                 initialised = true;
                 running     = true;
@@ -269,23 +269,6 @@ void RetroEngine::Run()
                         ResetCurrentStageFolder();
                         break;
                     case ENGINE_EXITGAME: running = false; break;
-                    case ENGINE_SCRIPTERROR:
-                        LoadGameConfig("Data/Game/GameConfig.bin");
-                        initErrorMessage();
-                        ResetCurrentStageFolder();
-                        break;
-                    case ENGINE_ENTER_HIRESMODE:
-                        gameMode    = ENGINE_MAINGAME;
-                        highResMode = true;
-                        printLog("Callback: HiRes Mode Enabled");
-                        break;
-                    case ENGINE_EXIT_HIRESMODE:
-                        gameMode    = ENGINE_MAINGAME;
-                        highResMode = false;
-                        printLog("Callback: HiRes Mode Disabled");
-                        break;
-                    case ENGINE_PAUSE: break;
-                    case ENGINE_WAIT: break;
                     default: break;
                 }
 
@@ -326,16 +309,9 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
         FileRead(gameDescriptionText, fileBuffer);
         gameDescriptionText[fileBuffer] = 0;
 
-        // Read Obect Names
-        byte objectCount = 0;
-        FileRead(&objectCount, 1);
-        for (byte o = 0; o < objectCount; ++o) {
-            FileRead(&fileBuffer, 1);
-            for (byte i = 0; i < fileBuffer; ++i) FileRead(&fileBuffer2, 1);
-        }
-
         // Read Script Paths
-        for (byte s = 0; s < objectCount; ++s) {
+        byte scriptCount = 0;
+        for (byte s = 0; s < scriptCount; ++s) {
             FileRead(&fileBuffer, 1);
             for (byte i = 0; i < fileBuffer; ++i) FileRead(&fileBuffer2, 1);
         }
@@ -358,17 +334,6 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
             globalVariables[v] += fileBuffer2 << 8;
             FileRead(&fileBuffer2, 1);
             globalVariables[v] += fileBuffer2;
-
-            if (devMenu) {
-                if (StrComp("Options.DevMenuFlag", globalVariableNames[v]))
-                    globalVariables[v] = 1;
-            }
-
-            if (StrComp("Engine.PlatformId", globalVariableNames[v]))
-                globalVariables[v] = RETRO_GAMEPLATFORMID;
-
-            if (StrComp("Engine.DeviceType", globalVariableNames[v]))
-                globalVariables[v] = RETRO_GAMEPLATFORM;
         }
 
         // Read SFX
@@ -417,12 +382,6 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
                 stageList[cat][s].highlighted = fileBuffer;
 
             }
-        }
-
-        //Temp maybe?
-        if (controlMode >= 0) {
-            saveRAM[35] = controlMode;
-            SetGlobalVariableByName("Options.OriginalControls", controlMode);
         }
 
         CloseFile();

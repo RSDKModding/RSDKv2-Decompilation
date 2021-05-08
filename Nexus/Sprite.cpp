@@ -226,9 +226,8 @@ int AddGraphicsFile(const char *filePath)
     switch (fileExtension) {
         case 'f': LoadGIFFile(sheetPath, sheetID); break;
         case 'p': LoadBMPFile(sheetPath, sheetID); break;
-        case 'r': LoadPVRFile(sheetPath, sheetID); break; // Lite & sega forever ver only
         case 'v': LoadRSVFile(sheetPath, sheetID); break;
-        case 'x': LoadGFXFile(sheetPath, sheetID); break; // Not in lite/sf ver
+        case 'x': LoadGFXFile(sheetPath, sheetID); break;
     }
 
     return sheetID;
@@ -295,13 +294,6 @@ int LoadBMPFile(const char *filePath, byte sheetID)
         }
         gfxDataPosition += surface->height * surface->width;
 
-        surface->widthShifted = 0;
-        int w                 = surface->width;
-        while (w > 1) {
-            w >>= 1;
-            ++surface->widthShifted;
-        }
-
         if (gfxDataPosition >= GFXDATA_MAX) {
             gfxDataPosition = 0;
             printLog("WARNING: Exceeded max gfx size!");
@@ -367,12 +359,6 @@ int LoadGIFFile(const char *filePath, byte sheetID)
         }
 
         surface->dataPosition = gfxDataPosition;
-        surface->widthShifted = 0;
-        int w                 = surface->width;
-        while (w > 1) {
-            w >>= 1;
-            ++surface->widthShifted;
-        }
 
         gfxDataPosition += surface->width * surface->height;
         if (gfxDataPosition < GFXDATA_MAX) {
@@ -429,12 +415,6 @@ int LoadGFXFile(const char *filePath, byte sheetID)
         }
 
         gfxDataPosition += surface->height * surface->width;
-        surface->widthShifted = 0;
-        int w                 = surface->width;
-        while (w > 1) {
-            w >>= 1;
-            ++surface->widthShifted;
-        }
 
         if (gfxDataPosition >= GFXDATA_MAX) {
             gfxDataPosition = 0;
@@ -484,55 +464,6 @@ int LoadRSVFile(const char *filePath, byte sheetID)
             gfxDataPosition = 0;
             printLog("WARNING: Exceeded max gfx size!");
         }
-
-        CloseFile();
-        return true;
-    }
-    return false;
-}
-int LoadPVRFile(const char *filePath, byte sheetID)
-{
-    // ONLY READS "PVRTC 2bpp RGB" PVR FILES
-    FileInfo info;
-    if (LoadFile(filePath, &info)) {
-        GFXSurface *surface = &gfxSurface[sheetID];
-        StrCopy(surface->fileName, filePath);
-
-        byte fileBuffer[2];
-
-        SetFilePosition(28);
-        FileRead(fileBuffer, 1);
-        int width = fileBuffer[0];
-        FileRead(fileBuffer, 1);
-        width += fileBuffer[0] << 8;
-        FileRead(fileBuffer, 1);
-        int height = fileBuffer[0];
-        FileRead(fileBuffer, 1);
-        height = fileBuffer[0] << 8;
-
-        surface->width        = width;
-        surface->height       = height;
-        surface->dataPosition = gfxDataPosition;
-        gfxDataPosition += surface->width * surface->height;
-
-        surface->widthShifted = 0;
-        int w                 = surface->width;
-        while (w > 1) {
-            w >>= 1;
-            ++surface->widthShifted;
-        }
-
-        return false; // yeah I have no clue how to handle this, cd lite has this be loaded every frame on framebuffer update and does it that way
-
-        ushort *buffer = NULL;
-        for (int h = 0; h < height; ++h) {
-            for (int w = 0; w < width; ++w) {
-                FileRead(fileBuffer, 2);
-                buffer[w] = 2 * (fileBuffer[0] + (fileBuffer[1] << 8)) | 1;
-            }
-            buffer += width;
-        }
-        buffer += 0x400 - width;
 
         CloseFile();
         return true;

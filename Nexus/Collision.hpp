@@ -25,7 +25,6 @@ enum CollisionSolidity {
 enum ObjectCollisionTypes {
     C_TOUCH       = 0,
     C_BOX         = 1,
-    C_BOX2        = 2,
     C_PLATFORM    = 3,
 };
 
@@ -55,7 +54,7 @@ void RWallCollision(Player *player, CollisionSensor *sensor);
 void SetPathGripSensors(Player *player);
 
 void ProcessPathGrip(Player *player);
-void ProcessAirCollision(Player *player);
+void ProcessTracedCollision(Player *player);
 
 void ProcessPlayerTileCollisions(Player *player);
 

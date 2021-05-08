@@ -26,10 +26,10 @@ void UpdateVideoFrame()
             byte clr[3];
             for (int i = 0; i < 0x80; ++i) {
                 FileRead(&clr, 3);
-                fullPalette32[i].r = clr[0];
-                fullPalette32[i].g = clr[1];
-                fullPalette32[i].b = clr[2];
-                fullPalette[i]     = ((ushort)(clr[0] >> 3) << 11) | 32 * (clr[1] >> 2) | (clr[2] >> 3);
+                palette32[i].r = clr[0];
+                palette32[i].g = clr[1];
+                palette32[i].b = clr[2];
+                palette16[i]     = ((ushort)(clr[0] >> 3) << 11) | 32 * (clr[1] >> 2) | (clr[2] >> 3);
             }
 
             FileRead(&fileBuffer, 1);
