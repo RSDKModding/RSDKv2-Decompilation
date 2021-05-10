@@ -34,8 +34,6 @@ extern byte fadeR;
 extern byte fadeG;
 extern byte fadeB;
 
-extern int paletteMode;
-
 #define RGB888_TO_RGB565(r, g, b) ((b) >> 3) | (((g) >> 2) << 5) | (((r) >> 3) << 11)
 
 #define PACK_RGB888(r, g, b) (((b) << 16) | ((g) << 8) | ((b) << 0))

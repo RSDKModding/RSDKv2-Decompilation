@@ -172,6 +172,7 @@ public:
     bool running     = false;
 
     int gameMode     = 1;
+    byte colourMode = 1; //16-bit
 
     int frameSkipSetting = 0;
     int frameSkipTimer   = 0;
@@ -197,6 +198,7 @@ public:
     char gameWindowText[0x40];
     char gameDescriptionText[0x100];
 
+    byte *pixelBuffer   = nullptr;
     ushort *frameBuffer   = nullptr;
 
     bool isFullScreen = false;

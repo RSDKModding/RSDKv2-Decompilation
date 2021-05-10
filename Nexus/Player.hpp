@@ -27,8 +27,8 @@ struct Player {
     int angle;
     int rotation;
     int timer;
+    byte type;
     byte state;
-    byte controlMode;
     byte collisionMode;
     int animationTimer;
     byte animation;
@@ -39,7 +39,7 @@ struct Player {
     byte skidding;
     byte pushing;
     byte collisionPlane;
-    byte controlLock;
+    byte controlMode;
     byte frictionLoss;
     int lookPos;
     PlayerMovementStats stats;
@@ -79,7 +79,6 @@ struct PlayerScript {
 
 extern Player playerList[PLAYER_COUNT];
 extern PlayerScript playerScriptList[PLAYER_COUNT];
-extern int playerListPos;
 extern int activePlayer;
 extern int activePlayerCount;
 
@@ -89,6 +88,11 @@ extern ushort leftBuffer;
 extern ushort rightBuffer;
 extern ushort jumpPressBuffer;
 extern ushort jumpHoldBuffer;
+
+void LoadPlayerFromList(byte characterID, byte playerID);
+
+void ProcessPlayerAnimationChange(Player *player);
+void DrawPlayer(Player *player, SpriteFrame *frame);
 
 void ProcessPlayerControl(Player *player);
 

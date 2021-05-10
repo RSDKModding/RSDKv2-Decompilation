@@ -301,7 +301,7 @@ AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
                             AliasInfo("MENU_2", "1"),
                             AliasInfo("C_TOUCH", "0"),
                             AliasInfo("C_BOX", "1"),
-                            AliasInfo("C_PLATFORM", "3") };
+                            AliasInfo("C_PLATFORM", "2") };
 
 
 const char scriptEvaluationTokens[][0x4] = {
@@ -368,18 +368,18 @@ enum ScrVariable {
     VAR_MENU2SELECTION,
     VAR_STAGEACTIVELIST,
     VAR_STAGELISTPOS,
-    VAR_GLOBAL,
     VAR_XSCROLLOFFSET,
     VAR_YSCROLLOFFSET,
+    VAR_GLOBAL,
     VAR_STAGETIMEENABLED,
     VAR_STAGEMILLISECONDS,
     VAR_STAGESECONDS,
     VAR_STAGEMINUTES,
     VAR_STAGEACTNO,
     VAR_OBJECTENTITYNO,
+    VAR_PLAYERTYPE,
     VAR_PLAYERSTATE,
     VAR_PLAYERCONTROLMODE,
-    VAR_PLAYERCONTROLLOCK,
     VAR_PLAYERCOLLISIONMODE,
     VAR_PLAYERCOLLISIONPLANE,
     VAR_PLAYERXPOS,
@@ -1117,7 +1117,7 @@ bool CheckOpcodeType(char *text)
 
 void ParseScriptFile(char *scriptName, int scriptID)
 {
-
+    int currentSub    = -1;
     jumpTableStackPos = 0;
     lineID            = 0;
     aliasCount        = COMMONALIAS_COUNT;
@@ -1197,6 +1197,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         objectScriptList[scriptID].subMain.jumpTablePtr  = jumpTableDataPos;
                         scriptDataOffset                                 = scriptDataPos;
                         jumpTableDataOffset                              = jumpTableDataPos;
+                        currentSub                                       = SUB_MAIN;
                     }
                     if (StrComp(scriptText, "subObjectPlayerInteraction")) {
                         parseMode                                                     = PARSEMODE_FUNCTION;
@@ -1204,6 +1205,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         objectScriptList[scriptID].subPlayerInteraction.jumpTablePtr  = jumpTableDataPos;
                         scriptDataOffset                                              = scriptDataPos;
                         jumpTableDataOffset                                           = jumpTableDataPos;
+                        currentSub                                                    = SUB_PLAYERINTERACTION;
                     }
                     if (StrComp(scriptText, "subObjectDraw")) {
                         parseMode                                        = PARSEMODE_FUNCTION;
@@ -1211,6 +1213,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         objectScriptList[scriptID].subDraw.jumpTablePtr  = jumpTableDataPos;
                         scriptDataOffset                                 = scriptDataPos;
                         jumpTableDataOffset                              = jumpTableDataPos;
+                        currentSub                                       = SUB_DRAW;
                     }
                     if (StrComp(scriptText, "subObjectStartup")) {
                         parseMode                                           = PARSEMODE_FUNCTION;
@@ -1218,23 +1221,37 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         objectScriptList[scriptID].subStartup.jumpTablePtr  = jumpTableDataPos;
                         scriptDataOffset                                    = scriptDataPos;
                         jumpTableDataOffset                                 = jumpTableDataPos;
+                        currentSub                                          = SUB_SETUP;
                     }
                     if (StrComp(scriptText, "subPlayerMain")) {
-                        parseMode                                        = PARSEMODE_FUNCTION;
-                        //objectScriptList[scriptID].subMain.scriptCodePtr = scriptDataPos;
-                        //objectScriptList[scriptID].subMain.jumpTablePtr  = jumpTableDataPos;
-                        scriptDataOffset                                 = scriptDataPos;
-                        jumpTableDataOffset                              = jumpTableDataPos;
+                        parseMode                                           = PARSEMODE_FUNCTION;
+                        playerScriptList[scriptID].scriptCodePtr_PlayerMain = scriptDataPos;
+                        playerScriptList[scriptID].jumpTablePtr_PlayerMain  = jumpTableDataPos;
+                        scriptDataOffset                                    = scriptDataPos;
+                        jumpTableDataOffset                                 = jumpTableDataPos;
+                        currentSub                                          = SUB_PLAYERMAIN;
                     }
-                    if (FindStringToken(scriptText, "subPlayerState", 1)) {
+                    if (!FindStringToken(scriptText, "subPlayerState", 1)) {
                         char stateName[0x20];
-                        for (textPos = 14; scriptText[textPos]; ++textPos) stateName[textPos - 9] = scriptText[textPos];
-                        stateName[textPos - 9] = 0;
+                        for (textPos = 14; scriptText[textPos]; ++textPos) stateName[textPos - 14] = scriptText[textPos];
+                        stateName[textPos - 14] = 0;
                         for (int a = 0; a < aliasCount; ++a) {
                             if (StrComp(stateName, aliases[a].name))
                                 StrCopy(stateName, aliases[a].value);
                         }
-                        parseMode = PARSEMODE_FUNCTION;
+
+                        int val = 0;
+                        if (ConvertStringToInteger(stateName, &val) == 1) {
+                            playerScriptList[scriptID].scriptCodePtr_PlayerState[val] = scriptDataPos;
+                            playerScriptList[scriptID].jumpTablePtr_PlayerState[val]  = jumpTablePos;
+                            scriptDataOffset                                          = scriptDataPos;
+                            jumpTableDataOffset                                       = jumpTablePos;
+                            parseMode                                                 = PARSEMODE_FUNCTION;
+                            currentSub                                                = SUB_PLAYERSTATE;
+                        }
+                        else {
+                            parseMode = PARSEMODE_SCOPELESS;
+                        }
                     }
                     break;
                 case PARSEMODE_PLATFORMSKIP:
@@ -1259,6 +1276,22 @@ void ParseScriptFile(char *scriptName, int scriptID)
                             ConvertArithmaticSyntax(scriptText);
                             if (!ReadSwitchCase(scriptText)) {
                                 ConvertFunctionText(scriptText);
+                                if (!scriptText[0]) {
+                                    parseMode = PARSEMODE_SCOPELESS;
+                                    switch (currentSub) {
+                                        case SUB_MAIN: scriptData[objectScriptList[scriptID].subMain.scriptCodePtr] = FUNC_END; break;
+                                        case SUB_PLAYERINTERACTION:
+                                            scriptData[objectScriptList[scriptID].subPlayerInteraction.scriptCodePtr] = FUNC_END;
+                                            break;
+                                        case SUB_DRAW: scriptData[objectScriptList[scriptID].subDraw.scriptCodePtr] = FUNC_END; break;
+                                        case SUB_SETUP: scriptData[objectScriptList[scriptID].subStartup.scriptCodePtr] = FUNC_END; break;
+                                        case SUB_PLAYERMAIN: scriptData[playerScriptList[scriptID].scriptCodePtr_PlayerMain] = FUNC_END; break;
+                                        case SUB_PLAYERSTATE:
+                                            for (int i = 0; i < 256; ++i) scriptData[playerScriptList[scriptID].scriptCodePtr_PlayerState[i]] = FUNC_END;
+                                            break;
+                                        default: break;
+                                    }
+                                }
                             }
                         }
                     }
@@ -1309,12 +1342,13 @@ void ClearScriptData()
     aliasCount = COMMONALIAS_COUNT;
     lineID = 0;
 
-    ClearGraphicsData();
-    ClearAnimationData();
-
     for (int p = 0; p < PLAYER_COUNT; ++p) {
-        //playerList[p].animationFile = GetDefaultAnimationRef();
-        //playerList[p].boundEntity   = &objectEntityList[p];
+        for (int s = 0; s < 256; ++s) {
+            playerScriptList[p].scriptCodePtr_PlayerState[s] = SCRIPTDATA_COUNT - 1;
+            playerScriptList[p].jumpTablePtr_PlayerState[s]  = JUMPTABLE_COUNT - 1;
+        }
+        playerScriptList[p].scriptCodePtr_PlayerMain = SCRIPTDATA_COUNT - 1;
+        playerScriptList[p].jumpTablePtr_PlayerMain  = JUMPTABLE_COUNT - 1;
     }
 
     for (int o = 0; o < OBJECT_COUNT; ++o) {
@@ -1327,7 +1361,7 @@ void ClearScriptData()
         scriptInfo->subDraw.jumpTablePtr               = JUMPTABLE_COUNT - 1;
         scriptInfo->subStartup.scriptCodePtr           = SCRIPTDATA_COUNT - 1;
         scriptInfo->subStartup.jumpTablePtr            = JUMPTABLE_COUNT - 1;
-        scriptInfo->frameStartPtr                    = scriptFrames;
+        scriptInfo->frameStartPtr                      = scriptFrames;
         scriptInfo->spriteSheetID                      = 0;
     }
 
@@ -1381,19 +1415,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 // Variables
                 switch (scriptData[scriptDataPtr++]) {
                     default: break;
-                    case VAR_TEMPVALUE0: scriptEng.operands[i] = scriptEng.tempValue[0]; break;
-                    case VAR_TEMPVALUE1: scriptEng.operands[i] = scriptEng.tempValue[1]; break;
-                    case VAR_TEMPVALUE2: scriptEng.operands[i] = scriptEng.tempValue[2]; break;
-                    case VAR_TEMPVALUE3: scriptEng.operands[i] = scriptEng.tempValue[3]; break;
-                    case VAR_TEMPVALUE4: scriptEng.operands[i] = scriptEng.tempValue[4]; break;
-                    case VAR_TEMPVALUE5: scriptEng.operands[i] = scriptEng.tempValue[5]; break;
-                    case VAR_TEMPVALUE6: scriptEng.operands[i] = scriptEng.tempValue[6]; break;
-                    case VAR_TEMPVALUE7: scriptEng.operands[i] = scriptEng.tempValue[7]; break;
-                    case VAR_CHECKRESULT: scriptEng.operands[i] = scriptEng.checkResult; break;
-                    case VAR_ARRAYPOS0: scriptEng.operands[i] = scriptEng.arrayPosition[0]; break;
-                    case VAR_ARRAYPOS1: scriptEng.operands[i] = scriptEng.arrayPosition[1]; break;
-                    case VAR_GLOBAL: scriptEng.operands[i] = globalVariables[arrayVal]; break;
-                    case VAR_OBJECTENTITYNO: scriptEng.operands[i] = arrayVal; break;
                     case VAR_OBJECTTYPE: {
                         scriptEng.operands[i] = objectEntityList[arrayVal].type;
                         break;
@@ -1482,15 +1503,48 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         scriptEng.operands[i] = objectEntityList[arrayVal].values[7];
                         break;
                     }
-                    case VAR_OBJECTOUTOFBOUNDS: {
-                        int pos = objectEntityList[arrayVal].XPos >> 16;
-                        if (pos <= xScrollOffset - OBJECT_BORDER_X1 || pos >= OBJECT_BORDER_X2 + xScrollOffset) {
-                            scriptEng.operands[i] = 1;
-                        }
-                        else {
-                            int pos               = objectEntityList[arrayVal].YPos >> 16;
-                            scriptEng.operands[i] = pos <= yScrollOffset - OBJECT_BORDER_Y1 || pos >= yScrollOffset + OBJECT_BORDER_Y2;
-                        }
+                    case VAR_TEMPVALUE0: scriptEng.operands[i] = scriptEng.tempValue[0]; break;
+                    case VAR_TEMPVALUE1: scriptEng.operands[i] = scriptEng.tempValue[1]; break;
+                    case VAR_TEMPVALUE2: scriptEng.operands[i] = scriptEng.tempValue[2]; break;
+                    case VAR_TEMPVALUE3: scriptEng.operands[i] = scriptEng.tempValue[3]; break;
+                    case VAR_TEMPVALUE4: scriptEng.operands[i] = scriptEng.tempValue[4]; break;
+                    case VAR_TEMPVALUE5: scriptEng.operands[i] = scriptEng.tempValue[5]; break;
+                    case VAR_TEMPVALUE6: scriptEng.operands[i] = scriptEng.tempValue[6]; break;
+                    case VAR_TEMPVALUE7: scriptEng.operands[i] = scriptEng.tempValue[7]; break;
+                    case VAR_CHECKRESULT: scriptEng.operands[i] = scriptEng.checkResult; break;
+                    case VAR_ARRAYPOS0: scriptEng.operands[i] = scriptEng.arrayPosition[0]; break;
+                    case VAR_ARRAYPOS1: scriptEng.operands[i] = scriptEng.arrayPosition[1]; break;
+                    case VAR_KEYDOWNUP: scriptEng.operands[i] = keyDown.up; break;
+                    case VAR_KEYDOWNDOWN: scriptEng.operands[i] = keyDown.down; break;
+                    case VAR_KEYDOWNLEFT: scriptEng.operands[i] = keyDown.left; break;
+                    case VAR_KEYDOWNRIGHT: scriptEng.operands[i] = keyDown.right; break;
+                    case VAR_KEYDOWNBUTTONA: scriptEng.operands[i] = keyDown.A; break;
+                    case VAR_KEYDOWNBUTTONB: scriptEng.operands[i] = keyDown.B; break;
+                    case VAR_KEYDOWNBUTTONC: scriptEng.operands[i] = keyDown.C; break;
+                    case VAR_KEYDOWNSTART: scriptEng.operands[i] = keyDown.start; break;
+                    case VAR_KEYPRESSUP: scriptEng.operands[i] = keyPress.up; break;
+                    case VAR_KEYPRESSDOWN: scriptEng.operands[i] = keyPress.down; break;
+                    case VAR_KEYPRESSLEFT: scriptEng.operands[i] = keyPress.left; break;
+                    case VAR_KEYPRESSRIGHT: scriptEng.operands[i] = keyPress.right; break;
+                    case VAR_KEYPRESSBUTTONA: scriptEng.operands[i] = keyPress.A; break;
+                    case VAR_KEYPRESSBUTTONB: scriptEng.operands[i] = keyPress.B; break;
+                    case VAR_KEYPRESSBUTTONC: scriptEng.operands[i] = keyPress.C; break;
+                    case VAR_KEYPRESSSTART: scriptEng.operands[i] = keyPress.start; break;
+                    case VAR_MENU1SELECTION: scriptEng.operands[i] = gameMenu[0].selection1; break;
+                    case VAR_MENU2SELECTION: scriptEng.operands[i] = gameMenu[1].selection1; break;
+                    case VAR_STAGEACTIVELIST: scriptEng.operands[i] = activeStageList; break;
+                    case VAR_STAGELISTPOS: scriptEng.operands[i] = stageListPosition; break;
+                    case VAR_GLOBAL: scriptEng.operands[i] = globalVariables[arrayVal]; break;
+                    case VAR_XSCROLLOFFSET: scriptEng.operands[i] = xScrollOffset; break;
+                    case VAR_YSCROLLOFFSET: scriptEng.operands[i] = yScrollOffset; break;
+                    case VAR_STAGETIMEENABLED: scriptEng.operands[i] = timeEnabled; break;
+                    case VAR_STAGEMILLISECONDS: scriptEng.operands[i] = stageMilliseconds; break;
+                    case VAR_STAGESECONDS: scriptEng.operands[i] = stageSeconds; break;
+                    case VAR_STAGEMINUTES: scriptEng.operands[i] = stageMinutes; break;
+                    case VAR_STAGEACTNO: scriptEng.operands[i] = actID; break;
+                    case VAR_OBJECTENTITYNO: scriptEng.operands[i] = arrayVal; break;
+                    case VAR_PLAYERTYPE: {
+                        scriptEng.operands[i] = playerList[activePlayer].type;
                         break;
                     }
                     case VAR_PLAYERSTATE: {
@@ -1499,10 +1553,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     }
                     case VAR_PLAYERCONTROLMODE: {
                         scriptEng.operands[i] = playerList[activePlayer].controlMode;
-                        break;
-                    }
-                    case VAR_PLAYERCONTROLLOCK: {
-                        scriptEng.operands[i] = playerList[activePlayer].controlLock;
                         break;
                     }
                     case VAR_PLAYERCOLLISIONMODE: {
@@ -1709,15 +1759,12 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         scriptEng.operands[i] = playerList[activePlayer].animationSpeed;
                         break;
                     }
-                    case VAR_STAGEACTIVELIST: scriptEng.operands[i] = activeStageList; break;
-                    case VAR_STAGELISTPOS: scriptEng.operands[i] = stageListPosition; break;
-                    case VAR_STAGETIMEENABLED: scriptEng.operands[i] = timeEnabled; break;
-                    case VAR_STAGEMILLISECONDS: scriptEng.operands[i] = stageMilliseconds; break;
-                    case VAR_STAGESECONDS: scriptEng.operands[i] = stageSeconds; break;
-                    case VAR_STAGEMINUTES: scriptEng.operands[i] = stageMinutes; break;
-                    case VAR_STAGEACTNO: scriptEng.operands[i] = actID; break;
                     case VAR_STAGEPAUSEENABLED: scriptEng.operands[i] = pauseEnabled; break;
                     case VAR_STAGELISTSIZE: scriptEng.operands[i] = stageListCount[activeStageList]; break;
+                    case VAR_SCREENCAMERAENABLED: scriptEng.operands[i] = cameraEnabled; break;
+                    case VAR_SCREENCAMERASTYLE: scriptEng.operands[i] = cameraStyle; break;
+                    case VAR_MUSICVOLUME: scriptEng.operands[i] = masterVolume; break;
+                    case VAR_MUSICCURRENTTRACK: scriptEng.operands[i] = trackID; break;
                     case VAR_STAGENEWXBOUNDARY1: scriptEng.operands[i] = newXBoundary1; break;
                     case VAR_STAGENEWXBOUNDARY2: scriptEng.operands[i] = newXBoundary2; break;
                     case VAR_STAGENEWYBOUNDARY1: scriptEng.operands[i] = newYBoundary1; break;
@@ -1726,30 +1773,17 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_STAGEXBOUNDARY2: scriptEng.operands[i] = xBoundary2; break;
                     case VAR_STAGEYBOUNDARY1: scriptEng.operands[i] = yBoundary1; break;
                     case VAR_STAGEYBOUNDARY2: scriptEng.operands[i] = yBoundary2; break;
-                    case VAR_SCREENCAMERAENABLED: scriptEng.operands[i] = cameraEnabled; break;
-                    case VAR_SCREENCAMERASTYLE: scriptEng.operands[i] = cameraStyle; break;
-                    case VAR_XSCROLLOFFSET: scriptEng.operands[i] = xScrollOffset; break;
-                    case VAR_YSCROLLOFFSET: scriptEng.operands[i] = yScrollOffset; break;
-                    case VAR_MUSICVOLUME: scriptEng.operands[i] = masterVolume; break;
-                    case VAR_MUSICCURRENTTRACK: scriptEng.operands[i] = trackID; break;
-                    case VAR_KEYDOWNUP: scriptEng.operands[i] = keyDown.up; break;
-                    case VAR_KEYDOWNDOWN: scriptEng.operands[i] = keyDown.down; break;
-                    case VAR_KEYDOWNLEFT: scriptEng.operands[i] = keyDown.left; break;
-                    case VAR_KEYDOWNRIGHT: scriptEng.operands[i] = keyDown.right; break;
-                    case VAR_KEYDOWNBUTTONA: scriptEng.operands[i] = keyDown.A; break;
-                    case VAR_KEYDOWNBUTTONB: scriptEng.operands[i] = keyDown.B; break;
-                    case VAR_KEYDOWNBUTTONC: scriptEng.operands[i] = keyDown.C; break;
-                    case VAR_KEYDOWNSTART: scriptEng.operands[i] = keyDown.start; break;
-                    case VAR_KEYPRESSUP: scriptEng.operands[i] = keyPress.up; break;
-                    case VAR_KEYPRESSDOWN: scriptEng.operands[i] = keyPress.down; break;
-                    case VAR_KEYPRESSLEFT: scriptEng.operands[i] = keyPress.left; break;
-                    case VAR_KEYPRESSRIGHT: scriptEng.operands[i] = keyPress.right; break;
-                    case VAR_KEYPRESSBUTTONA: scriptEng.operands[i] = keyPress.A; break;
-                    case VAR_KEYPRESSBUTTONB: scriptEng.operands[i] = keyPress.B; break;
-                    case VAR_KEYPRESSBUTTONC: scriptEng.operands[i] = keyPress.C; break;
-                    case VAR_KEYPRESSSTART: scriptEng.operands[i] = keyPress.start; break;
-                    case VAR_MENU1SELECTION: scriptEng.operands[i] = gameMenu[0].selection1; break;
-                    case VAR_MENU2SELECTION: scriptEng.operands[i] = gameMenu[1].selection1; break;
+                    case VAR_OBJECTOUTOFBOUNDS: {
+                        int pos = objectEntityList[arrayVal].XPos >> 16;
+                        if (pos <= xScrollOffset - OBJECT_BORDER_X1 || pos >= OBJECT_BORDER_X2 + xScrollOffset) {
+                            scriptEng.operands[i] = 1;
+                        }
+                        else {
+                            int pos               = objectEntityList[arrayVal].YPos >> 16;
+                            scriptEng.operands[i] = pos <= yScrollOffset - OBJECT_BORDER_Y1 || pos >= yScrollOffset + OBJECT_BORDER_Y2;
+                        }
+                        break;
+                    }
                 }
             }
             else if (opcodeType == SCRIPTVAR_INTCONST) { // int constant
@@ -1765,15 +1799,15 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             break;
                         }
                         case 1: {
-                            scriptText[c] = (0xFFFFFF & scriptData[scriptDataPtr]) >> 16;
+                            scriptText[c] = (0x00FFFFFF & scriptData[scriptDataPtr]) >> 16;
                             break;
                         }
                         case 2: {
-                            scriptText[c] = (0xFFFF & scriptData[scriptDataPtr]) >> 8;
+                            scriptText[c] = (0x0000FFFF & scriptData[scriptDataPtr]) >> 8;
                             break;
                         }
                         case 3: {
-                            scriptText[c] = scriptData[scriptDataPtr++];
+                            scriptText[c] = (0x000000FF & scriptData[scriptDataPtr++]) >> 0;
                             break;
                         }
                         default: break;
@@ -1997,6 +2031,10 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY, spriteFrame->width,
                            spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                 break;
+            case FUNC_DRAWSPRITE3D:
+                opcodeSize  = 0;
+                //Does not exist
+                break;
             case FUNC_DRAWNUMBERS: {
                 opcodeSize = 0;
                 int i      = 10;
@@ -2057,30 +2095,27 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             scriptEng.operands[0] = scriptEng.operands[0] + 26;
                             charID++;
                         }
-                        while (titleCardText[charID] != 0) {
-                            if (titleCardText[charID] != '-') {
-                                int character = titleCardText[charID];
-                                if (character == ' ')
-                                    character = 0;
-                                if (character == '-')
-                                    character = 0;
-                                if (character > '/' && character < ':')
-                                    character -= 22;
-                                if (character > '9' && character < 'f')
-                                    character -= 'A';
-                                if (character <= -1) {
-                                    scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
-                                }
-                                else {
-                                    spriteFrame = &scriptInfo->frameStartPtr[character];
-                                    character += scriptEng.operands[0];
-                                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
-                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                               scriptInfo->spriteSheetID);
-                                    scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
-                                }
-                                charID++;
+                        while (titleCardText[charID] != 0 && titleCardText[charID] != '-') {
+                            int character = titleCardText[charID];
+                            if (character == ' ')
+                                character = 0;
+                            if (character == '-')
+                                character = 0;
+                            if (character > '/' && character < ':')
+                                character -= 22;
+                            if (character > '9' && character < 'f')
+                                character -= 'A';
+                            if (character <= -1) {
+                                scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                             }
+                            else {
+                                spriteFrame = &scriptInfo->frameStartPtr[character];
+                                character += scriptEng.operands[0];
+                                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                                scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                            }
+                            charID++;
                         }
                         break;
                     }
@@ -2156,7 +2191,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             case FUNC_SETDEBUGICON: {
                 //"SetDebugIcon"
                 break;
-            } 
+            }
             case FUNC_LOADPALETTE:
                 opcodeSize = 0;
                 LoadPalette(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
@@ -2167,7 +2202,21 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             case FUNC_SETFADE:
                 opcodeSize = 0;
-                SetFade(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                SetFade(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
+                        scriptEng.operands[5]);
+                break;
+            case FUNC_SETWATERCOLOR:
+                opcodeSize = 0;
+                // Exists but never called
+                break;
+            case FUNC_SETBLENDTABLE:
+                opcodeSize = 0;
+                SetBlendTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                break;
+            case FUNC_SETTINTTABLE:
+                opcodeSize = 0;
+                SetTintTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
+                             scriptEng.operands[5]);
                 break;
             case FUNC_CLEARSCREEN:
                 opcodeSize = 0;
@@ -2205,11 +2254,11 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         }
                         break;
                     case FX_TINT:
-                        if (entity->inkEffect == 2) {
+                        if (entity->inkEffect == INK_TINT) {
                             DrawScaledTintMask(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
                                                (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
                                                entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX,
-                                               spriteFrame->sprY, scriptInfo->spriteSheetID);
+                                               spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
                         }
                         else {
                             DrawSpriteScaled(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
@@ -2249,10 +2298,10 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         }
                         break;
                     case FX_TINT:
-                        if (entity->inkEffect == INK_ALPHA) {
+                        if (entity->inkEffect == INK_TINT) {
                             DrawScaledTintMask(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
                                                -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
-                                               spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                                               spriteFrame->sprX, spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
                         }
                         else {
                             DrawSpriteScaled(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
@@ -2262,6 +2311,14 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                 }
                 break;
+            case FUNC_DRAWLIFEICON: {
+                opcodeSize  = 0;
+                SpriteAnimation *anim = &playerScriptList[playerList[0].type].animations[15];
+
+                DrawSprite(anim->frames[0].pivotX + scriptEng.operands[0], anim->frames[0].pivotY + scriptEng.operands[1], anim->frames[0].width,
+                           anim->frames[0].height, anim->frames[0].sprX, anim->frames[0].sprY, anim->frames[0].sheetID);
+                break;
+            }
             case FUNC_SETUPMENU: {
                 opcodeSize     = 0;
                 TextMenu *menu = &gameMenu[scriptEng.operands[0]];
@@ -2290,7 +2347,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             case FUNC_DRAWTINTRECT:
                 opcodeSize = 0;
-                DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4]);
                 break;
             case FUNC_RESETOBJECTENTITY: {
                 opcodeSize            = 0;
@@ -2372,10 +2429,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             case FUNC_DEFAULTJUMPACTION: DefaultJumpAction(&playerList[activePlayer]); break;
             case FUNC_SETMUSICTRACK:
                 opcodeSize = 0;
-                if (scriptEng.operands[2] <= 1)
-                    SetMusicTrack(scriptText, scriptEng.operands[1], scriptEng.operands[2], 0);
-                else
-                    SetMusicTrack(scriptText, scriptEng.operands[1], true, scriptEng.operands[2]);
+                SetMusicTrack(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
                 break;
             case FUNC_PLAYMUSIC:
                 opcodeSize = 0;
@@ -2402,9 +2456,9 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 switch (scriptEng.operands[0]) {
                     default: break;
                     case CSIDE_FLOOR: ObjectFloorCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_LWALL: ObjectLWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_RWALL: ObjectRWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_ROOF: ObjectRoofCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_LWALL: ObjectLWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_RWALL: ObjectRWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_ROOF: ObjectRoofCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
                 }
                 break;
             case FUNC_OBJECTTILEGRIP:
@@ -2412,15 +2466,14 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 switch (scriptEng.operands[0]) {
                     default: break;
                     case CSIDE_FLOOR: ObjectFloorGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_LWALL: ObjectLWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_RWALL: ObjectRWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    case CSIDE_ROOF: ObjectRoofGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_LWALL: ObjectLWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_RWALL: ObjectRWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    //case CSIDE_ROOF: ObjectRoofGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
                 }
                 break;
             case FUNC_LOADVIDEO:
                 opcodeSize = 0;
                 // PauseSound();
-                StopMusic();
                 scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
                 // ResumeSound();
                 break;
@@ -2471,19 +2524,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 // Variables
                 switch (scriptData[scriptDataPtr++]) {
                     default: break;
-                    case VAR_TEMPVALUE0: scriptEng.tempValue[0] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE1: scriptEng.tempValue[1] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE2: scriptEng.tempValue[2] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE3: scriptEng.tempValue[3] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE4: scriptEng.tempValue[4] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE5: scriptEng.tempValue[5] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE6: scriptEng.tempValue[6] = scriptEng.operands[i]; break;
-                    case VAR_TEMPVALUE7: scriptEng.tempValue[7] = scriptEng.operands[i]; break;
-                    case VAR_CHECKRESULT: scriptEng.checkResult = scriptEng.operands[i]; break;
-                    case VAR_ARRAYPOS0: scriptEng.arrayPosition[0] = scriptEng.operands[i]; break;
-                    case VAR_ARRAYPOS1: scriptEng.arrayPosition[1] = scriptEng.operands[i]; break;
-                    case VAR_GLOBAL: globalVariables[arrayVal] = scriptEng.operands[i]; break;
-                    case VAR_OBJECTENTITYNO: break;
                     case VAR_OBJECTTYPE: {
                         objectEntityList[arrayVal].type = scriptEng.operands[i];
                         break;
@@ -2572,17 +2612,64 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         objectEntityList[arrayVal].values[7] = scriptEng.operands[i];
                         break;
                     }
-                    case VAR_OBJECTOUTOFBOUNDS: break;
+                    case VAR_TEMPVALUE0: scriptEng.tempValue[0] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE1: scriptEng.tempValue[1] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE2: scriptEng.tempValue[2] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE3: scriptEng.tempValue[3] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE4: scriptEng.tempValue[4] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE5: scriptEng.tempValue[5] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE6: scriptEng.tempValue[6] = scriptEng.operands[i]; break;
+                    case VAR_TEMPVALUE7: scriptEng.tempValue[7] = scriptEng.operands[i]; break;
+                    case VAR_CHECKRESULT: scriptEng.checkResult = scriptEng.operands[i]; break;
+                    case VAR_ARRAYPOS0: scriptEng.arrayPosition[0] = scriptEng.operands[i]; break;
+                    case VAR_ARRAYPOS1: scriptEng.arrayPosition[1] = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNUP: keyDown.up = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNDOWN: keyDown.down = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNLEFT: keyDown.left = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNRIGHT: keyDown.right = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONA: keyDown.A = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONB: keyDown.B = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONC: keyDown.C = scriptEng.operands[i]; break;
+                    case VAR_KEYDOWNSTART: keyDown.start = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSUP: keyPress.up = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSDOWN: keyPress.down = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSLEFT: keyPress.left = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSRIGHT: keyPress.right = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONA: keyPress.A = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONB: keyPress.B = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONC: keyPress.C = scriptEng.operands[i]; break;
+                    case VAR_KEYPRESSSTART: keyPress.start = scriptEng.operands[i]; break;
+                    case VAR_MENU1SELECTION: gameMenu[0].selection1 = scriptEng.operands[i]; break;
+                    case VAR_MENU2SELECTION: gameMenu[1].selection1 = scriptEng.operands[i]; break;
+                    case VAR_STAGEACTIVELIST: activeStageList = scriptEng.operands[i]; break;
+                    case VAR_STAGELISTPOS: stageListPosition = scriptEng.operands[i]; break;
+                    case VAR_XSCROLLOFFSET:
+                        xScrollOffset = scriptEng.operands[i];
+                        xScrollA      = xScrollOffset;
+                        xScrollB      = SCREEN_XSIZE + xScrollOffset;
+                        break;
+                    case VAR_YSCROLLOFFSET:
+                        yScrollOffset = scriptEng.operands[i];
+                        yScrollA      = yScrollOffset;
+                        yScrollB      = SCREEN_YSIZE + yScrollOffset;
+                        break;
+                    case VAR_GLOBAL: globalVariables[arrayVal] = scriptEng.operands[i]; break;
+                    case VAR_STAGETIMEENABLED: timeEnabled = scriptEng.operands[i]; break;
+                    case VAR_STAGEMILLISECONDS: stageMilliseconds = scriptEng.operands[i]; break;
+                    case VAR_STAGESECONDS: stageSeconds = scriptEng.operands[i]; break;
+                    case VAR_STAGEMINUTES: stageMinutes = scriptEng.operands[i]; break;
+                    case VAR_STAGEACTNO: actID = scriptEng.operands[i]; break;
+                    case VAR_OBJECTENTITYNO: break;
+                    case VAR_PLAYERTYPE: {
+                        playerList[activePlayer].type = scriptEng.operands[i];
+                        break;
+                    }
                     case VAR_PLAYERSTATE: {
                         playerList[activePlayer].state = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCONTROLMODE: {
                         playerList[activePlayer].controlMode = scriptEng.operands[i];
-                        break;
-                    }
-                    case VAR_PLAYERCONTROLLOCK: {
-                        playerList[activePlayer].controlLock = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONMODE: {
@@ -2629,12 +2716,44 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         playerList[activePlayer].angle = scriptEng.operands[i];
                         break;
                     }
+                    case VAR_PLAYERROTATION: {
+                        playerList[activePlayer].rotation = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERDIRECTION: {
+                        playerList[activePlayer].direction = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERANIMATION: {
+                        playerList[activePlayer].animation = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERFRAME: {
+                        playerList[activePlayer].frame = scriptEng.operands[i];
+                        break;
+                    }
                     case VAR_PLAYERSKIDDING: {
                         playerList[activePlayer].skidding = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERPUSHING: {
                         playerList[activePlayer].pushing = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERFRICTIONLOSS: {
+                        playerList[activePlayer].frictionLoss = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERWALKINGSPEED: {
+                        playerList[activePlayer].walkingSpeed = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERRUNNINGSPEED: {
+                        playerList[activePlayer].runningSpeed = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERJUMPINGSPEED: {
+                        playerList[activePlayer].jumpingSpeed = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERTRACKSCROLL: {
@@ -2706,11 +2825,11 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERROLLINGACCELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingAcceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.rollingAcceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROLLINGDECELERATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].stats.rollingDeceleration = scriptEng.operands[i];
+                        playerList[activePlayer].stats.rollingDeceleration = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERENTITYNO: break;
@@ -2719,11 +2838,22 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_PLAYERCOLLISIONRIGHT: break;
                     case VAR_PLAYERCOLLISIONBOTTOM: break;
                     case VAR_PLAYERFLAILING: {
-                        scriptEng.operands[i] = playerList[activePlayer].flailing[arrayVal] = scriptEng.operands[i];
+                        playerList[activePlayer].flailing[arrayVal] = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_STAGEPAUSEENABLED: {
+                        pauseEnabled = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_STAGELISTSIZE: {
                         break;
                     }
                     case VAR_PLAYERTIMER: {
                         playerList[activePlayer].timer = scriptEng.operands[i];
+                        break;
+                    }
+                    case VAR_PLAYERANIMATIONSPEED: {
+                        playerList[activePlayer].animationSpeed = scriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERTILECOLLISIONS: {
@@ -2731,34 +2861,17 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
-                        scriptEng.operands[i] = playerList[activePlayer].objectInteraction = scriptEng.operands[i];
+                        playerList[activePlayer].objectInteraction = scriptEng.operands[i];
                         break;
                     }
+                    case VAR_SCREENCAMERAENABLED: cameraEnabled = scriptEng.operands[i]; break;
+                    case VAR_SCREENCAMERASTYLE: cameraStyle = scriptEng.operands[i]; break;
+                    case VAR_MUSICVOLUME: SetMusicVolume(scriptEng.operands[i]); break;
+                    case VAR_MUSICCURRENTTRACK: break;
                     case VAR_PLAYERVISIBLE: {
                         playerList[activePlayer].visible = scriptEng.operands[i];
                         break;
                     }
-                    case VAR_PLAYERROTATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].rotation = scriptEng.operands[i];
-                        break;
-                    }
-                    case VAR_PLAYERFRAME: {
-                        playerList[activePlayer].frame = scriptEng.operands[i];
-                        break;
-                    }
-                    case VAR_PLAYERANIMATION: {
-                        scriptEng.operands[i] = playerList[activePlayer].animation = scriptEng.operands[i];
-                        break;
-                    }
-                    case VAR_STAGEACTIVELIST: activeStageList = scriptEng.operands[i]; break;
-                    case VAR_STAGELISTPOS: stageListPosition = scriptEng.operands[i]; break;
-                    case VAR_STAGETIMEENABLED: timeEnabled = scriptEng.operands[i]; break;
-                    case VAR_STAGEMILLISECONDS: stageMilliseconds = scriptEng.operands[i]; break;
-                    case VAR_STAGESECONDS: stageSeconds = scriptEng.operands[i]; break;
-                    case VAR_STAGEMINUTES: stageMinutes = scriptEng.operands[i]; break;
-                    case VAR_STAGEACTNO: actID = scriptEng.operands[i]; break;
-                    case VAR_STAGEPAUSEENABLED: pauseEnabled = scriptEng.operands[i]; break;
-                    case VAR_STAGELISTSIZE: break;
                     case VAR_STAGENEWXBOUNDARY1: newXBoundary1 = scriptEng.operands[i]; break;
                     case VAR_STAGENEWXBOUNDARY2: newXBoundary2 = scriptEng.operands[i]; break;
                     case VAR_STAGENEWYBOUNDARY1: newYBoundary1 = scriptEng.operands[i]; break;
@@ -2787,38 +2900,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             newYBoundary2 = scriptEng.operands[i];
                         }
                         break;
-                    case VAR_SCREENCAMERAENABLED: cameraEnabled = scriptEng.operands[i]; break;
-                    case VAR_SCREENCAMERASTYLE: cameraStyle = scriptEng.operands[i]; break;
-                    case VAR_XSCROLLOFFSET:
-                        xScrollOffset = scriptEng.operands[i];
-                        xScrollA      = xScrollOffset;
-                        xScrollB      = SCREEN_XSIZE + xScrollOffset;
-                        break;
-                    case VAR_YSCROLLOFFSET:
-                        yScrollOffset = scriptEng.operands[i];
-                        yScrollA      = yScrollOffset;
-                        yScrollB      = SCREEN_YSIZE + yScrollOffset;
-                        break;
-                    case VAR_MUSICVOLUME: SetMusicVolume(scriptEng.operands[i]); break;
-                    case VAR_MUSICCURRENTTRACK: break;
-                    case VAR_KEYDOWNUP: keyDown.up = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNDOWN: keyDown.down = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNLEFT: keyDown.left = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNRIGHT: keyDown.right = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONA: keyDown.A = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONB: keyDown.B = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONC: keyDown.C = scriptEng.operands[i]; break;
-                    case VAR_KEYDOWNSTART: keyDown.start = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSUP: keyPress.up = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSDOWN: keyPress.down = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSLEFT: keyPress.left = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSRIGHT: keyPress.right = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONA: keyPress.A = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONB: keyPress.B = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONC: keyPress.C = scriptEng.operands[i]; break;
-                    case VAR_KEYPRESSSTART: keyPress.start = scriptEng.operands[i]; break;
-                    case VAR_MENU1SELECTION: gameMenu[0].selection1 = scriptEng.operands[i]; break;
-                    case VAR_MENU2SELECTION: gameMenu[1].selection1 = scriptEng.operands[i]; break;
+                    case VAR_OBJECTOUTOFBOUNDS: break;
                 }
             }
             else if (opcodeType == SCRIPTVAR_INTCONST) { // int constant

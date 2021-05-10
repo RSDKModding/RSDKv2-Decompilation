@@ -22,7 +22,7 @@ void ProcessStartupObjects()
         objectLoop                  = TEMPENTITY_START;
         curObjectType               = i;
         int frameStart              = scriptFrameCount;
-        scriptInfo->frameStartPtr   = scriptFrames;
+        scriptInfo->frameStartPtr   = &scriptFrames[scriptFrameCount];
         scriptInfo->spriteSheetID   = 0;
         entity->type                = i;
         if (scriptData[scriptInfo->subStartup.scriptCodePtr] > 0)
@@ -53,7 +53,6 @@ void ProcessObjects()
         }
 
         if (active && entity->type > OBJ_TYPE_BLANKOBJECT) {
-
             if (entity->type == OBJ_TYPE_PLAYER) {
                 if (objectLoop >= 2) {
                     entity->type = OBJ_TYPE_BLANKOBJECT;
@@ -67,10 +66,10 @@ void ProcessObjects()
                             ProcessPlayerControl(player);
                             player->animationSpeed = 0;
                             if (scriptData[script->scriptCodePtr_PlayerMain] > 0)
-                                ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_MAIN);
-                            if (scriptData[script->scriptCodePtr_PlayerState[player->controlMode]] > 0)
-                                ProcessScript(script->scriptCodePtr_PlayerState[player->controlMode],
-                                              script->jumpTablePtr_PlayerState[player->controlMode], SUB_MAIN);
+                                ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_PLAYERMAIN);
+                            if (scriptData[script->scriptCodePtr_PlayerState[player->state]] > 0)
+                                ProcessScript(script->scriptCodePtr_PlayerState[player->state], script->jumpTablePtr_PlayerState[player->state],
+                                              SUB_PLAYERSTATE);
                             ProcessPlayerAnimation(player);
                             if (player->tileCollisions)
                                 ProcessPlayerTileCollisions(player);
@@ -79,7 +78,7 @@ void ProcessObjects()
                             ProcessPlayerControl(player);
                             ProcessPlayerAnimation(player);
                             if (scriptData[script->scriptCodePtr_PlayerMain] > 0)
-                                ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_MAIN);
+                                ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_PLAYERMAIN);
                             if (player->tileCollisions)
                                 ProcessPlayerTileCollisions(player);
                             break;
@@ -91,7 +90,7 @@ void ProcessObjects()
                                 if (keyPress.B) {
                                     player->tileCollisions                     = true;
                                     player->objectInteraction                  = true;
-                                    player->controlLock                        = 0;
+                                    player->controlMode                        = 0;
                                     objectEntityList[objectLoop].propertyValue = 0;
                                 }
                             }

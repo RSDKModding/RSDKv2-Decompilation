@@ -2,15 +2,14 @@
 
 void initDevMenu()
 {
-    drawStageGFXHQ = false;
     xScrollOffset = 0;
     yScrollOffset = 0;
     StopMusic();
     StopAllSfx();
     ReleaseStageSfx();
-    fadeMode        = 0;
+    fadeMode = 0;
 
-    if (Engine.usingBinFile) {
+    if (Engine.usingBinFile && !Engine.devMenu) {
         ClearGraphicsData();
         for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
@@ -21,15 +20,11 @@ void initDevMenu()
         stageListPosition = 0;
     }
     else {
-        playerListPos   = 0;
         Engine.gameMode = ENGINE_DEVMENU;
         ClearGraphicsData();
-        ClearAnimationData();
-        LoadPalette("MasterPalette.act", 0, 256);
+        LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         textMenuSurfaceNo = 0;
         LoadGIFFile("Data/Game/SystemText.gif", 0);
-        SetPaletteEntry(0xF0, 0x00, 0x00, 0x00);
-        SetPaletteEntry(0xFF, 0xFF, 0xFF, 0xFF);
         SetupTextMenu(&gameMenu[0], 0);
         AddTextMenuEntry(&gameMenu[0], "RETRO SONIC DEFAULT MENU");
         AddTextMenuEntry(&gameMenu[0], " ");
@@ -141,7 +136,7 @@ void processStageSelect()
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX - 4, 72);
             DrawTextMenu(&gameMenu[1], SCREEN_CENTERX - 40, 96);
             if (keyPress.start || keyPress.A) {
-                playerListPos = gameMenu[1].selection1;
+                LoadPlayerFromList(gameMenu[1].selection1, 0);
                 SetupTextMenu(&gameMenu[0], 0);
                 AddTextMenuEntry(&gameMenu[0], "SELECT A STAGE LIST");
                 AddTextMenuEntry(&gameMenu[0], " ");
@@ -241,8 +236,8 @@ void processStageSelect()
                 LoadConfigListText(&gameMenu[1], 0);
                 gameMenu[0].alignment      = 2;
                 gameMenu[1].alignment      = 0;
-                gameMenu[1].selectionCount  = 1;
-                gameMenu[1].selection1     = playerListPos;
+                gameMenu[1].selectionCount = 1;
+                gameMenu[1].selection1     = 0;
                 stageMode                  = DEVMENU_PLAYERSEL;
             }
             break;

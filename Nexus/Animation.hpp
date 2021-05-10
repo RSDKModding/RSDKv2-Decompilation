@@ -42,7 +42,7 @@ extern int scriptFrameCount;
 extern SpriteFrame animFrames[SPRITEFRAME_COUNT];
 extern Hitbox hitboxList[HITBOX_COUNT];
 
-void LoadPlayerAnimation(const char *filePath);
+void LoadPlayerAnimation(const char *filePath, int playerID);
 void ClearAnimationData();
 
 #endif // !ANIMATION_H

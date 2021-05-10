@@ -131,10 +131,6 @@ bool processEvents()
                             Engine.gameMode = ENGINE_MAINGAME;
                         }
                         break;
-                    case SDLK_F10:
-                        if (Engine.devMenu)
-                            Engine.showPaletteOverlay ^= 1;
-                        break;
 #if RETRO_PLATFORM == RETRO_OSX
                     case SDLK_TAB:
                         if (Engine.devMenu)
@@ -193,7 +189,6 @@ bool processEvents()
 void RetroEngine::Init()
 {
     CalculateTrigAngles();
-    GenerateBlendLookupTable();
     InitUserdata();
     initMods();
     char dest[0x200];
@@ -225,7 +220,6 @@ void RetroEngine::Init()
                 ClearScriptData();
                 initialised = true;
                 running     = true;
-                gameMode    = ENGINE_MAINGAME;
             }
         }
     }
@@ -295,6 +289,8 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
     byte fileBuffer  = 0;
     byte fileBuffer2 = 0;
     char data[0x40];
+    char strBuf[0x80];
+    byte strLen = 0;
 
     if (LoadFile(filePath, &info)) {
         FileRead(&fileBuffer, 1);
@@ -311,6 +307,7 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
 
         // Read Script Paths
         byte scriptCount = 0;
+        FileRead(&scriptCount, 1);
         for (byte s = 0; s < scriptCount; ++s) {
             FileRead(&fileBuffer, 1);
             for (byte i = 0; i < fileBuffer; ++i) FileRead(&fileBuffer2, 1);
@@ -348,8 +345,18 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
         byte playerCount = 0;
         FileRead(&playerCount, 1);
         for (byte p = 0; p < playerCount; ++p) {
-            FileRead(&fileBuffer, 1);
-            for (byte i = 0; i < fileBuffer; ++i) FileRead(&fileBuffer2, 1);
+            // Player Anim
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+            // Player Script
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+            // Player Name
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
         }
 
         for (int c = 0; c < 4; ++c) {

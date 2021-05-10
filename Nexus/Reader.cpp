@@ -184,8 +184,6 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
 
     FileRead(&fileBuffer, 1);
     dirCount = fileBuffer;
-    FileRead(&fileBuffer, 1);
-    dirCount += fileBuffer << 8;
 
     i                  = 0;
     fileOffset         = 0;
@@ -194,7 +192,6 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
         FileRead(&fileBuffer, 1);
         for (j = 0; j < fileBuffer; ++j) {
             FileRead(&stringBuffer[j], 1);
-            stringBuffer[j] ^= -1 - fileBuffer;
         }
         stringBuffer[j] = 0;
 
@@ -260,7 +257,6 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             j = 0;
             while (j < fileBuffer) {
                 FileRead(&stringBuffer[j], 1);
-                stringBuffer[j] = ~stringBuffer[j];
                 ++j;
                 ++virtualFileOffset;
             }
@@ -525,8 +521,6 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
 
     FileRead2(fileInfo, &fileBuffer, 1);
     dirCount = fileBuffer;
-    FileRead2(fileInfo, &fileBuffer, 1);
-    dirCount += fileBuffer << 8;
 
     i                  = 0;
     fileOffset         = 0;
@@ -535,7 +529,6 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
         FileRead2(fileInfo, &fileBuffer, 1);
         for (j = 0; j < fileBuffer; ++j) {
             FileRead2(fileInfo, &stringBuffer[j], 1);
-            stringBuffer[j] ^= -1 - fileBuffer;
         }
         stringBuffer[j] = 0;
 
@@ -558,9 +551,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
                 FileRead2(fileInfo, &fileBuffer, 1);
                 for (j = 0; j < fileBuffer; ++j) {
                     FileRead2(fileInfo, &stringBuffer[j], 1);
-                    stringBuffer[j] ^= -1 - fileBuffer;
                 }
-                stringBuffer[j] = 0;
 
                 FileRead2(fileInfo, &fileBuffer, 1);
                 nextFileOffset = fileBuffer;
@@ -591,7 +582,6 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     else {
         fSeek(fileInfo->cFileHandle, fileOffset + headerSize, SEEK_SET);
         fileInfo->bufferPosition = 0;
-        // readSize          = 0;
         fileInfo->readPos           = 0;
         fileInfo->virtualFileOffset = fileOffset + headerSize;
         i                           = 0;
@@ -601,7 +591,6 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
             j = 0;
             while (j < fileBuffer) {
                 FileRead2(fileInfo, &stringBuffer[j], 1);
-                stringBuffer[j] = ~stringBuffer[j];
                 ++j;
                 ++fileInfo->virtualFileOffset;
             }
@@ -669,7 +658,6 @@ size_t FileRead2(FileInfo *info, void *dest, int size)
             info->bufferPosition = 0;
 
             while (size > 0) {
-                *data ^= 0xFF;
                 data++;
                 --size;
             }

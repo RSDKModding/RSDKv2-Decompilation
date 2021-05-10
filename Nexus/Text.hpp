@@ -29,8 +29,6 @@ void LoadConfigListText(TextMenu *menu, int listNo);
 
 void SetupTextMenu(TextMenu *menu, int rowCount);
 void AddTextMenuEntry(TextMenu *menu, const char *text);
-void AddTextMenuEntryMapped(TextMenu *menu, const char *text);
-void SetTextMenuEntry(TextMenu *menu, const char *text, int rowID);
 void EditTextMenuEntry(TextMenu *menu, const char *text, int rowID);
 
 #endif // !TEXTSYSTEM_H

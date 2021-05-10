@@ -433,7 +433,7 @@ int LoadRSVFile(const char *filePath, byte sheetID)
         GFXSurface *surface = &gfxSurface[sheetID];
         StrCopy(surface->fileName, filePath);
 
-        videoData         = sheetID;
+        videoSurface         = sheetID;
         currentVideoFrame = 0;
 
         byte fileBuffer = 0;
@@ -455,8 +455,8 @@ int LoadRSVFile(const char *filePath, byte sheetID)
 
         videoFilePos   = (int)GetFilePosition();
         videoPlaying   = true;
-        surface->height       = videoWidth;
-        surface->width        = videoHeight;
+        surface->width        = videoWidth;
+        surface->height       = videoHeight;
         surface->dataPosition = gfxDataPosition;
         gfxDataPosition += surface->width * surface->height;
 
@@ -465,7 +465,6 @@ int LoadRSVFile(const char *filePath, byte sheetID)
             printLog("WARNING: Exceeded max gfx size!");
         }
 
-        CloseFile();
         return true;
     }
     return false;

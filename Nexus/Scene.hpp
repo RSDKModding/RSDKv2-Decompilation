@@ -117,7 +117,6 @@ extern SceneInfo stageList[STAGELIST_MAX][0x100];
 
 extern int stageMode;
 
-extern int cameraTarget;
 extern int cameraStyle;
 extern int cameraEnabled;
 extern int cameraAdjustY;
@@ -178,6 +177,11 @@ extern int bgDeformationData1[DEFORM_COUNT];
 extern int bgDeformationData2[DEFORM_COUNT];
 extern int bgDeformationData3[DEFORM_COUNT];
 
+extern int fgDeformationOffset;
+extern int fgDeformationOffsetW;
+extern int bgDeformationOffset;
+extern int bgDeformationOffsetW;
+
 extern LineScroll hParallax;
 extern LineScroll vParallax;
 
@@ -185,9 +189,6 @@ extern Tiles128x128 tiles128x128;
 extern CollisionMasks collisionMasks[2];
 
 extern byte tilesetGFXData[TILESET_SIZE];
-
-extern ushort tile3DFloorBuffer[0x13334];
-extern bool drawStageGFXHQ;
 
 void ProcessStage();
 
@@ -214,17 +215,6 @@ void LoadStageChunks();
 void LoadStageCollisions();
 void LoadStageGIFFile(int stageID);
 void LoadStageGFXFile(int stageID);
-
-inline void Init3DFloorBuffer(int layerID)
-{
-    for (int y = 0; y < TILELAYER_CHUNK_H; ++y) {
-        for (int x = 0; x < TILELAYER_CHUNK_W; ++x) {
-            int c                           = stageLayouts[layerID].tiles[(x >> 3) + (y >> 3 << 8)] << 6;
-            int tx                          = x & 7;
-            tile3DFloorBuffer[x + (y << 8)] = c + tx + ((y & 7) << 3);
-        }
-    }
-}
 
 inline void Copy16x16Tile(ushort dest, ushort src)
 {

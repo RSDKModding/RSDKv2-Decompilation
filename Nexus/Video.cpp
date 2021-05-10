@@ -4,16 +4,17 @@ int currentVideoFrame = 0;
 int videoFrameCount   = 0;
 int videoWidth        = 0;
 int videoHeight       = 0;
-int videoData         = 0;
+int videoSurface      = 0;
 int videoFilePos      = 0;
-bool videoPlaying     = 0;
+bool videoPlaying     = false;
 
 void UpdateVideoFrame()
 {
     if (videoPlaying) {
         if (videoFrameCount > currentVideoFrame) {
-            GFXSurface *surface = &gfxSurface[videoData];
-            byte fileBuffer      = 0;
+            GFXSurface *surface = &gfxSurface[videoSurface];
+            byte fileBuffer     = 0;
+            ushort fileBuffer2  = 0;
             FileRead(&fileBuffer, 1);
             videoFilePos += fileBuffer;
             FileRead(&fileBuffer, 1);
@@ -26,19 +27,17 @@ void UpdateVideoFrame()
             byte clr[3];
             for (int i = 0; i < 0x80; ++i) {
                 FileRead(&clr, 3);
-                palette32[i].r = clr[0];
-                palette32[i].g = clr[1];
-                palette32[i].b = clr[2];
-                palette16[i]     = ((ushort)(clr[0] >> 3) << 11) | 32 * (clr[1] >> 2) | (clr[2] >> 3);
+                SetPaletteEntry(i, clr[0], clr[1], clr[2]);
             }
+            SetPaletteEntry(0, 0x00, 0x00, 0x00);
 
             FileRead(&fileBuffer, 1);
             while (fileBuffer != ',') FileRead(&fileBuffer, 1); // gif image start identifier
 
-            FileRead(&fileBuffer, 2); // IMAGE LEFT
-            FileRead(&fileBuffer, 2); // IMAGE TOP
-            FileRead(&fileBuffer, 2); // IMAGE WIDTH
-            FileRead(&fileBuffer, 2); // IMAGE HEIGHT
+            FileRead(&fileBuffer2, 2); // IMAGE LEFT
+            FileRead(&fileBuffer2, 2); // IMAGE TOP
+            FileRead(&fileBuffer2, 2); // IMAGE WIDTH
+            FileRead(&fileBuffer2, 2); // IMAGE HEIGHT
             FileRead(&fileBuffer, 1); // PaletteType
             bool interlaced = (fileBuffer & 0x40) >> 6;
             if (fileBuffer >> 7 == 1) {
@@ -54,7 +53,7 @@ void UpdateVideoFrame()
             ++currentVideoFrame;
         }
         else {
-            videoPlaying = 0;
+            videoPlaying = false;
             CloseFile();
         }
     }

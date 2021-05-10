@@ -30,7 +30,7 @@ struct ScriptEngine {
     int checkResult;
 };
 
-enum ScriptSubs { SUB_MAIN = 0, SUB_PLAYERINTERACTION = 1, SUB_DRAW = 2, SUB_SETUP = 3 };
+enum ScriptSubs { SUB_MAIN = 0, SUB_PLAYERINTERACTION = 1, SUB_DRAW = 2, SUB_SETUP = 3, SUB_PLAYERMAIN = 4, SUB_PLAYERSTATE = 5 };
 
 extern ObjectScript objectScriptList[OBJECT_COUNT];
 extern ScriptPtr functionScriptList[FUNCTION_COUNT];

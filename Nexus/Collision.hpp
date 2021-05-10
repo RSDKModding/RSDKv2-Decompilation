@@ -25,7 +25,7 @@ enum CollisionSolidity {
 enum ObjectCollisionTypes {
     C_TOUCH       = 0,
     C_BOX         = 1,
-    C_PLATFORM    = 3,
+    C_PLATFORM    = 2,
 };
 
 struct CollisionSensor
@@ -59,8 +59,7 @@ void ProcessTracedCollision(Player *player);
 void ProcessPlayerTileCollisions(Player *player);
 
 void TouchCollision(int left, int top, int right, int bottom);
-void BoxCollision(int left, int top, int right, int bottom);  // Standard
-void BoxCollision2(int left, int top, int right, int bottom); // Updated (?)
+void BoxCollision(int left, int top, int right, int bottom);
 void PlatformCollision(int left, int top, int right, int bottom);
 
 void ObjectFloorCollision(int xOffset, int yOffset, int cPath);

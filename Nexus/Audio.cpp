@@ -111,7 +111,6 @@ void LoadGlobalSfx()
         FileRead(strBuffer, fileBuffer);
         strBuffer[fileBuffer] = 0;
 
-        // Read Obect Names
         // Read Script Paths
         byte scriptCount = 0;
         FileRead(&scriptCount, 1);
@@ -198,7 +197,7 @@ void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
                 if (bytes_read == 0) {
                     // We've reached the end of the file
                     if (musInfo.trackLoop) {
-                        ov_pcm_seek(&musInfo.vorbisFile, musInfo.loopPoint);
+                        ov_pcm_seek(&musInfo.vorbisFile, 0);
                         continue;
                     }
                     else {
@@ -311,7 +310,6 @@ void ProcessAudioPlayback(void *userdata, Uint8 *stream, int len)
 
         if (LoadFile2(trackPtr->fileName, &musInfo.fileInfo)) {
             musInfo.trackLoop = trackPtr->trackLoop;
-            musInfo.loopPoint = trackPtr->loopPoint;
             musInfo.loaded    = true;
 
             unsigned long long samples = 0;
@@ -465,14 +463,13 @@ void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sby
 }
 #endif
 
-void SetMusicTrack(char *filePath, byte trackID, bool loop, uint loopPoint)
+void SetMusicTrack(char *filePath, byte trackID, bool loop)
 {
     LOCK_AUDIO_DEVICE()
     TrackInfo *track = &musicTracks[trackID];
     StrCopy(track->fileName, "Data/Music/");
     StrAdd(track->fileName, filePath);
     track->trackLoop = loop;
-    track->loopPoint = loopPoint;
     UNLOCK_AUDIO_DEVICE()
 }
 bool PlayMusic(int track)
@@ -507,6 +504,9 @@ void LoadSfx(char *filePath, byte sfxID)
         byte *sfx = new byte[info.fileSize];
         FileRead(sfx, info.fileSize);
         CloseFile();
+
+        //Un-encrypt sfx
+        for (int i = 0; i < info.fileSize; ++i) sfx[i] ^= 0xFF;
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
         SDL_LockAudio();

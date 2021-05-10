@@ -8,8 +8,12 @@ Hitbox hitboxList[HITBOX_COUNT];
 
 void LoadPlayerAnimation(const char *filePath, int playerID)
 {
+    char buffer[0x80];
+    StrCopy(buffer, "Data/Animations/");
+    StrAdd(buffer, filePath);
+
     FileInfo info;
-    if (LoadFile(filePath, &info)) {
+    if (LoadFile(buffer, &info)) {
         byte fileBuffer = 0;
         char strBuf[0x21];
         byte sheetIDs[4];
@@ -31,12 +35,17 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
                 GetFileInfo(&info);
                 CloseFile();
 
-                RemoveGraphicsFile("", i + 4 * playerID + 16);
-                switch (strBuf[strlen(strBuf) - 3]) {
-                    case 'f': sheetIDs[s] = LoadGIFFile(strBuf, i + 4 * playerID + 16); break;
-                    case 'p': sheetIDs[s] = LoadBMPFile(strBuf, i + 4 * playerID + 16); break;
-                    case 'x': sheetIDs[s] = LoadGFXFile(strBuf, i + 4 * playerID + 16); break;
+                RemoveGraphicsFile("", s + 4 * playerID + 16);
+
+                StrCopy(buffer, "Data/Sprites/");
+                StrAdd(buffer, strBuf);
+
+                switch (strBuf[i - 1]) {
+                    case 'f': LoadGIFFile(buffer, s + 4 * playerID + 16); break;
+                    case 'p': LoadBMPFile(buffer, s + 4 * playerID + 16); break;
+                    case 'x': LoadGFXFile(buffer, s + 4 * playerID + 16); break;
                 }
+                sheetIDs[s] = (4 * playerID + 16) + s;
 
                 SetFileInfo(&info);
             }
@@ -54,7 +63,7 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
             FileRead(&anim->loopPoint, 1);
             anim->frames = &animFrames[frameID];
 
-            for (int j = 0; j < anim->frameCount; ++j) {
+            for (int f = 0; f < anim->frameCount; ++f) {
                 SpriteFrame *frame = &animFrames[frameID++];
                 FileRead(&frame->sheetID, 1);
                 frame->sheetID = sheetIDs[frame->sheetID];
@@ -98,8 +107,8 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
 void ClearAnimationData()
 {
     for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(scriptFrames[f]);
-    for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
-    for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(hitboxList[h]);
+    //for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
+    //for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(hitboxList[h]);
 
     scriptFrameCount   = 0;
 }

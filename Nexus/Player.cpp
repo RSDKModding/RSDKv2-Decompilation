@@ -2,7 +2,6 @@
 
 Player playerList[PLAYER_COUNT];
 PlayerScript playerScriptList[PLAYER_COUNT];
-int playerListPos = 0;
 int activePlayer  = 0;
 int activePlayerCount = 1;
 
@@ -12,6 +11,114 @@ ushort leftBuffer      = 0;
 ushort rightBuffer     = 0;
 ushort jumpPressBuffer = 0;
 ushort jumpHoldBuffer  = 0;
+
+void LoadPlayerFromList(byte characterID, byte playerID)
+{
+    FileInfo info;
+    char strBuf[0x100];
+    byte fileBuffer = 0;
+    byte count      = 0;
+    byte strLen     = 0;
+    if (LoadFile("Data/Game/GameConfig.bin", &info)) {
+        // Name
+        FileRead(&strLen, 1);
+        FileRead(&strBuf, strLen);
+        strBuf[strLen] = 0;
+
+        // 'Data'
+        FileRead(&strLen, 1);
+        FileRead(&strBuf, strLen);
+        strBuf[strLen] = 0;
+
+        // About
+        FileRead(&strLen, 1);
+        FileRead(&strBuf, strLen);
+        strBuf[strLen] = 0;
+
+        // Script Paths
+        FileRead(&count, 1);
+        for (int s = 0; s < count; ++s) {
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+        }
+
+        // Variables
+        FileRead(&count, 1);
+        for (int v = 0; v < count; ++v) {
+            // Var Name
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+
+            // Var Value
+            FileRead(&fileBuffer, 1);
+            FileRead(&fileBuffer, 1);
+            FileRead(&fileBuffer, 1);
+            FileRead(&fileBuffer, 1);
+        }
+
+        // SFX
+        FileRead(&count, 1);
+        for (int s = 0; s < count; ++s) {
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+        }
+
+        // Players
+        FileRead(&count, 1);
+        for (int p = 0; p < count; ++p) {
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen); //player anim file
+            strBuf[strLen] = '\0';
+
+            FileRead(&strLen, 1);
+            FileRead(&playerScriptList[p].scriptPath, strLen); // player script file
+            playerScriptList[p].scriptPath[strLen] = '\0';
+
+            if (characterID == p) {
+                GetFileInfo(&info);
+                CloseFile();
+                LoadPlayerAnimation(strBuf, playerID);
+                SetFileInfo(&info);
+            }
+        }
+        CloseFile();
+    }
+}
+
+void ProcessPlayerAnimationChange(Player *player)
+{
+    if (player->animation != player->prevAnimation) {
+        if (player->animation == 10)
+            player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+        if (player->prevAnimation == 10)
+            player->YPos -= (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+        player->prevAnimation  = player->animation;
+        player->frame          = 0;
+        player->animationTimer = 0;
+    }
+}
+
+void DrawPlayer(Player *player, SpriteFrame *frame)
+{
+    int rotation = 0;
+    switch (player->animation) {
+        case 5:
+        case 6:
+        case 8:
+        case 34:
+            if (player->rotation >= 0x80)
+                rotation = 0x200 - ((266 - player->rotation) >> 5 << 6);
+            else
+                rotation = (player->rotation + 10) >> 5 << 6;
+            break;
+        default: break;
+    }
+    DrawSpriteRotated(player->direction, player->screenXPos, player->screenYPos, -frame->pivotX, -frame->pivotY, frame->sprX, frame->sprY,
+                      frame->width, frame->height, rotation, frame->sheetID);
+}
 
 void ProcessPlayerControl(Player *Player)
 {
@@ -92,7 +199,7 @@ void DefaultAirMovement(Player *player)
         if (player->right)
             player->direction = FLIP_NONE;
     }
-    else if (player->right == 1) {
+    else if (player->right) {
         player->speed += player->stats.airAcceleration;
         player->direction = FLIP_NONE;
     }
@@ -292,7 +399,8 @@ void DefaultRollingMovement(Player *player)
             player->speed = 0;
     }
     if ((player->angle < 12 || player->angle > 244) && !player->speed)
-        player->controlMode = 0;
+        player->state = 0;
+
     if (player->speed <= 0) {
         if (sinVal256[player->angle] >= 0) {
             player->speed = (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8) + player->speed;
@@ -307,8 +415,9 @@ void DefaultRollingMovement(Player *player)
     else {
         player->speed += 0x5000 * sinVal256[player->angle] >> 8;
     }
+
     if (player->speed > 0x180000)
-    player->speed = 0x180000;
+        player->speed = 0x180000;
 }
 
 void ProcessDebugMode(Player *player)
@@ -337,7 +446,7 @@ void ProcessDebugMode(Player *player)
 
 void ProcessPlayerAnimation(Player *player)
 {
-    PlayerScript *script = &playerScriptList[player->state];
+    PlayerScript *script = &playerScriptList[player->type];
     if (!player->gravity) {
         int speed = (player->jumpingSpeed * abs(player->speed) / 6 >> 16) + 48;
         if (speed > 0xF0)

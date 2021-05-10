@@ -12,9 +12,8 @@ SceneInfo stageList[STAGELIST_MAX][0x100];
 
 int stageMode = STAGEMODE_LOAD;
 
-int cameraTarget   = -1;
 int cameraStyle    = 0;
-int cameraEnabled  = 0;
+int cameraEnabled  = false;
 int cameraAdjustY  = 0;
 int xScrollOffset  = 0;
 int yScrollOffset  = 0;
@@ -34,8 +33,8 @@ int yBoundary1    = 0;
 int newYBoundary1 = 0;
 int xBoundary2    = 0;
 int yBoundary2    = 0;
-int waterLevel    = 0;
-int waterDrawPos  = 0;
+int waterLevel    = 0x7FFFFFF;
+int waterDrawPos  = SCREEN_YSIZE;
 int newXBoundary2 = 0;
 int newYBoundary2 = 0;
 
@@ -71,6 +70,11 @@ int bgDeformationData1[DEFORM_COUNT];
 int bgDeformationData2[DEFORM_COUNT];
 int bgDeformationData3[DEFORM_COUNT];
 
+int fgDeformationOffset  = 0;
+int fgDeformationOffsetW = 0;
+int bgDeformationOffset  = 0;
+int bgDeformationOffsetW = 0;
+
 LineScroll hParallax;
 LineScroll vParallax;
 
@@ -79,8 +83,6 @@ CollisionMasks collisionMasks[2];
 
 byte tilesetGFXData[TILESET_SIZE];
 
-ushort tile3DFloorBuffer[0x13334];
-
 void ProcessStage(void)
 {
     int updateMax = 0; 
@@ -88,8 +90,7 @@ void ProcessStage(void)
         case STAGEMODE_LOAD: // Startup
             fadeMode = 0;
 
-            cameraEnabled = 1;
-            cameraTarget  = -1;
+            cameraEnabled = true;
             cameraAdjustY = 0;
             xScrollOffset = 0;
             yScrollOffset = 0;
@@ -103,7 +104,7 @@ void ProcessStage(void)
 
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 MEM_ZERO(playerList[i]);
-                playerList[i].visible            = 1;
+                playerList[i].visible            = true;
                 playerList[i].gravity            = 1; // Air
                 playerList[i].tileCollisions     = true;
                 playerList[i].objectInteraction = true;
@@ -120,13 +121,8 @@ void ProcessStage(void)
             LoadStageFiles();
             break;
         case STAGEMODE_NORMAL:
-            drawStageGFXHQ = false;
             if (fadeMode > 0)
                 fadeMode--;
-
-            if (paletteMode > 0) {
-                paletteMode = 0;
-            }
 
             lastXSize = -1;
             lastYSize = -1;
@@ -162,56 +158,77 @@ void ProcessStage(void)
                 ProcessObjects();
             }
 
-            if (cameraTarget > -1) {
-                if (cameraEnabled == 1) {
+            if (objectEntityList[0].type == OBJ_TYPE_PLAYER) {
+                if (cameraEnabled) {
                     switch (cameraStyle) {
-                        case 0: SetPlayerScreenPosition(&playerList[cameraTarget]); break;
-                        case 1: SetPlayerScreenPositionCDStyle(&playerList[cameraTarget]); break;
-                        case 2: SetPlayerScreenPositionCDStyle(&playerList[cameraTarget]); break;
-                        case 3: SetPlayerScreenPositionCDStyle(&playerList[cameraTarget]); break;
-                        case 4: SetPlayerHLockedScreenPosition(&playerList[cameraTarget]); break;
+                        case 0: SetPlayerScreenPosition(&playerList[0]); break;
+                        case 1: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                        case 2: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                        case 3: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                        case 4: SetPlayerHLockedScreenPosition(&playerList[0]); break;
                         default: break;
                     }
                 }
                 else {
-                    SetPlayerLockedScreenPosition(&playerList[cameraTarget]);
+                    SetPlayerLockedScreenPosition(&playerList[0]);
                 }
             }
 
             DrawStageGFX();
             break;
         case STAGEMODE_PAUSED:
-            drawStageGFXHQ = false;
             if (fadeMode > 0)
                 fadeMode--;
 
-            if (paletteMode > 0) {
-                paletteMode = 0;
-            }
             lastXSize = -1;
             lastYSize = -1;
             CheckKeyDown(&keyDown, 0xFF);
             CheckKeyPress(&keyPress, 0xFF);
             
-            updateMax = 1;
-            /*updateMax = Engine.renderFrameIndex;
-            if (Engine.refreshRate >= Engine.targetRefreshRate) {
-                updateMax = 0;
-                if (Engine.frameCount % Engine.skipFrameIndex < Engine.renderFrameIndex)
-                    updateMax = 1;
-            }*/
+            if (keyPress.C) {
+                keyPress.C = false;
+                if (timeEnabled) {
+                    if (++frameCounter == Engine.refreshRate) {
+                        frameCounter = 0;
+                        if (++stageSeconds > 59) {
+                            stageSeconds = 0;
+                            if (++stageMinutes > 59)
+                                stageMinutes = 0;
+                        }
+                    }
+                    stageMilliseconds = 100 * frameCounter / Engine.refreshRate;
+                }
 
-            // Update
-            for (int i = 0; i < updateMax; ++i) {
-                ProcessPausedObjects();
+                updateMax = 1;
+                /*updateMax = Engine.renderFrameIndex;
+                if (Engine.refreshRate >= Engine.targetRefreshRate) {
+                    updateMax = 0;
+                    if (Engine.frameCount % Engine.skipFrameIndex < Engine.renderFrameIndex)
+                        updateMax = 1;
+                }*/
+
+                // Update
+                for (int i = 0; i < updateMax; ++i) {
+                    ProcessObjects();
+                }
+
+                if (objectEntityList[0].type == OBJ_TYPE_PLAYER) {
+                    if (cameraEnabled) {
+                        switch (cameraStyle) {
+                            case 0: SetPlayerScreenPosition(&playerList[0]); break;
+                            case 1: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                            case 2: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                            case 3: SetPlayerScreenPositionCDStyle(&playerList[0]); break;
+                            case 4: SetPlayerHLockedScreenPosition(&playerList[0]); break;
+                            default: break;
+                        }
+                    }
+                    else {
+                        SetPlayerLockedScreenPosition(&playerList[0]);
+                    }
+                }
             }
-            DrawObjectList(0);
-            DrawObjectList(1);
-            DrawObjectList(2);
-            DrawObjectList(3);
-            DrawObjectList(4);
-            DrawObjectList(5);
-            DrawObjectList(6);
+
             if (pauseEnabled && keyPress.start) {
                 stageMode = STAGEMODE_NORMAL;
                 ResumeSound();
@@ -228,7 +245,7 @@ void LoadStageFiles(void)
     FileInfo info;
     byte fileBuffer  = 0;
     byte fileBuffer2 = 0;
-    int scriptID    = 1;
+    int scriptID    = 2;
     char strBuffer[0x100];
 
     if (!CheckCurrentStageFolder(stageListPosition)) {
@@ -251,16 +268,9 @@ void LoadStageFiles(void)
             FileRead(&fileBuffer, 1);
             FileRead(&strBuffer, fileBuffer);
 
-            byte globalObjectCount = 0;
-            FileRead(&globalObjectCount, 1);
-            for (byte i = 0; i < globalObjectCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
-                SetObjectTypeName(strBuffer, i + scriptID);
-            }
-
-            for (byte i = 0; i < globalObjectCount; ++i) {
+            byte globalScriptCount = 0;
+            FileRead(&globalScriptCount, 1);
+            for (byte i = 0; i < globalScriptCount; ++i) {
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
                 strBuffer[fileBuffer2] = 0;
@@ -280,16 +290,9 @@ void LoadStageFiles(void)
                 SetPaletteEntry(i, clr[0], clr[1], clr[2]);
             }
 
-            byte stageObjectCount = 0;
-            FileRead(&stageObjectCount, 1);
-            for (byte i = 0; i < stageObjectCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
-                SetObjectTypeName(strBuffer, scriptID + i);
-            }
-
-            for (byte i = 0; i < stageObjectCount; ++i) {
+            byte stageScriptCount = 0;
+            FileRead(&stageScriptCount, 1);
+            for (byte i = 0; i < stageScriptCount; ++i) {
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
                 strBuffer[fileBuffer2] = 0;
@@ -313,6 +316,11 @@ void LoadStageFiles(void)
             CloseFile();
         }
         FileInfo info;
+        for (int p = 0; p < PLAYER_COUNT; ++p) {
+            if (playerScriptList[p].scriptPath[0])
+                ParseScriptFile(playerScriptList[p].scriptPath, p);
+        }
+
         if (LoadStageFile("16x16Tiles.gif", stageListPosition, &info)) {
             CloseFile();
             LoadStageGIFFile(stageListPosition);
@@ -327,14 +335,13 @@ void LoadStageFiles(void)
         printLog("Reloading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][stageListPosition].name);
     }
     LoadStageChunks();
-    for (int i = 0; i < TRACK_COUNT; ++i) SetMusicTrack((char *)"", i, 0, 0);
+    for (int i = 0; i < TRACK_COUNT; ++i) SetMusicTrack((char *)"", i, false);
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         MEM_ZERO(objectEntityList[i]);
         objectEntityList[i].drawOrder      = 3;
         objectEntityList[i].scale          = 512;
     }
     LoadActLayout();
-    Init3DFloorBuffer(0);
     ProcessStartupObjects();
     xScrollA = (playerList[0].XPos >> 16) - SCREEN_CENTERX;
     xScrollB                 = (playerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
@@ -421,11 +428,11 @@ void LoadActLayout()
 
         // READ OBJECTS
         FileRead(&fileBuffer, 1);
-        int ObjectCount = fileBuffer;
+        int objectCount = fileBuffer;
         FileRead(&fileBuffer, 1);
-        ObjectCount = (ObjectCount << 8) + fileBuffer;
+        objectCount = (objectCount << 8) + fileBuffer;
         Entity *object = &objectEntityList[32];
-        for (int i = 0; i < ObjectCount; ++i) {
+        for (int i = 0; i < objectCount; ++i) {
             FileRead(&fileBuffer, 1);
             object->type = fileBuffer;
 
@@ -443,6 +450,20 @@ void LoadActLayout()
             FileRead(&fileBuffer, 1);
             object->YPos += fileBuffer;
             object->YPos <<= 16;
+
+            if (object->type == OBJ_TYPE_PLAYER && playerList[0].type == object->propertyValue) {
+                Entity *player     = &objectEntityList[0];
+                player->type       = OBJ_TYPE_PLAYER;
+                player->drawOrder  = 4;
+                player->priority   = true;
+                playerList[0].XPos = object->XPos;
+                playerList[0].YPos = object->YPos;
+                SetMovementStats(&playerList[0].stats);
+                playerList[0].walkingSpeed = playerScriptList[playerList[0].type].startWalkSpeed;
+                playerList[0].runningSpeed = playerScriptList[playerList[0].type].startRunSpeed;
+                playerList[0].jumpingSpeed = playerScriptList[playerList[0].type].startJumpSpeed;
+                object->type               = OBJ_TYPE_BLANKOBJECT;
+            }
 
             ++object;
         }
@@ -534,8 +555,6 @@ void LoadStageBackground()
             for (int y = 0; y < stageLayouts[i].height; ++y) {
                 ushort *chunks = &stageLayouts[i].tiles[y * 0x100];
                 for (int x = 0; x < stageLayouts[i].width; ++x) {
-                    FileRead(&fileBuffer, 1);
-                    *chunks = fileBuffer << 8;
                     FileRead(&fileBuffer, 1);
                     *chunks += fileBuffer;
                     ++chunks;

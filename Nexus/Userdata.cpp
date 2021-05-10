@@ -42,7 +42,8 @@ void InitUserdata()
         ini.SetInteger("Dev", "StartingCategory", Engine.startList = 0);
         ini.SetInteger("Dev", "StartingScene", Engine.startStage = 0);
         ini.SetInteger("Dev", "FastForwardSpeed", Engine.fastForwardSpeed = 8);
-        ini.SetBool("Dev", "UseHQModes", Engine.useHQModes = true);
+        sprintf(Engine.dataFile, "%s", "Data.bin");
+        ini.SetString("Dev", "DataFile", Engine.dataFile);
 
         ini.SetBool("Window", "FullScreen", Engine.startFullScreen = DEFAULT_FULLSCREEN);
         ini.SetBool("Window", "Borderless", Engine.borderless = false);
@@ -115,11 +116,9 @@ void InitUserdata()
             Engine.startStage = 0;
         if (!ini.GetInteger("Dev", "FastForwardSpeed", &Engine.fastForwardSpeed))
             Engine.fastForwardSpeed = 8;
-        if (!ini.GetBool("Dev", "UseHQModes", &Engine.useHQModes))
-            Engine.useHQModes = true;
 
         if (!ini.GetString("Dev", "DataFile", Engine.dataFile))
-            StrCopy(Engine.dataFile, "Data.rsdk");
+            StrCopy(Engine.dataFile, "Data.bin");
 
         if (!ini.GetBool("Window", "FullScreen", &Engine.startFullScreen))
             Engine.startFullScreen = DEFAULT_FULLSCREEN;
@@ -264,8 +263,9 @@ void writeSettings() {
     ini.SetInteger("Dev", "StartingScene", Engine.startStage);
     ini.SetComment("Dev", "FFComment", "Determines how fast the game will be when fastforwarding is active");
     ini.SetInteger("Dev", "FastForwardSpeed", Engine.fastForwardSpeed);
-    ini.SetComment("Dev", "UseHQComment","Determines if applicable rendering modes (such as 3D floor from special stages) will render in \"High Quality\" mode or standard mode");
-    ini.SetBool("Dev", "UseHQModes", Engine.useHQModes);
+
+    ini.SetComment("Dev", "DataFileComment", "Determines what Datafile will be loaded");
+    ini.SetString("Dev", "DataFile", Engine.dataFile);
 
     ini.SetComment("Dev", "DataFileComment", "Determines what RSDK file will be loaded");
     ini.SetString("Dev", "DataFile", Engine.dataFile);

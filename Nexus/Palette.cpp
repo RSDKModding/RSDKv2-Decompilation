@@ -24,17 +24,11 @@ byte fadeR   = 0;
 byte fadeG   = 0;
 byte fadeB   = 0;
 
-int paletteMode = 0;
-
 void LoadPalette(const char *filePath, int startIndex, int endIndex)
 {
     FileInfo info;
-    char fullPath[0x80];
 
-    StrCopy(fullPath, "Data/Palettes/");
-    StrAdd(fullPath, filePath);
-
-    if (LoadFile(fullPath, &info)) {
+    if (LoadFile(filePath, &info)) {
         SetFilePosition(3 * startIndex);
 
         byte colour[3];
@@ -48,15 +42,15 @@ void LoadPalette(const char *filePath, int startIndex, int endIndex)
 
 void SetFade(byte r, byte g, byte b, ushort a, int start, int end)
 {
-    paletteMode = 1;
+    fadeMode = 1;
     if (a > 255)
         a = 255;
     if (end < 256)
         ++end;
     for (int i = start; i < end; ++i) {
-        ushort red     = (ushort)(r * a + (0xFF - a) * palette8[i].r) >> 8;
-        ushort green   = (ushort)(g * a + (0xFF - a) * palette8[i].g) >> 8;
-        ushort blue    = (ushort)(b * a + (0xFF - a) * palette8[i].b) >> 8;
+        byte red     = (ushort)(r * a + (0xFF - a) * palette8[i].r) >> 8;
+        byte green   = (ushort)(g * a + (0xFF - a) * palette8[i].g) >> 8;
+        byte blue    = (ushort)(b * a + (0xFF - a) * palette8[i].b) >> 8;
         palette16F[i]  = RGB888_TO_RGB565(red, green, blue);
         palette32F[i]  = PACK_RGB888(red, green, blue);
         palette8F[i].r = red;
@@ -76,13 +70,13 @@ void SetFade(byte r, byte g, byte b, ushort a, int start, int end)
 
 void SetWaterColour(byte r, byte g, byte b, ushort a)
 {
-    paletteMode = 1;
+    fadeMode = 1;
     if (a > 255)
         a = 255;
     for (int i = 0; i < 0x100; ++i) {
-        ushort red     = (ushort)(r * a + (0xFF - a) * palette8[i].r) >> 8;
-        ushort green   = (ushort)(g * a + (0xFF - a) * palette8[i].g) >> 8;
-        ushort blue    = (ushort)(b * a + (0xFF - a) * palette8[i].b) >> 8;
+        byte red     = (ushort)(r * a + (0xFF - a) * palette8[i].r) >> 8;
+        byte green   = (ushort)(g * a + (0xFF - a) * palette8[i].g) >> 8;
+        byte blue    = (ushort)(b * a + (0xFF - a) * palette8[i].b) >> 8;
         palette16W[i]  = RGB888_TO_RGB565(red, green, blue);
         palette32W[i]  = PACK_RGB888(red, green, blue);
         palette8W[i].r = red;
@@ -93,7 +87,7 @@ void SetWaterColour(byte r, byte g, byte b, ushort a)
 
 void WaterFlash()
 {
-    paletteMode = 5;
+    fadeMode = 5;
     for (int i = 0; i < 0x100; ++i) {
         palette16WF[i]  = RGB888_TO_RGB565(0xFF, 0xFF, 0xFF);
         palette32WF[i]  = PACK_RGB888(0xFF, 0xFF, 0xFF);

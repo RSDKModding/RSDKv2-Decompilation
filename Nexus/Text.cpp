@@ -12,46 +12,33 @@ void AddTextMenuEntry(TextMenu *menu, const char *text)
 {
     menu->entryStart[menu->rowCount] = menu->textDataPos;
     menu->entrySize[menu->rowCount]  = 0;
-    for (int i = 0; i < StrLength(text);) {
-        if (text[i] != '\0') {
-            menu->textData[menu->textDataPos++] = text[i];
-            menu->entrySize[menu->rowCount]++;
-            ++i;
-        }
-        else {
-            break;
-        }
+    for (int i = 0; i < StrLength(text); ++i) {
+        menu->textData[menu->textDataPos] = text[i];
+        if (menu->textData[menu->textDataPos] == ' ')
+            menu->textData[menu->textDataPos] = 0;
+        if (menu->textData[menu->textDataPos] > '/' && menu->textData[menu->textDataPos] < ':')
+            menu->textData[menu->textDataPos] -= 21;
+        if (menu->textData[menu->textDataPos] > '9' && menu->textData[menu->textDataPos] < 'f')
+            menu->textData[menu->textDataPos] -= '@';
+        ++menu->textDataPos;
+        ++menu->entrySize[menu->rowCount];
     }
     menu->rowCount++;
 }
-void SetTextMenuEntry(TextMenu *menu, const char *text, int rowID)
-{
-    menu->entryStart[rowID] = menu->textDataPos;
-    menu->entrySize[rowID]  = 0;
-    for (int i = 0; i < StrLength(text);) {
-        if (text[i] != '\0') {
-            menu->textData[menu->textDataPos++] = text[i];
-            menu->entrySize[rowID]++;
-            ++i;
-        }
-        else {
-            break;
-        }
-    }
-}
 void EditTextMenuEntry(TextMenu *menu, const char *text, int rowID)
 {
-    int entryPos             = menu->entryStart[rowID];
+    int pos                = menu->entryStart[rowID];
     menu->entrySize[rowID] = 0;
-    for (int i = 0; i < StrLength(text);) {
-        if (text[i] != '\0') {
-            menu->textData[entryPos++] = text[i];
-            menu->entrySize[rowID]++;
-            ++i;
-        }
-        else {
-            break;
-        }
+    for (int i = 0; i < StrLength(text); ++i) {
+        menu->textData[pos] = text[i];
+        if (menu->textData[pos] == ' ')
+            menu->textData[pos] = 0;
+        if (menu->textData[pos] > '/' && menu->textData[pos] < ':')
+            menu->textData[pos] -= 21;
+        if (menu->textData[pos] > '9' && menu->textData[pos] < 'f')
+            menu->textData[pos] -= '@';
+        ++menu->entrySize[menu->rowCount];
+        pos++;
     }
 }
 void LoadConfigListText(TextMenu *menu, int listNo)
@@ -111,9 +98,18 @@ void LoadConfigListText(TextMenu *menu, int listNo)
         // Players
         FileRead(&count, 1);
         for (int p = 0; p < count; ++p) {
+            // Player Anim
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen);
-            strBuf[strLen] = '\0';
+            strBuf[strLen] = 0;
+            // Player Script
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
+            // Player Name
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen);
+            strBuf[strLen] = 0;
 
             if (listNo == 0) //Player List
                 AddTextMenuEntry(menu, strBuf);
