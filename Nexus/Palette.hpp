@@ -29,10 +29,6 @@ extern Colour palette8F[PALETTE_SIZE];
 extern Colour palette8WF[PALETTE_SIZE];
 
 extern int fadeMode;
-extern byte fadeA;
-extern byte fadeR;
-extern byte fadeG;
-extern byte fadeB;
 
 #define RGB888_TO_RGB565(r, g, b) ((b) >> 3) | (((g) >> 2) << 5) | (((r) >> 3) << 11)
 

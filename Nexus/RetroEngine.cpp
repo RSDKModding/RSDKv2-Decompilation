@@ -52,8 +52,6 @@ bool processEvents()
                 }
                 Engine.gameMode = ENGINE_EXITGAME;
                 return false;
-            case SDL_APP_WILLENTERBACKGROUND: /*Engine.Callback(CALLBACK_ENTERBG);*/ break;
-            case SDL_APP_WILLENTERFOREGROUND: /*Engine.Callback(CALLBACK_ENTERFG);*/ break;
             case SDL_APP_TERMINATING: Engine.gameMode = ENGINE_EXITGAME; break;
 #endif
             case SDL_KEYDOWN:
@@ -61,7 +59,7 @@ bool processEvents()
                     default: break;
                     case SDLK_ESCAPE:
                         if (Engine.devMenu)
-                            Engine.gameMode = ENGINE_INITDEVMENU;
+                            Engine.gameMode = ENGINE_INITSYSMENU;
                         break;
                     case SDLK_F4:
                         Engine.isFullScreen ^= 1;
@@ -98,6 +96,9 @@ bool processEvents()
                             stageListPosition = 0;
                             stageMode         = STAGEMODE_LOAD;
                             Engine.gameMode   = ENGINE_MAINGAME;
+                        }
+                        else {
+                            Engine.running = false;
                         }
                         break;
                     case SDLK_F2:
@@ -216,7 +217,7 @@ void RetroEngine::Init()
     if (LoadGameConfig("Data/Game/GameConfig.bin")) {
         if (InitRenderDevice()) {
             if (InitAudioPlayback()) {
-                initDevMenu();
+                InitSystemMenu();
                 ClearScriptData();
                 initialised = true;
                 running     = true;
@@ -251,15 +252,15 @@ void RetroEngine::Run()
 
             if (!masterPaused || frameStep) {
                 switch (gameMode) {
-                    case ENGINE_DEVMENU:
-                        processStageSelect();
+                    case ENGINE_SYSMENU:
+                        ProcessSystemMenu();
                         break;
                     case ENGINE_MAINGAME:
                         ProcessStage(); 
                         break;
-                    case ENGINE_INITDEVMENU:
+                    case ENGINE_INITSYSMENU:
                         LoadGameConfig("Data/Game/GameConfig.bin");
-                        initDevMenu();
+                        InitSystemMenu();
                         ResetCurrentStageFolder();
                         break;
                     case ENGINE_EXITGAME: running = false; break;

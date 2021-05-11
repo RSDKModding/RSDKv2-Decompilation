@@ -97,9 +97,9 @@ typedef unsigned int uint;
 enum RetroLanguages { RETRO_EN = 0, RETRO_FR = 1, RETRO_IT = 2, RETRO_DE = 3, RETRO_ES = 4, RETRO_JP = 5 };
 
 enum RetroStates {
-    ENGINE_DEVMENU         = 0,
+    ENGINE_SYSMENU         = 0,
     ENGINE_MAINGAME        = 1,
-    ENGINE_INITDEVMENU     = 2,
+    ENGINE_INITSYSMENU     = 2,
     ENGINE_EXITGAME        = 3,
 };
 
@@ -191,15 +191,10 @@ public:
 
     bool LoadGameConfig(const char *Filepath);
 
-    int callbackMessage = 0;
-    int prevMessage     = 0;
-    int waitValue       = 0;
-
     char gameWindowText[0x40];
     char gameDescriptionText[0x100];
 
     byte *pixelBuffer   = nullptr;
-    ushort *frameBuffer   = nullptr;
 
     bool isFullScreen = false;
 

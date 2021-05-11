@@ -19,10 +19,6 @@ Colour palette8F[PALETTE_SIZE];
 Colour palette8WF[PALETTE_SIZE];
 
 int fadeMode = 0;
-byte fadeA   = 0;
-byte fadeR   = 0;
-byte fadeG   = 0;
-byte fadeB   = 0;
 
 void LoadPalette(const char *filePath, int startIndex, int endIndex)
 {

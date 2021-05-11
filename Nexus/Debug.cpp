@@ -1,6 +1,6 @@
 #include "RetroEngine.hpp"
 
-void initDevMenu()
+void InitSystemMenu()
 {
     xScrollOffset = 0;
     yScrollOffset = 0;
@@ -20,7 +20,7 @@ void initDevMenu()
         stageListPosition = 0;
     }
     else {
-        Engine.gameMode = ENGINE_DEVMENU;
+        Engine.gameMode = ENGINE_SYSMENU;
         ClearGraphicsData();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         textMenuSurfaceNo = 0;
@@ -47,7 +47,7 @@ void initDevMenu()
         gameMenu[0].selection2     = 7;
     }
 }
-void processStageSelect()
+void ProcessSystemMenu()
 {
     ClearScreen(0xF0);
     keyDown.start = false;

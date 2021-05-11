@@ -38,8 +38,8 @@ enum DevMenuMenus {
     DEVMENU_MODMENU,
 };
 
-void initDevMenu();
+void InitSystemMenu();
 void initErrorMessage();
-void processStageSelect();
+void ProcessSystemMenu();
 
 #endif //!DEBUG_H

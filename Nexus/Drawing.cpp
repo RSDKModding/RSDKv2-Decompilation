@@ -22,8 +22,6 @@ int InitRenderDevice()
 
     sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.usingBinFile ? "" : " (Using Data Folder)");
 
-    Engine.frameBuffer = new ushort[SCREEN_XSIZE * SCREEN_YSIZE];
-    memset(Engine.frameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(ushort));
     Engine.pixelBuffer = new byte[SCREEN_XSIZE * SCREEN_YSIZE];
     memset(Engine.pixelBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(byte));
 
@@ -55,7 +53,13 @@ int InitRenderDevice()
     SDL_RenderSetLogicalSize(Engine.renderer, SCREEN_XSIZE, SCREEN_YSIZE);
     SDL_SetRenderDrawBlendMode(Engine.renderer, SDL_BLENDMODE_BLEND);
 
-    Engine.screenBuffer = SDL_CreateTexture(Engine.renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, SCREEN_XSIZE, SCREEN_YSIZE);
+    int colourMode = 0;
+    if (Engine.colourMode == 1)
+        colourMode = SDL_PIXELFORMAT_RGB565;
+    else
+        colourMode = SDL_PIXELFORMAT_RGB888;
+
+    Engine.screenBuffer = SDL_CreateTexture(Engine.renderer, colourMode, SDL_TEXTUREACCESS_STREAMING, SCREEN_XSIZE, SCREEN_YSIZE);
 
     if (!Engine.screenBuffer) {
         printLog("ERROR: failed to create screen buffer!\nerror msg: %s", SDL_GetError());
@@ -153,20 +157,32 @@ void FlipScreen()
     if (Engine.gameMode == ENGINE_EXITGAME)
         return;
 
+    // Clear the screen. This is needed to keep the
+    // pillarboxes in fullscreen from displaying garbage data.
+#if RETRO_USING_SDL2
+    SDL_RenderClear(Engine.renderer);
+#endif
+
+    int pitch      = 0;
+    void *pixels = NULL;
+
     switch (Engine.colourMode) {
         case 0: // 8-bit
+        {
+            uint *frameBuffer = new uint[SCREEN_XSIZE * SCREEN_YSIZE];
+            memset(frameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(uint));
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
                         Colour clr                                 = palette8F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
                         Colour clr                                 = palette8WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
             }
@@ -174,47 +190,71 @@ void FlipScreen()
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
                         Colour clr                                 = palette8[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
                         Colour clr                                 = palette8W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
             }
+
+#if RETRO_USING_SDL2
+            SDL_LockTexture(Engine.screenBuffer, NULL, &pixels, &pitch);
+            memcpy(pixels, frameBuffer, pitch * SCREEN_YSIZE);
+            SDL_UnlockTexture(Engine.screenBuffer);
+#endif
+            if (frameBuffer)
+                delete[] frameBuffer;
             break;
+        }
         case 1: // 16-bit
+        {
+            ushort *frameBuffer = new ushort[SCREEN_XSIZE * SCREEN_YSIZE];
+            memset(frameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(ushort));
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = palette16F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = palette16WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
             }
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = palette16[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = palette16W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
             }
+
+#if RETRO_USING_SDL2
+            SDL_LockTexture(Engine.screenBuffer, NULL, &pixels, &pitch);
+            memcpy(pixels, frameBuffer, pitch * SCREEN_YSIZE);
+            SDL_UnlockTexture(Engine.screenBuffer);
+#endif
+            if (frameBuffer)
+                delete[] frameBuffer;
             break;
+        }
         case 2: // 32-bit
+        {
+            uint *frameBuffer = new uint[SCREEN_XSIZE * SCREEN_YSIZE];
+            memset(frameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(uint));
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
@@ -222,7 +262,7 @@ void FlipScreen()
                         byte r                                     = (clr >> 16) & 0xFF;
                         byte g                                     = (clr >> 8) & 0xFF;
                         byte b                                     = (clr >> 0) & 0xFF;
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
 
@@ -232,7 +272,7 @@ void FlipScreen()
                         byte r                                     = (clr >> 16) & 0xFF;
                         byte g                                     = (clr >> 8) & 0xFF;
                         byte b                                     = (clr >> 0) & 0xFF;
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
             }
@@ -243,7 +283,7 @@ void FlipScreen()
                         byte r                                     = (clr >> 16) & 0xFF;
                         byte g                                     = (clr >> 8) & 0xFF;
                         byte b                                     = (clr >> 0) & 0xFF;
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
 
@@ -253,35 +293,32 @@ void FlipScreen()
                         byte r                                     = (clr >> 16) & 0xFF;
                         byte g                                     = (clr >> 8) & 0xFF;
                         byte b                                     = (clr >> 0) & 0xFF;
-                        Engine.frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
             }
+
+#if RETRO_USING_SDL2
+            SDL_LockTexture(Engine.screenBuffer, NULL, &pixels, &pitch);
+            memcpy(pixels, frameBuffer, pitch * SCREEN_YSIZE);
+            SDL_UnlockTexture(Engine.screenBuffer);
+#endif
+            if (frameBuffer)
+                delete[] frameBuffer;
             break;
+        }
     }
 
-    // Clear the screen. This is needed to keep the
-    // pillarboxes in fullscreen from displaying garbage data.
-    SDL_RenderClear(Engine.renderer);
-
-    int pitch      = 0;
-    ushort *pixels = NULL;
-
-    SDL_LockTexture(Engine.screenBuffer, NULL, (void **)&pixels, &pitch);
-    memcpy(pixels, Engine.frameBuffer, pitch * SCREEN_YSIZE);
-    SDL_UnlockTexture(Engine.screenBuffer);
-
+#if RETRO_USING_SDL2
     SDL_SetRenderTarget(Engine.renderer, NULL);
     SDL_RenderCopy(Engine.renderer, Engine.screenBuffer, NULL, NULL);
 
-    // no change here
     SDL_RenderPresent(Engine.renderer);
+#endif
 }
 
 void ReleaseRenderDevice()
 {
-    if (Engine.frameBuffer)
-        delete[] Engine.frameBuffer;
     if (Engine.pixelBuffer)
         delete[] Engine.pixelBuffer;
 #if RETRO_USING_SDL2
