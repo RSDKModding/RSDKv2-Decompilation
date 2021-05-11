@@ -127,10 +127,9 @@ extern int yScrollB;
 extern int xScrollA;
 extern int xScrollB;
 extern int yScrollMove;
-extern int cameraShakeX;
-extern int cameraShakeY;
+extern int earthquakeX;
+extern int earthquakeY;
 extern int cameraLag;
-extern int cameraLagStyle;
 
 extern int xBoundary1;
 extern int newXBoundary1;
@@ -224,11 +223,8 @@ inline void Copy16x16Tile(ushort dest, ushort src)
     while (cnt--) *destPtr++ = *srcPtr++;
 }
 
-void SetLayerDeformation(int selectedDef, int waveLength, int waveType, int deformType, int YPos, int waveSize);
-
 void SetPlayerScreenPosition(Player *player);
 void SetPlayerScreenPositionCDStyle(Player *player);
-void SetPlayerHLockedScreenPosition(Player *player);
 void SetPlayerLockedScreenPosition(Player *player);
 
 #endif // !SCENE_H

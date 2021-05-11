@@ -39,7 +39,7 @@ struct Player {
     byte skidding;
     byte pushing;
     byte collisionPlane;
-    byte controlMode;
+    sbyte controlMode;
     byte frictionLoss;
     int lookPos;
     PlayerMovementStats stats;

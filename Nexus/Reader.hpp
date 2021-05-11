@@ -41,8 +41,11 @@ struct FileInfo {
     int readPos;
     int bufferPosition;
     int virtualFileOffset;
+#if !RETRO_USE_ORIGINAL_CODE
+    bool encrypted;
     FileIO *cFileHandle;
     byte isMod;
+#endif
 };
 
 extern char binFileName[0x400];

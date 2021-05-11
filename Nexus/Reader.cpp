@@ -113,6 +113,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         fileInfo->fileSize          = vFileSize;
         fileInfo->virtualFileOffset = virtualFileOffset;
         fileInfo->bufferPosition    = bufferPosition;
+        fileInfo->encrypted         = true;
     }
     else {
         cFileHandle = fOpen(fileInfo->fileName, "rb");
@@ -129,6 +130,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos           = readPos;
         fileInfo->virtualFileOffset = 0;
         fileInfo->bufferPosition    = 0;
+        fileInfo->encrypted         = false;
     }
     bufferPosition = 0;
     readSize       = 0;
@@ -445,7 +447,8 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->fileSize       = (int)fTell(fileInfo->cFileHandle);
         fileInfo->bufferPosition = 0;
         // readSize       = 0;
-        fileInfo->readPos = 0;
+        fileInfo->readPos   = 0;
+        fileInfo->encrypted = true;
         if (!ParseVirtualFileSystem2(fileInfo)) {
             fClose(fileInfo->cFileHandle);
             fileInfo->cFileHandle = NULL;
@@ -467,6 +470,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos           = readPos;
         fileInfo->virtualFileOffset = 0;
         fileInfo->bufferPosition    = 0;
+        fileInfo->encrypted         = false;
     }
     fileInfo->bufferPosition = 0;
 

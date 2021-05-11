@@ -506,7 +506,9 @@ void LoadSfx(char *filePath, byte sfxID)
         CloseFile();
 
         //Un-encrypt sfx
-        for (int i = 0; i < info.fileSize; ++i) sfx[i] ^= 0xFF;
+        if (info.encrypted) {
+            for (int i = 0; i < info.fileSize; ++i) sfx[i] ^= 0xFF;
+        }
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
         SDL_LockAudio();
