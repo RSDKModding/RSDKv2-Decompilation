@@ -64,37 +64,43 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
 
     Engine.usingDataFileStore = Engine.usingBinFile;
 
+#if RETRO_USE_MOD_LOADER
     fileInfo->isMod = false;
     isModdedFile    = false;
+#endif
+    bool addPath    = true;
+    // Fixes any case differences
+    char pathLower[0x100];
+    memset(pathLower, 0, sizeof(char) * 0x100);
+    for (int c = 0; c < strlen(filePathBuf); ++c) {
+        pathLower[c] = tolower(filePathBuf[c]);
+    }
+
     for (int m = 0; m < modCount; ++m) {
         if (modList[m].active) {
-            std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(filePathBuf);
+            std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
                 Engine.forceFolder  = true;
                 Engine.usingBinFile = false;
                 fileInfo->isMod     = true;
                 isModdedFile        = true;
+                addPath             = false;
                 break;
             }
         }
     }
 
-    if (forceUseScripts && !Engine.forceFolder) {
-        if (std::string(filePathBuf).rfind("Data/Scripts/", 0) == 0 && ends_with(std::string(filePathBuf), "txt")) {
-            // is a script, since those dont exist normally, load them from "scripts/"
-            Engine.forceFolder  = true;
-            Engine.usingBinFile = false;
-            fileInfo->isMod     = true;
-            isModdedFile        = true;
-            std::string fStr    = std::string(filePathBuf);
-            fStr.erase(fStr.begin(), fStr.begin() + 5); // remove "Data/"
-            StrCopy(filePathBuf, fStr.c_str());
-        }
+#if RETRO_PLATFORM == RETRO_OSX
+    if (addPath) {
+        char pathBuf[0x100];
+        sprintf(pathBuf, "%s/%s", gamePath, filePathBuf);
+        sprintf(filePathBuf, "%s", pathBuf);
     }
+#endif
 
-    StrCopy(fileInfo->fileName, filePathBuf);
-    StrCopy(fileName, filePathBuf);
+    StrCopy(fileInfo->fileName, "");
+    StrCopy(fileName, "");
 
     if (Engine.usingBinFile && !Engine.forceFolder) {
         cFileHandle = fOpen(binFileName, "rb");
@@ -103,6 +109,9 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         bufferPosition = 0;
         readSize       = 0;
         readPos        = 0;
+
+        StrCopy(fileInfo->fileName, filePath);
+        StrCopy(fileName, filePath);
         if (!ParseVirtualFileSystem(fileInfo)) {
             fClose(cFileHandle);
             cFileHandle = NULL;
@@ -116,11 +125,14 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         fileInfo->encrypted         = true;
     }
     else {
+        StrCopy(fileInfo->fileName, filePathBuf);
+        StrCopy(fileName, filePathBuf);
         cFileHandle = fOpen(fileInfo->fileName, "rb");
         if (!cFileHandle) {
             printLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
+
         virtualFileOffset = 0;
         fSeek(cFileHandle, 0, SEEK_END);
         fileInfo->fileSize = (int)fTell(cFileHandle);
@@ -411,35 +423,44 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
 
     Engine.usingDataFileStore = Engine.usingBinFile;
 
+#if RETRO_USE_MOD_LOADER
     fileInfo->isMod = false;
     isModdedFile    = false;
+#endif
+    bool addPath = true;
+    // Fixes ".ani" ".Ani" bug and any other case differences
+    char pathLower[0x100];
+    memset(pathLower, 0, sizeof(char) * 0x100);
+    for (int c = 0; c < strlen(filePathBuf); ++c) {
+        pathLower[c] = tolower(filePathBuf[c]);
+    }
+
+#if RETRO_USE_MOD_LOADER
     for (int m = 0; m < modCount; ++m) {
         if (modList[m].active) {
-            std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(filePathBuf);
+            std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
-                Engine.forceFolder  = true;
+                Engine.forceFolder   = true;
                 Engine.usingBinFile = false;
-                fileInfo->isMod     = true;
-                isModdedFile        = true;
+                fileInfo->isMod      = true;
+                isModdedFile         = true;
+                addPath              = false;
                 break;
             }
         }
     }
-    if (forceUseScripts && !Engine.forceFolder) {
-        if (std::string(filePathBuf).rfind("Data/Scripts/", 0) == 0 && ends_with(std::string(filePathBuf), "txt")) {
-            // is a script, since those dont exist normally, load them from "scripts/"
-            Engine.forceFolder  = true;
-            Engine.usingBinFile = false;
-            fileInfo->isMod     = true;
-            isModdedFile        = true;
-            std::string fStr    = std::string(filePathBuf);
-            fStr.erase(fStr.begin(), fStr.begin() + 5); // remove "Data/"
-            StrCopy(filePathBuf, fStr.c_str());
-        }
-    }
+#endif
 
-    StrCopy(fileInfo->fileName, filePathBuf);
+#if RETRO_PLATFORM == RETRO_OSX
+    if (addPath) {
+        char pathBuf[0x100];
+        sprintf(pathBuf, "%s/%s", gamePath, filePathBuf);
+        sprintf(filePathBuf, "%s", pathBuf);
+    }
+#endif
+
+    StrCopy(fileInfo->fileName, "");
 
     if (Engine.usingBinFile && !Engine.forceFolder) {
         fileInfo->cFileHandle = fOpen(binFileName, "rb");
@@ -449,6 +470,8 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         // readSize       = 0;
         fileInfo->readPos   = 0;
         fileInfo->encrypted = true;
+
+        StrCopy(fileInfo->fileName, filePath);
         if (!ParseVirtualFileSystem2(fileInfo)) {
             fClose(fileInfo->cFileHandle);
             fileInfo->cFileHandle = NULL;
@@ -457,11 +480,13 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         }
     }
     else {
+        StrCopy(fileInfo->fileName, filePathBuf);
         fileInfo->cFileHandle = fOpen(fileInfo->fileName, "rb");
         if (!fileInfo->cFileHandle) {
             printLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
+
         fSeek(fileInfo->cFileHandle, 0, SEEK_END);
         fileInfo->vFileSize = (int)fTell(fileInfo->cFileHandle);
         fileInfo->fileSize  = fileInfo->vFileSize;

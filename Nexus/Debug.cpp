@@ -94,6 +94,7 @@ void ProcessSystemMenu()
                         StrCopy(buffer, modList[m].name.c_str());
                         StrAdd(buffer, ": ");
                         StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
+                        for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                         AddTextMenuEntry(&gameMenu[1], buffer);
                     }
 
@@ -298,6 +299,7 @@ void ProcessSystemMenu()
                 StrCopy(buffer, modList[gameMenu[1].selection1].name.c_str());
                 StrAdd(buffer, ": ");
                 StrAdd(buffer, (modList[gameMenu[1].selection1].active ? "  Active" : "Inactive"));
+                for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                 EditTextMenuEntry(&gameMenu[1], buffer, gameMenu[1].selection1);
             }
 
@@ -330,16 +332,12 @@ void ProcessSystemMenu()
                 ReleaseGlobalSfx();
                 LoadGlobalSfx();
 
-                forceUseScripts = false;
-                for (int m = 0; m < modCount; ++m) {
-                    if (modList[m].useScripts && modList[m].active)
-                        forceUseScripts = true;
-                }
                 saveMods();
             }
 
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX - 4, 40);
             DrawTextMenu(&gameMenu[1], SCREEN_CENTERX + 100, 64);
+            break;
         }
         default: break;
     }

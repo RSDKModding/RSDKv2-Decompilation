@@ -1607,6 +1607,22 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         scriptEng.operands[i] = playerList[activePlayer].pushing;
                         break;
                     }
+                    case VAR_PLAYERFRICTIONLOSS: {
+                        scriptEng.operands[i] = playerList[activePlayer].frictionLoss;
+                        break;
+                    }
+                    case VAR_PLAYERWALKINGSPEED: {
+                        scriptEng.operands[i] = playerList[activePlayer].walkingSpeed;
+                        break;
+                    }
+                    case VAR_PLAYERRUNNINGSPEED: {
+                        scriptEng.operands[i] = playerList[activePlayer].runningSpeed;
+                        break;
+                    }
+                    case VAR_PLAYERJUMPINGSPEED: {
+                        scriptEng.operands[i] = playerList[activePlayer].jumpingSpeed;
+                        break;
+                    }
                     case VAR_PLAYERTRACKSCROLL: {
                         scriptEng.operands[i] = playerList[activePlayer].trackScroll;
                         break;
@@ -1823,673 +1839,684 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
         SpriteFrame *spriteFrame = nullptr;
 
         // Functions
-        switch (opcode) {
-            default: break;
-            case FUNC_END: running = false; break;
-            case FUNC_EQUAL: scriptEng.operands[0] = scriptEng.operands[1]; break;
-            case FUNC_ADD: scriptEng.operands[0] += scriptEng.operands[1]; break;
-            case FUNC_SUB: scriptEng.operands[0] -= scriptEng.operands[1]; break;
-            case FUNC_INC: ++scriptEng.operands[0]; break;
-            case FUNC_DEC: --scriptEng.operands[0]; break;
-            case FUNC_MUL: scriptEng.operands[0] *= scriptEng.operands[1]; break;
-            case FUNC_DIV: scriptEng.operands[0] /= scriptEng.operands[1]; break;
-            case FUNC_SHR: scriptEng.operands[0] >>= scriptEng.operands[1]; break;
-            case FUNC_SHL: scriptEng.operands[0] <<= scriptEng.operands[1]; break;
-            case FUNC_AND: scriptEng.operands[0] &= scriptEng.operands[1]; break;
-            case FUNC_OR: scriptEng.operands[0] |= scriptEng.operands[1]; break;
-            case FUNC_XOR: scriptEng.operands[0] ^= scriptEng.operands[1]; break;
-            case FUNC_NOT: scriptEng.operands[0] = ~scriptEng.operands[0]; break;
-            case FUNC_FLIPSIGN: scriptEng.operands[0] = -scriptEng.operands[0]; break;
-            case FUNC_CHECKEQUAL:
-                scriptEng.checkResult = scriptEng.operands[0] == scriptEng.operands[1];
-                opcodeSize            = 0;
-                break;
-            case FUNC_CHECKGREATER:
-                scriptEng.checkResult = scriptEng.operands[0] > scriptEng.operands[1];
-                opcodeSize            = 0;
-                break;
-            case FUNC_CHECKLOWER:
-                scriptEng.checkResult = scriptEng.operands[0] < scriptEng.operands[1];
-                opcodeSize            = 0;
-                break;
-            case FUNC_CHECKNOTEQUAL:
-                scriptEng.checkResult = scriptEng.operands[0] != scriptEng.operands[1];
-                opcodeSize            = 0;
-                break;
-            case FUNC_IFEQUAL:
-                if (scriptEng.operands[1] != scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_IFGREATER:
-                if (scriptEng.operands[1] <= scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_IFGREATEROREQUAL:
-                if (scriptEng.operands[1] < scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_IFLOWER:
-                if (scriptEng.operands[1] >= scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_IFLOWEROREQUAL:
-                if (scriptEng.operands[1] > scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_IFNOTEQUAL:
-                if (scriptEng.operands[1] == scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize                          = 0;
-                break;
-            case FUNC_ELSE:
-                opcodeSize    = 0;
-                scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--] + 1];
-                break;
-            case FUNC_ENDIF:
-                opcodeSize = 0;
-                --jumpTableStackPos;
-                break;
-            case FUNC_WEQUAL:
-                if (scriptEng.operands[1] != scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+        for (int v = 1; v < VAR_MAX_CNT; ++v) {
+            switch (opcode) {
+                default: break;
+                case FUNC_END: running = false; break;
+                case FUNC_EQUAL: scriptEng.operands[0] = scriptEng.operands[1]; break;
+                case FUNC_ADD: scriptEng.operands[0] += scriptEng.operands[1]; break;
+                case FUNC_SUB: scriptEng.operands[0] -= scriptEng.operands[1]; break;
+                case FUNC_INC: ++scriptEng.operands[0]; break;
+                case FUNC_DEC: --scriptEng.operands[0]; break;
+                case FUNC_MUL: scriptEng.operands[0] *= scriptEng.operands[1]; break;
+                case FUNC_DIV: scriptEng.operands[0] /= scriptEng.operands[1]; break;
+                case FUNC_SHR: scriptEng.operands[0] >>= scriptEng.operands[1]; break;
+                case FUNC_SHL: scriptEng.operands[0] <<= scriptEng.operands[1]; break;
+                case FUNC_AND: scriptEng.operands[0] &= scriptEng.operands[1]; break;
+                case FUNC_OR: scriptEng.operands[0] |= scriptEng.operands[1]; break;
+                case FUNC_XOR: scriptEng.operands[0] ^= scriptEng.operands[1]; break;
+                case FUNC_NOT: scriptEng.operands[0] = ~scriptEng.operands[0]; break;
+                case FUNC_FLIPSIGN: scriptEng.operands[0] = -scriptEng.operands[0]; break;
+                case FUNC_CHECKEQUAL:
+                    scriptEng.checkResult = scriptEng.operands[0] == scriptEng.operands[1];
+                    opcodeSize            = 0;
+                    break;
+                case FUNC_CHECKGREATER:
+                    scriptEng.checkResult = scriptEng.operands[0] > scriptEng.operands[1];
+                    opcodeSize            = 0;
+                    break;
+                case FUNC_CHECKLOWER:
+                    scriptEng.checkResult = scriptEng.operands[0] < scriptEng.operands[1];
+                    opcodeSize            = 0;
+                    break;
+                case FUNC_CHECKNOTEQUAL:
+                    scriptEng.checkResult = scriptEng.operands[0] != scriptEng.operands[1];
+                    opcodeSize            = 0;
+                    break;
+                case FUNC_IFEQUAL:
+                    if (scriptEng.operands[1] != scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_WGREATER:
-                if (scriptEng.operands[1] <= scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_IFGREATER:
+                    if (scriptEng.operands[1] <= scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_WGREATEROREQUAL:
-                if (scriptEng.operands[1] < scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_IFGREATEROREQUAL:
+                    if (scriptEng.operands[1] < scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_WLOWER:
-                if (scriptEng.operands[1] >= scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_IFLOWER:
+                    if (scriptEng.operands[1] >= scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_WLOWEROREQUAL:
-                if (scriptEng.operands[1] > scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_IFLOWEROREQUAL:
+                    if (scriptEng.operands[1] > scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_WNOTEQUAL:
-                if (scriptEng.operands[1] == scriptEng.operands[2])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
-                else
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_IFNOTEQUAL:
+                    if (scriptEng.operands[1] == scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0]];
                     jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                opcodeSize = 0;
-                break;
-            case FUNC_LOOP:
-                opcodeSize    = 0;
-                scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--]];
-                break;
-            case FUNC_SWITCH:
-                jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
-                if (scriptEng.operands[1] < jumpTableData[jumpTablePtr + scriptEng.operands[0]]
-                    || scriptEng.operands[1] > jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1])
-                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 2];
-                else
-                    scriptDataPtr = scriptCodePtr
-                                    + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 4
-                                                    + (scriptEng.operands[1] - jumpTableData[jumpTablePtr + scriptEng.operands[0]])];
-                opcodeSize = 0;
-                break;
-            case FUNC_BREAK:
-                opcodeSize    = 0;
-                scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--] + 3];
-                break;
-            case FUNC_ENDSWITCH:
-                opcodeSize = 0;
-                --jumpTableStackPos;
-                break;
-            case FUNC_RAND: scriptEng.operands[0] = rand() % scriptEng.operands[1]; break;
-            case FUNC_SIN: {
-                scriptEng.operands[0] = sin512(scriptEng.operands[1]);
-                break;
-            }
-            case FUNC_COS: {
-                scriptEng.operands[0] = cos512(scriptEng.operands[1]);
-                break;
-            }
-            case FUNC_SIN256: {
-                scriptEng.operands[0] = sin256(scriptEng.operands[1]);
-                break;
-            }
-            case FUNC_COS256: {
-                scriptEng.operands[0] = cos256(scriptEng.operands[1]);
-                break;
-            }
-            case FUNC_SINCHANGE: {
-                scriptEng.operands[0] = scriptEng.operands[3] + (sin512(scriptEng.operands[1]) >> scriptEng.operands[2]) - scriptEng.operands[4];
-                break;
-            }
-            case FUNC_COSCHANGE: {
-                scriptEng.operands[0] = scriptEng.operands[3] + (cos512(scriptEng.operands[1]) >> scriptEng.operands[2]) - scriptEng.operands[4];
-                break;
-            }
-            case FUNC_ATAN2: {
-                scriptEng.operands[0] = ArcTanLookup(scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            }
-            case FUNC_INTERPOLATE:
-                scriptEng.operands[0] =
-                    (scriptEng.operands[2] * (0x100 - scriptEng.operands[3]) + scriptEng.operands[3] * scriptEng.operands[1]) >> 8;
-                break;
-            case FUNC_INTERPOLATEXY:
-                scriptEng.operands[0] =
-                    (scriptEng.operands[3] * (0x100 - scriptEng.operands[6]) >> 8) + ((scriptEng.operands[6] * scriptEng.operands[2]) >> 8);
-                scriptEng.operands[1] =
-                    (scriptEng.operands[5] * (0x100 - scriptEng.operands[6]) >> 8) + (scriptEng.operands[6] * scriptEng.operands[4] >> 8);
-                break;
-            case FUNC_LOADSPRITESHEET:
-                opcodeSize                = 0;
-                scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
-                break;
-            case FUNC_REMOVESPRITESHEET:
-                opcodeSize = 0;
-                RemoveGraphicsFile(scriptText, -1);
-                break;
-            case FUNC_DRAWSPRITE:
-                opcodeSize  = 0;
-                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
-                DrawSprite((entity->XPos >> 16) - xScrollOffset + spriteFrame->pivotX, (entity->YPos >> 16) - yScrollOffset + spriteFrame->pivotY,
-                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                break;
-            case FUNC_DRAWSPRITEXY:
-                opcodeSize  = 0;
-                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
-                DrawSprite((scriptEng.operands[1] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                           (scriptEng.operands[2] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width, spriteFrame->height,
-                           spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                break;
-            case FUNC_DRAWSPRITESCREENXY:
-                opcodeSize  = 0;
-                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
-                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY, spriteFrame->width,
-                           spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                break;
-            case FUNC_DRAWSPRITE3D:
-                opcodeSize  = 0;
-                //Does not exist
-                break;
-            case FUNC_DRAWNUMBERS: {
-                opcodeSize = 0;
-                int i      = 10;
-                if (scriptEng.operands[6]) {
-                    while (scriptEng.operands[4] > 0) {
-                        int frameID = scriptEng.operands[3] % i / (i / 10) + scriptEng.operands[0];
-                        spriteFrame = &scriptInfo->frameStartPtr[frameID];
-                        DrawSprite(spriteFrame->pivotX + scriptEng.operands[1], spriteFrame->pivotY + scriptEng.operands[2], spriteFrame->width,
-                                   spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                        scriptEng.operands[1] -= scriptEng.operands[5];
-                        i *= 10;
-                        --scriptEng.operands[4];
-                    }
+                    opcodeSize                          = 0;
+                    break;
+                case FUNC_ELSE:
+                    opcodeSize    = 0;
+                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--] + 1];
+                    break;
+                case FUNC_ENDIF:
+                    opcodeSize = 0;
+                    --jumpTableStackPos;
+                    break;
+                case FUNC_WEQUAL:
+                    if (scriptEng.operands[1] != scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_WGREATER:
+                    if (scriptEng.operands[1] <= scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_WGREATEROREQUAL:
+                    if (scriptEng.operands[1] < scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_WLOWER:
+                    if (scriptEng.operands[1] >= scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_WLOWEROREQUAL:
+                    if (scriptEng.operands[1] > scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_WNOTEQUAL:
+                    if (scriptEng.operands[1] == scriptEng.operands[2])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1];
+                    else
+                        jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_LOOP:
+                    opcodeSize    = 0;
+                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--]];
+                    break;
+                case FUNC_SWITCH:
+                    jumpTableStack[++jumpTableStackPos] = scriptEng.operands[0];
+                    if (scriptEng.operands[1] < jumpTableData[jumpTablePtr + scriptEng.operands[0]]
+                        || scriptEng.operands[1] > jumpTableData[jumpTablePtr + scriptEng.operands[0] + 1])
+                        scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 2];
+                    else
+                        scriptDataPtr = scriptCodePtr
+                                        + jumpTableData[jumpTablePtr + scriptEng.operands[0] + 4
+                                                        + (scriptEng.operands[1] - jumpTableData[jumpTablePtr + scriptEng.operands[0]])];
+                    opcodeSize = 0;
+                    break;
+                case FUNC_BREAK:
+                    opcodeSize    = 0;
+                    scriptDataPtr = scriptCodePtr + jumpTableData[jumpTablePtr + jumpTableStack[jumpTableStackPos--] + 3];
+                    break;
+                case FUNC_ENDSWITCH:
+                    opcodeSize = 0;
+                    --jumpTableStackPos;
+                    break;
+                case FUNC_RAND: scriptEng.operands[0] = rand() % scriptEng.operands[1]; break;
+                case FUNC_SIN: {
+                    scriptEng.operands[0] = sin512(scriptEng.operands[1]);
+                    break;
                 }
-                else {
-                    int extra = 10;
-                    if (scriptEng.operands[3])
-                        extra = 10 * scriptEng.operands[3];
-                    while (scriptEng.operands[4] > 0) {
-                        if (extra >= i) {
+                case FUNC_COS: {
+                    scriptEng.operands[0] = cos512(scriptEng.operands[1]);
+                    break;
+                }
+                case FUNC_SIN256: {
+                    scriptEng.operands[0] = sin256(scriptEng.operands[1]);
+                    break;
+                }
+                case FUNC_COS256: {
+                    scriptEng.operands[0] = cos256(scriptEng.operands[1]);
+                    break;
+                }
+                case FUNC_SINCHANGE: {
+                    scriptEng.operands[0] = scriptEng.operands[3] + (sin512(scriptEng.operands[1]) >> scriptEng.operands[2]) - scriptEng.operands[4];
+                    break;
+                }
+                case FUNC_COSCHANGE: {
+                    scriptEng.operands[0] = scriptEng.operands[3] + (cos512(scriptEng.operands[1]) >> scriptEng.operands[2]) - scriptEng.operands[4];
+                    break;
+                }
+                case FUNC_ATAN2: {
+                    scriptEng.operands[0] = ArcTanLookup(scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                }
+                case FUNC_INTERPOLATE:
+                    scriptEng.operands[0] =
+                        (scriptEng.operands[2] * (0x100 - scriptEng.operands[3]) + scriptEng.operands[3] * scriptEng.operands[1]) >> 8;
+                    break;
+                case FUNC_INTERPOLATEXY:
+                    scriptEng.operands[0] =
+                        (scriptEng.operands[3] * (0x100 - scriptEng.operands[6]) >> 8) + ((scriptEng.operands[6] * scriptEng.operands[2]) >> 8);
+                    scriptEng.operands[1] =
+                        (scriptEng.operands[5] * (0x100 - scriptEng.operands[6]) >> 8) + (scriptEng.operands[6] * scriptEng.operands[4] >> 8);
+                    break;
+                case FUNC_LOADSPRITESHEET:
+                    opcodeSize                = 0;
+                    scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
+                    break;
+                case FUNC_REMOVESPRITESHEET:
+                    opcodeSize = 0;
+                    RemoveGraphicsFile(scriptText, -1);
+                    break;
+                case FUNC_DRAWSPRITE:
+                    opcodeSize  = 0;
+                    spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
+                    DrawSprite((entity->XPos >> 16) - xScrollOffset + spriteFrame->pivotX, (entity->YPos >> 16) - yScrollOffset + spriteFrame->pivotY,
+                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                    break;
+                case FUNC_DRAWSPRITEXY:
+                    opcodeSize  = 0;
+                    spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
+                    DrawSprite((scriptEng.operands[1] >> 16) - xScrollOffset + spriteFrame->pivotX,
+                               (scriptEng.operands[2] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width, spriteFrame->height,
+                               spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                    break;
+                case FUNC_DRAWSPRITESCREENXY:
+                    opcodeSize  = 0;
+                    spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
+                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY, spriteFrame->width,
+                               spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                    break;
+                case FUNC_DRAWSPRITE3D:
+                    opcodeSize = 0;
+                    // Does not exist
+                    break;
+                case FUNC_DRAWNUMBERS: {
+                    opcodeSize = 0;
+                    int i      = 10;
+                    if (scriptEng.operands[6]) {
+                        while (scriptEng.operands[4] > 0) {
                             int frameID = scriptEng.operands[3] % i / (i / 10) + scriptEng.operands[0];
                             spriteFrame = &scriptInfo->frameStartPtr[frameID];
                             DrawSprite(spriteFrame->pivotX + scriptEng.operands[1], spriteFrame->pivotY + scriptEng.operands[2], spriteFrame->width,
                                        spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                            scriptEng.operands[1] -= scriptEng.operands[5];
+                            i *= 10;
+                            --scriptEng.operands[4];
                         }
-                        scriptEng.operands[1] -= scriptEng.operands[5];
-                        i *= 10;
-                        --scriptEng.operands[4];
                     }
-                }
-                break;
-            }
-            case FUNC_DRAWACTNAME: {
-                opcodeSize = 0;
-                switch (scriptEng.operands[3]) {
-                    default: break;
-                    case 1: {
-                        int charID = 0;
-                        if (scriptEng.operands[4] == 1 && titleCardText[charID]) {
-                            int character = titleCardText[charID];
-                            if (character == ' ')
-                                character = 0;
-                            if (character == '-')
-                                character = 0;
-                            if (character > '/' && character < ':')
-                                character -= 22;
-                            if (character > '9' && character < 'f')
-                                character -= 'A';
-                            if (character <= -1) {
-                                scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
-                            }
-                            else {
-                                character += scriptEng.operands[0];
-                                spriteFrame = &scriptInfo->frameStartPtr[character];
-                                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                    else {
+                        int extra = 10;
+                        if (scriptEng.operands[3])
+                            extra = 10 * scriptEng.operands[3];
+                        while (scriptEng.operands[4] > 0) {
+                            if (extra >= i) {
+                                int frameID = scriptEng.operands[3] % i / (i / 10) + scriptEng.operands[0];
+                                spriteFrame = &scriptInfo->frameStartPtr[frameID];
+                                DrawSprite(spriteFrame->pivotX + scriptEng.operands[1], spriteFrame->pivotY + scriptEng.operands[2],
                                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
                             }
-                            scriptEng.operands[0] += 26;
-                            charID++;
+                            scriptEng.operands[1] -= scriptEng.operands[5];
+                            i *= 10;
+                            --scriptEng.operands[4];
                         }
-                        while (titleCardText[charID] != 0 && titleCardText[charID] != '-') {
-                            int character = titleCardText[charID];
-                            if (character == ' ')
-                                character = 0;
-                            if (character == '-')
-                                character = 0;
-                            if (character > '/' && character < ':')
-                                character -= 22;
-                            if (character > '9' && character < 'f')
-                                character -= 'A';
-                            if (character <= -1) {
-                                scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
-                            }
-                            else {
-                                character += scriptEng.operands[0];
-                                spriteFrame = &scriptInfo->frameStartPtr[character];
-                                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
-                                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
-                            }
-                            charID++;
-                        }
-                        break;
                     }
-                    case 2: {
-                        int charID = titleCardWord2;
-                        if (scriptEng.operands[4] == 1 && titleCardText[charID] != 0) {
-                            int character = titleCardText[charID];
-                            if (character == ' ')
-                                character = 0;
-                            if (character == '-')
-                                character = 0;
-                            if (character > '/' && character < ':')
-                                character -= 22;
-                            if (character > '9' && character < 'f')
-                                character -= 'A';
-                            if (character <= -1) {
-                                scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
+                    break;
+                }
+                case FUNC_DRAWACTNAME: {
+                    opcodeSize = 0;
+                    switch (scriptEng.operands[3]) {
+                        default: break;
+                        case 1: {
+                            int charID = 0;
+                            if (scriptEng.operands[4] == 1 && titleCardText[charID]) {
+                                int character = titleCardText[charID];
+                                if (character == ' ')
+                                    character = 0;
+                                if (character == '-')
+                                    character = 0;
+                                if (character > '/' && character < ':')
+                                    character -= 22;
+                                if (character > '9' && character < 'f')
+                                    character -= 'A';
+                                if (character <= -1) {
+                                    scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
+                                }
+                                else {
+                                    character += scriptEng.operands[0];
+                                    spriteFrame = &scriptInfo->frameStartPtr[character];
+                                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                               scriptInfo->spriteSheetID);
+                                    scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                                }
+                                scriptEng.operands[0] += 26;
+                                charID++;
                             }
-                            else {
-                                character += scriptEng.operands[0];
-                                spriteFrame = &scriptInfo->frameStartPtr[character];
-                                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
-                                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                            while (titleCardText[charID] != 0 && titleCardText[charID] != '-') {
+                                int character = titleCardText[charID];
+                                if (character == ' ')
+                                    character = 0;
+                                if (character == '-')
+                                    character = 0;
+                                if (character > '/' && character < ':')
+                                    character -= 22;
+                                if (character > '9' && character < 'f')
+                                    character -= 'A';
+                                if (character <= -1) {
+                                    scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
+                                }
+                                else {
+                                    character += scriptEng.operands[0];
+                                    spriteFrame = &scriptInfo->frameStartPtr[character];
+                                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                               scriptInfo->spriteSheetID);
+                                    scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                                }
+                                charID++;
                             }
-                            scriptEng.operands[0] += 26;
-                            charID++;
+                            break;
                         }
-                        while (titleCardText[charID] != 0) {
-                            int character = titleCardText[charID];
-                            if (character == ' ')
-                                character = 0;
-                            if (character == '-')
-                                character = 0;
-                            if (character > '/' && character < ':')
-                                character -= 22;
-                            if (character > '9' && character < 'f')
-                                character -= 'A';
-                            if (character <= -1) {
-                                scriptEng.operands[1] = scriptEng.operands[1] + scriptEng.operands[5] + scriptEng.operands[6];
+                        case 2: {
+                            int charID = titleCardWord2;
+                            if (scriptEng.operands[4] == 1 && titleCardText[charID] != 0) {
+                                int character = titleCardText[charID];
+                                if (character == ' ')
+                                    character = 0;
+                                if (character == '-')
+                                    character = 0;
+                                if (character > '/' && character < ':')
+                                    character -= 22;
+                                if (character > '9' && character < 'f')
+                                    character -= 'A';
+                                if (character <= -1) {
+                                    scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
+                                }
+                                else {
+                                    character += scriptEng.operands[0];
+                                    spriteFrame = &scriptInfo->frameStartPtr[character];
+                                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                               scriptInfo->spriteSheetID);
+                                    scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                                }
+                                scriptEng.operands[0] += 26;
+                                charID++;
                             }
-                            else {
-                                character += scriptEng.operands[0];
-                                spriteFrame = &scriptInfo->frameStartPtr[character];
-                                DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
-                                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                            while (titleCardText[charID] != 0) {
+                                int character = titleCardText[charID];
+                                if (character == ' ')
+                                    character = 0;
+                                if (character == '-')
+                                    character = 0;
+                                if (character > '/' && character < ':')
+                                    character -= 22;
+                                if (character > '9' && character < 'f')
+                                    character -= 'A';
+                                if (character <= -1) {
+                                    scriptEng.operands[1] = scriptEng.operands[1] + scriptEng.operands[5] + scriptEng.operands[6];
+                                }
+                                else {
+                                    character += scriptEng.operands[0];
+                                    spriteFrame = &scriptInfo->frameStartPtr[character];
+                                    DrawSprite(scriptEng.operands[1] + spriteFrame->pivotX, scriptEng.operands[2] + spriteFrame->pivotY,
+                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                               scriptInfo->spriteSheetID);
+                                    scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
+                                }
+                                charID++;
                             }
-                            charID++;
+                            break;
                         }
-                        break;
                     }
+                    break;
                 }
-                break;
-            }
-            case FUNC_DRAWMENU:
-                opcodeSize        = 0;
-                textMenuSurfaceNo = scriptInfo->spriteSheetID;
-                DrawTextMenu(&gameMenu[scriptEng.operands[0]], scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            case FUNC_SPRITEFRAME:
-                opcodeSize = 0;
-                if (scriptSub == SUB_SETUP && scriptFrameCount < SPRITEFRAME_COUNT) {
-                    scriptFrames[scriptFrameCount].pivotX = scriptEng.operands[0];
-                    scriptFrames[scriptFrameCount].pivotY = scriptEng.operands[1];
-                    scriptFrames[scriptFrameCount].width  = scriptEng.operands[2];
-                    scriptFrames[scriptFrameCount].height = scriptEng.operands[3];
-                    scriptFrames[scriptFrameCount].sprX   = scriptEng.operands[4];
-                    scriptFrames[scriptFrameCount].sprY   = scriptEng.operands[5];
-                    ++scriptFrameCount;
-                }
-                break;
-            case FUNC_SETDEBUGICON: {
-                //"SetDebugIcon"
-                break;
-            }
-            case FUNC_LOADPALETTE:
-                opcodeSize = 0;
-                LoadPalette(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            case FUNC_ROTATEPALETTE:
-                opcodeSize = 0;
-                RotatePalette(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            case FUNC_SETFADE:
-                opcodeSize = 0;
-                SetFade(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
-                        scriptEng.operands[5]);
-                break;
-            case FUNC_SETWATERCOLOR:
-                opcodeSize = 0;
-                // Exists but never called
-                break;
-            case FUNC_SETBLENDTABLE:
-                opcodeSize = 0;
-                SetBlendTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
-                break;
-            case FUNC_SETTINTTABLE:
-                opcodeSize = 0;
-                SetTintTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
-                             scriptEng.operands[5]);
-                break;
-            case FUNC_CLEARSCREEN:
-                opcodeSize = 0;
-                ClearScreen(scriptEng.operands[0]);
-                break;
-            case FUNC_DRAWSPRITEFX:
-                opcodeSize  = 0;
-                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
-                switch (scriptEng.operands[1]) {
-                    default: break;
-                    case FX_SCALE:
-                        DrawSpriteScaled(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
-                                         (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY, entity->scale,
-                                         entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                         scriptInfo->spriteSheetID);
-                        break;
-                    case FX_ROTATE:
-                        DrawSpriteRotated(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
-                                          (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
-                                          spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
-                                          scriptInfo->spriteSheetID);
-                        break;
-                    case FX_INK:
-                        switch (entity->inkEffect) {
-                            case INK_NONE:
-                                DrawSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                           (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                           spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                break;
-                            case INK_BLEND:
-                                DrawBlendedSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
-                                                  (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
-                                                  spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                break;
-                        }
-                        break;
-                    case FX_TINT:
-                        if (entity->inkEffect == INK_TINT) {
-                            DrawScaledTintMask(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
-                                               (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
-                                               entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX,
-                                               spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
-                        }
-                        else {
+                case FUNC_DRAWMENU:
+                    opcodeSize        = 0;
+                    textMenuSurfaceNo = scriptInfo->spriteSheetID;
+                    DrawTextMenu(&gameMenu[scriptEng.operands[0]], scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                case FUNC_SPRITEFRAME:
+                    opcodeSize = 0;
+                    if (scriptSub == SUB_SETUP && scriptFrameCount < SPRITEFRAME_COUNT) {
+                        scriptFrames[scriptFrameCount].pivotX = scriptEng.operands[0];
+                        scriptFrames[scriptFrameCount].pivotY = scriptEng.operands[1];
+                        scriptFrames[scriptFrameCount].width  = scriptEng.operands[2];
+                        scriptFrames[scriptFrameCount].height = scriptEng.operands[3];
+                        scriptFrames[scriptFrameCount].sprX   = scriptEng.operands[4];
+                        scriptFrames[scriptFrameCount].sprY   = scriptEng.operands[5];
+                        ++scriptFrameCount;
+                    }
+                    break;
+                case FUNC_SETDEBUGICON:
+                    opcodeSize = 0;
+                    break;
+                case FUNC_LOADPALETTE:
+                    opcodeSize = 0;
+                    LoadPalette(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                case FUNC_ROTATEPALETTE:
+                    opcodeSize = 0;
+                    RotatePalette(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                case FUNC_SETFADE:
+                    opcodeSize = 0;
+                    SetFade(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
+                            scriptEng.operands[5]);
+                    break;
+                case FUNC_SETWATERCOLOR:
+                    opcodeSize = 0;
+                    // Exists but never called
+                    break;
+                case FUNC_SETBLENDTABLE:
+                    opcodeSize = 0;
+                    SetBlendTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                    break;
+                case FUNC_SETTINTTABLE:
+                    opcodeSize = 0;
+                    SetTintTable(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4],
+                                 scriptEng.operands[5]);
+                    break;
+                case FUNC_CLEARSCREEN:
+                    opcodeSize = 0;
+                    ClearScreen(scriptEng.operands[0]);
+                    break;
+                case FUNC_DRAWSPRITEFX:
+                    opcodeSize  = 0;
+                    spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
+                    switch (scriptEng.operands[1]) {
+                        default: break;
+                        case FX_SCALE:
                             DrawSpriteScaled(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
                                              (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY, entity->scale,
                                              entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
                                              scriptInfo->spriteSheetID);
-                        }
-                        break;
-                }
-                break;
-            case FUNC_DRAWSPRITESCREENFX:
-                opcodeSize  = 0;
-                spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
-                switch (scriptEng.operands[1]) {
-                    default: break;
-                    case FX_SCALE:
-                        DrawSpriteScaled(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX, -spriteFrame->pivotY,
-                                         entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                         scriptInfo->spriteSheetID);
-                        break;
-                    case FX_ROTATE:
-                        DrawSpriteRotated(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX, -spriteFrame->pivotY,
-                                          spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
-                                          scriptInfo->spriteSheetID);
-                        break;
-                    case FX_INK:
-                        switch (entity->inkEffect) {
-                            case INK_NONE:
-                                DrawSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                           spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                                break;
-                            case INK_BLEND:
-                                DrawBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
-                                                  spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
-                                                  scriptInfo->spriteSheetID);
-                                break;
-                        }
-                        break;
-                    case FX_TINT:
-                        if (entity->inkEffect == INK_TINT) {
-                            DrawScaledTintMask(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
-                                               -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
-                                               spriteFrame->sprX, spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
-                        }
-                        else {
+                            break;
+                        case FX_ROTATE:
+                            DrawSpriteRotated(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
+                                              (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
+                                              spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height, entity->rotation,
+                                              scriptInfo->spriteSheetID);
+                            break;
+                        case FX_INK:
+                            switch (entity->inkEffect) {
+                                case INK_NONE:
+                                    DrawSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
+                                               (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
+                                               spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                                    break;
+                                case INK_BLEND:
+                                    DrawBlendedSprite((scriptEng.operands[2] >> 16) - xScrollOffset + spriteFrame->pivotX,
+                                                      (scriptEng.operands[3] >> 16) - yScrollOffset + spriteFrame->pivotY, spriteFrame->width,
+                                                      spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                                    break;
+                            }
+                            break;
+                        case FX_TINT:
+                            if (entity->inkEffect == INK_TINT) {
+                                DrawScaledTintMask(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
+                                                   (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
+                                                   entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX,
+                                                   spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
+                            }
+                            else {
+                                DrawSpriteScaled(entity->direction, (scriptEng.operands[2] >> 16) - xScrollOffset,
+                                                 (scriptEng.operands[3] >> 16) - yScrollOffset, -spriteFrame->pivotX, -spriteFrame->pivotY,
+                                                 entity->scale, entity->scale, spriteFrame->width, spriteFrame->height, spriteFrame->sprX,
+                                                 spriteFrame->sprY, scriptInfo->spriteSheetID);
+                            }
+                            break;
+                    }
+                    break;
+                case FUNC_DRAWSPRITESCREENFX:
+                    opcodeSize  = 0;
+                    spriteFrame = &scriptInfo->frameStartPtr[scriptEng.operands[0]];
+                    switch (scriptEng.operands[1]) {
+                        default: break;
+                        case FX_SCALE:
                             DrawSpriteScaled(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
                                              -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
                                              spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
-                        }
-                        break;
-                }
-                break;
-            case FUNC_DRAWLIFEICON: {
-                opcodeSize  = 0;
-                SpriteAnimation *anim = &playerScriptList[playerList[0].type].animations[15];
+                            break;
+                        case FX_ROTATE:
+                            DrawSpriteRotated(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
+                                              -spriteFrame->pivotY, spriteFrame->sprX, spriteFrame->sprY, spriteFrame->width, spriteFrame->height,
+                                              entity->rotation, scriptInfo->spriteSheetID);
+                            break;
+                        case FX_INK:
+                            switch (entity->inkEffect) {
+                                case INK_NONE:
+                                    DrawSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
+                                               spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                               scriptInfo->spriteSheetID);
+                                    break;
+                                case INK_BLEND:
+                                    DrawBlendedSprite(scriptEng.operands[2] + spriteFrame->pivotX, scriptEng.operands[3] + spriteFrame->pivotY,
+                                                      spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY,
+                                                      scriptInfo->spriteSheetID);
+                                    break;
+                            }
+                            break;
+                        case FX_TINT:
+                            if (entity->inkEffect == INK_TINT) {
+                                DrawScaledTintMask(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
+                                                   -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
+                                                   spriteFrame->sprX, spriteFrame->sprY, 0, scriptInfo->spriteSheetID);
+                            }
+                            else {
+                                DrawSpriteScaled(entity->direction, scriptEng.operands[2], scriptEng.operands[3], -spriteFrame->pivotX,
+                                                 -spriteFrame->pivotY, entity->scale, entity->scale, spriteFrame->width, spriteFrame->height,
+                                                 spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
+                            }
+                            break;
+                    }
+                    break;
+                case FUNC_DRAWLIFEICON: {
+                    opcodeSize            = 0;
+                    SpriteAnimation *anim = &playerScriptList[playerList[0].type].animations[ANI_LIFEICON];
 
-                DrawSprite(anim->frames[0].pivotX + scriptEng.operands[0], anim->frames[0].pivotY + scriptEng.operands[1], anim->frames[0].width,
-                           anim->frames[0].height, anim->frames[0].sprX, anim->frames[0].sprY, anim->frames[0].sheetID);
-                break;
-            }
-            case FUNC_SETUPMENU: {
-                opcodeSize     = 0;
-                TextMenu *menu = &gameMenu[scriptEng.operands[0]];
-                SetupTextMenu(menu, scriptEng.operands[1]);
-                menu->selectionCount = scriptEng.operands[2];
-                menu->alignment      = scriptEng.operands[3];
-                break;
-            }
-            case FUNC_ADDMENUENTRY: {
-                opcodeSize                           = 0;
-                TextMenu *menu                       = &gameMenu[scriptEng.operands[0]];
-                menu->entryHighlight[menu->rowCount] = scriptEng.operands[2];
-                AddTextMenuEntry(menu, scriptText);
-                break;
-            }
-            case FUNC_EDITMENUENTRY: {
-                opcodeSize     = 0;
-                TextMenu *menu = &gameMenu[scriptEng.operands[0]];
-                EditTextMenuEntry(menu, scriptText, scriptEng.operands[2]);
-                menu->entryHighlight[scriptEng.operands[2]] = scriptEng.operands[3];
-                break;
-            }
-            case FUNC_LOADSTAGE:
-                opcodeSize = 0;
-                stageMode  = STAGEMODE_LOAD;
-                break;
-            case FUNC_DRAWTINTRECT:
-                opcodeSize = 0;
-                DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3], scriptEng.operands[4]);
-                break;
-            case FUNC_RESETOBJECTENTITY: {
-                opcodeSize            = 0;
-                Entity *newEnt        = &objectEntityList[scriptEng.operands[0]];
-                newEnt->type          = scriptEng.operands[1];
-                newEnt->propertyValue = scriptEng.operands[2];
-                newEnt->XPos          = scriptEng.operands[3];
-                newEnt->YPos          = scriptEng.operands[4];
-                newEnt->direction     = FLIP_NONE;
-                newEnt->frame         = 0;
-                newEnt->priority      = PRIORITY_BOUNDS;
-                newEnt->rotation      = 0;
-                newEnt->state         = 0;
-                newEnt->drawOrder     = 3;
-                newEnt->scale         = 512;
-                newEnt->inkEffect     = INK_NONE;
-                newEnt->values[0]     = 0;
-                newEnt->values[1]     = 0;
-                newEnt->values[2]     = 0;
-                newEnt->values[3]     = 0;
-                newEnt->values[4]     = 0;
-                newEnt->values[5]     = 0;
-                newEnt->values[6]     = 0;
-                newEnt->values[7]     = 0;
-                break;
-            }
-            case FUNC_PLAYEROBJECTCOLLISION:
-                opcodeSize = 0;
-                switch (scriptEng.operands[0]) {
-                    default: break;
-                    case C_TOUCH:
-                        scriptEng.operands[5] = entity->XPos >> 16;
-                        scriptEng.operands[6] = entity->YPos >> 16;
-                        TouchCollision(scriptEng.operands[5] + scriptEng.operands[1], scriptEng.operands[6] + scriptEng.operands[2],
-                                       scriptEng.operands[5] + scriptEng.operands[3], scriptEng.operands[6] + scriptEng.operands[4]);
-                        break;
-                    case C_BOX:
-                        BoxCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
-                                     entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
-                        break;
-                    case C_PLATFORM:
-                        PlatformCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
-                                          entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
-                        break;
+                    DrawSprite(anim->frames[0].pivotX + scriptEng.operands[0], anim->frames[0].pivotY + scriptEng.operands[1], anim->frames[0].width,
+                               anim->frames[0].height, anim->frames[0].sprX, anim->frames[0].sprY, anim->frames[0].sheetID);
+                    break;
                 }
-                break;
-            case FUNC_CREATETEMPOBJECT: {
-                opcodeSize = 0;
-                if (objectEntityList[scriptEng.arrayPosition[2]].type > 0 && ++scriptEng.arrayPosition[2] == ENTITY_COUNT)
-                    scriptEng.arrayPosition[2] = TEMPENTITY_START;
-                Entity *temp         = &objectEntityList[scriptEng.arrayPosition[2]];
-                temp->type           = scriptEng.operands[0];
-                temp->propertyValue  = scriptEng.operands[1];
-                temp->XPos           = scriptEng.operands[2];
-                temp->YPos           = scriptEng.operands[3];
-                temp->direction      = FLIP_NONE;
-                temp->frame          = 0;
-                temp->priority       = PRIORITY_ALWAYS;
-                temp->rotation       = 0;
-                temp->state          = 0;
-                temp->drawOrder      = 3;
-                temp->scale          = 512;
-                temp->inkEffect      = INK_NONE;
-                temp->values[0]      = 0;
-                temp->values[1]      = 0;
-                temp->values[2]      = 0;
-                temp->values[3]      = 0;
-                temp->values[4]      = 0;
-                temp->values[5]      = 0;
-                temp->values[6]      = 0;
-                temp->values[7]      = 0;
-                break;
-            }                   
-            case FUNC_DEFAULTGROUNDMOVEMENT: DefaultGroundMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTAIRMOVEMENT: DefaultAirMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTROLLINGMOVEMENT: DefaultRollingMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTGRAVITYTRUE: DefaultGravityTrue(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTGRAVITYFALSE: DefaultGravityFalse(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTJUMPACTION: DefaultJumpAction(&playerList[activePlayer]); break;
-            case FUNC_SETMUSICTRACK:
-                opcodeSize = 0;
-                SetMusicTrack(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            case FUNC_PLAYMUSIC:
-                opcodeSize = 0;
-                PlayMusic(scriptEng.operands[0]);
-                break;
-            case FUNC_STOPMUSIC:
-                opcodeSize = 0;
-                StopMusic();
-                break;
-            case FUNC_PLAYSFX:
-                opcodeSize = 0;
-                PlaySfx(scriptEng.operands[0], scriptEng.operands[1]);
-                break;
-            case FUNC_STOPSFX:
-                opcodeSize = 0;
-                StopSfx(scriptEng.operands[0]);
-                break;
-            case FUNC_SETSFXATTRIBUTES:
-                opcodeSize = 0;
-                SetSfxAttributes(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2]);
-                break;
-            case FUNC_OBJECTTILECOLLISION:
-                opcodeSize = 0;
-                switch (scriptEng.operands[0]) {
-                    default: break;
-                    case CSIDE_FLOOR: ObjectFloorCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_LWALL: ObjectLWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_RWALL: ObjectRWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_ROOF: ObjectRoofCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                case FUNC_SETUPMENU: {
+                    opcodeSize     = 0;
+                    TextMenu *menu = &gameMenu[scriptEng.operands[0]];
+                    SetupTextMenu(menu, scriptEng.operands[1]);
+                    menu->selectionCount = scriptEng.operands[2];
+                    menu->alignment      = scriptEng.operands[3];
+                    break;
                 }
-                break;
-            case FUNC_OBJECTTILEGRIP:
-                opcodeSize = 0;
-                switch (scriptEng.operands[0]) {
-                    default: break;
-                    case CSIDE_FLOOR: ObjectFloorGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_LWALL: ObjectLWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_RWALL: ObjectRWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                    //case CSIDE_ROOF: ObjectRoofGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                case FUNC_ADDMENUENTRY: {
+                    opcodeSize                           = 0;
+                    TextMenu *menu                       = &gameMenu[scriptEng.operands[0]];
+                    menu->entryHighlight[menu->rowCount] = scriptEng.operands[2];
+                    AddTextMenuEntry(menu, scriptText);
+                    break;
                 }
-                break;
-            case FUNC_LOADVIDEO:
-                opcodeSize = 0;
-                // PauseSound();
-                scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
-                // ResumeSound();
-                break;
-            case FUNC_NEXTVIDEOFRAME:
-                opcodeSize = 0;
-                UpdateVideoFrame();
-                break;
-            case FUNC_PLAYSTAGESFX:
-                opcodeSize = 0;
-                PlaySfx(globalSFXCount + scriptEng.operands[0], scriptEng.operands[1]);
-                break;
-            case FUNC_STOPSTAGESFX:
-                opcodeSize = 0;
-                StopSfx(globalSFXCount + scriptEng.operands[0]);
-                break;
+                case FUNC_EDITMENUENTRY: {
+                    opcodeSize     = 0;
+                    TextMenu *menu = &gameMenu[scriptEng.operands[0]];
+                    EditTextMenuEntry(menu, scriptText, scriptEng.operands[2]);
+                    menu->entryHighlight[scriptEng.operands[2]] = scriptEng.operands[3];
+                    break;
+                }
+                case FUNC_LOADSTAGE:
+                    opcodeSize = 0;
+                    stageMode  = STAGEMODE_LOAD;
+                    break;
+                case FUNC_DRAWTINTRECT:
+                    opcodeSize = 0;
+                    DrawTintRectangle(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3],
+                                      scriptEng.operands[4]);
+                    break;
+                case FUNC_RESETOBJECTENTITY: {
+                    opcodeSize            = 0;
+                    Entity *newEnt        = &objectEntityList[scriptEng.operands[0]];
+                    newEnt->type          = scriptEng.operands[1];
+                    newEnt->propertyValue = scriptEng.operands[2];
+                    newEnt->XPos          = scriptEng.operands[3];
+                    newEnt->YPos          = scriptEng.operands[4];
+                    newEnt->direction     = FLIP_NONE;
+                    newEnt->frame         = 0;
+                    newEnt->priority      = PRIORITY_BOUNDS;
+                    newEnt->rotation      = 0;
+                    newEnt->state         = 0;
+                    newEnt->drawOrder     = 3;
+                    newEnt->scale         = 512;
+                    newEnt->inkEffect     = INK_NONE;
+                    newEnt->values[0]     = 0;
+                    newEnt->values[1]     = 0;
+                    newEnt->values[2]     = 0;
+                    newEnt->values[3]     = 0;
+                    newEnt->values[4]     = 0;
+                    newEnt->values[5]     = 0;
+                    newEnt->values[6]     = 0;
+                    newEnt->values[7]     = 0;
+                    break;
+                }
+                case FUNC_PLAYEROBJECTCOLLISION:
+                    opcodeSize = 0;
+                    switch (scriptEng.operands[0]) {
+                        default: break;
+                        case C_TOUCH:
+                            scriptEng.operands[5] = entity->XPos >> 16;
+                            scriptEng.operands[6] = entity->YPos >> 16;
+                            TouchCollision(scriptEng.operands[5] + scriptEng.operands[1], scriptEng.operands[6] + scriptEng.operands[2],
+                                           scriptEng.operands[5] + scriptEng.operands[3], scriptEng.operands[6] + scriptEng.operands[4]);
+                            break;
+                        case C_BOX:
+                            BoxCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
+                                         entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
+                            break;
+                        case C_PLATFORM:
+                            PlatformCollision(entity->XPos + (scriptEng.operands[1] << 16), entity->YPos + (scriptEng.operands[2] << 16),
+                                              entity->XPos + (scriptEng.operands[3] << 16), entity->YPos + (scriptEng.operands[4] << 16));
+                            break;
+                    }
+                    break;
+                case FUNC_CREATETEMPOBJECT: {
+                    opcodeSize = 0;
+                    if (objectEntityList[scriptEng.arrayPosition[2]].type > 0 && ++scriptEng.arrayPosition[2] == ENTITY_COUNT)
+                        scriptEng.arrayPosition[2] = TEMPENTITY_START;
+                    Entity *temp        = &objectEntityList[scriptEng.arrayPosition[2]];
+                    temp->type          = scriptEng.operands[0];
+                    temp->propertyValue = scriptEng.operands[1];
+                    temp->XPos          = scriptEng.operands[2];
+                    temp->YPos          = scriptEng.operands[3];
+                    temp->direction     = FLIP_NONE;
+                    temp->frame         = 0;
+                    temp->priority      = PRIORITY_ALWAYS;
+                    temp->rotation      = 0;
+                    temp->state         = 0;
+                    temp->drawOrder     = 3;
+                    temp->scale         = 512;
+                    temp->inkEffect     = INK_NONE;
+                    temp->values[0]     = 0;
+                    temp->values[1]     = 0;
+                    temp->values[2]     = 0;
+                    temp->values[3]     = 0;
+                    temp->values[4]     = 0;
+                    temp->values[5]     = 0;
+                    temp->values[6]     = 0;
+                    temp->values[7]     = 0;
+                    break;
+                }
+                case FUNC_DEFAULTGROUNDMOVEMENT: DefaultGroundMovement(&playerList[activePlayer]); break;
+                case FUNC_DEFAULTAIRMOVEMENT: DefaultAirMovement(&playerList[activePlayer]); break;
+                case FUNC_DEFAULTROLLINGMOVEMENT: DefaultRollingMovement(&playerList[activePlayer]); break;
+                case FUNC_DEFAULTGRAVITYTRUE: DefaultGravityTrue(&playerList[activePlayer]); break;
+                case FUNC_DEFAULTGRAVITYFALSE: DefaultGravityFalse(&playerList[activePlayer]); break;
+                case FUNC_DEFAULTJUMPACTION: DefaultJumpAction(&playerList[activePlayer]); break;
+                case FUNC_SETMUSICTRACK:
+                    opcodeSize = 0;
+                    SetMusicTrack(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                case FUNC_PLAYMUSIC:
+                    opcodeSize = 0;
+                    PlayMusic(scriptEng.operands[0]);
+                    break;
+                case FUNC_STOPMUSIC:
+                    opcodeSize = 0;
+                    StopMusic();
+                    break;
+                case FUNC_PLAYSFX:
+                    opcodeSize = 0;
+                    PlaySfx(scriptEng.operands[0], scriptEng.operands[1]);
+                    break;
+                case FUNC_STOPSFX:
+                    opcodeSize = 0;
+                    StopSfx(scriptEng.operands[0]);
+                    break;
+                case FUNC_SETSFXATTRIBUTES:
+                    opcodeSize = 0;
+                    SetSfxAttributes(scriptEng.operands[0], scriptEng.operands[1], scriptEng.operands[2]);
+                    break;
+                case FUNC_OBJECTTILECOLLISION:
+                    opcodeSize = 0;
+                    switch (scriptEng.operands[0]) {
+                        default: break;
+                        case CSIDE_FLOOR:
+                            ObjectFloorCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                            break;
+                            // case CSIDE_LWALL: ObjectLWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                            // case CSIDE_RWALL: ObjectRWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                            // case CSIDE_ROOF: ObjectRoofCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    }
+                    break;
+                case FUNC_OBJECTTILEGRIP:
+                    opcodeSize = 0;
+                    switch (scriptEng.operands[0]) {
+                        default: break;
+                        case CSIDE_FLOOR:
+                            ObjectFloorGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
+                            break;
+                            // case CSIDE_LWALL: ObjectLWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                            // case CSIDE_RWALL: ObjectRWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                            // case CSIDE_ROOF: ObjectRoofGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
+                    }
+                    break;
+                case FUNC_LOADVIDEO:
+                    opcodeSize = 0;
+                    // PauseSound();
+                    scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
+                    // ResumeSound();
+                    break;
+                case FUNC_NEXTVIDEOFRAME:
+                    opcodeSize = 0;
+                    UpdateVideoFrame();
+                    break;
+                case FUNC_PLAYSTAGESFX:
+                    opcodeSize = 0;
+                    PlaySfx(globalSFXCount + scriptEng.operands[0], scriptEng.operands[1]);
+                    break;
+                case FUNC_STOPSTAGESFX:
+                    opcodeSize = 0;
+                    StopSfx(globalSFXCount + scriptEng.operands[0]);
+                    break;
+            }
         }
 
         // Set Values

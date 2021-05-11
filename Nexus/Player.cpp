@@ -91,9 +91,9 @@ void LoadPlayerFromList(byte characterID, byte playerID)
 void ProcessPlayerAnimationChange(Player *player)
 {
     if (player->animation != player->prevAnimation) {
-        if (player->animation == 10)
+        if (player->animation == ANI_JUMPING)
             player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
-        if (player->prevAnimation == 10)
+        if (player->prevAnimation == ANI_JUMPING)
             player->YPos -= (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
         player->prevAnimation  = player->animation;
         player->frame          = 0;
@@ -105,10 +105,10 @@ void DrawPlayer(Player *player, SpriteFrame *frame)
 {
     int rotation = 0;
     switch (player->animation) {
-        case 5:
-        case 6:
-        case 8:
-        case 34:
+        case ANI_RUNNING:
+        case ANI_WALKING:
+        case ANI_PEELOUT:
+        case ANI_CORKSCREW:
             if (player->rotation >= 0x80)
                 rotation = 0x200 - ((266 - player->rotation) >> 5 << 6);
             else
@@ -374,10 +374,10 @@ void DefaultJumpAction(Player *player)
     player->XVelocity     = (player->speed * cosVal256[player->angle] + player->stats.jumpStrength * sinVal256[player->angle]) >> 8;
     player->YVelocity     = (player->speed * sinVal256[player->angle] + -player->stats.jumpStrength * cosVal256[player->angle]) >> 8;
     player->speed         = player->XVelocity;
-    player->trackScroll   = 1;
-    player->animation     = 10;
+    player->trackScroll   = true;
+    player->animation     = ANI_JUMPING;
     player->angle         = 0;
-    player->collisionMode = 0;
+    player->collisionMode = CMODE_FLOOR;
     player->timer         = 1;
 }
 
@@ -451,17 +451,17 @@ void ProcessPlayerAnimation(Player *player)
         int speed = (player->jumpingSpeed * abs(player->speed) / 6 >> 16) + 48;
         if (speed > 0xF0)
             speed = 0xF0;
-        script->animations[10].speed = speed;
+        script->animations[ANI_JUMPING].speed = speed;
 
         switch (player->animation) {
-            case 5: script->animations[player->animation].speed = ((uint)(player->walkingSpeed * abs(player->speed) / 6) >> 16) + 20; break;
-            case 6:
+            case ANI_WALKING: script->animations[player->animation].speed = ((uint)(player->walkingSpeed * abs(player->speed) / 6) >> 16) + 20; break;
+            case ANI_RUNNING:
                 speed = player->runningSpeed * abs(player->speed) / 6 >> 16;
                 if (speed > 0xF0)
                     speed = 0xF0;
                 script->animations[player->animation].speed = speed;
                 break;
-            case 8:
+            case ANI_PEELOUT:
                 speed = player->runningSpeed * abs(player->speed) / 6 >> 16;
                 if (speed > 0xF0)
                     speed = 0xF0;
@@ -474,9 +474,9 @@ void ProcessPlayerAnimation(Player *player)
     else
         player->animationTimer += player->animationSpeed;
     if (player->animation != player->prevAnimation) {
-        if (player->animation == 10)
+        if (player->animation == ANI_JUMPING)
             player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
-        if (player->prevAnimation == 10)
+        if (player->prevAnimation == ANI_JUMPING)
             player->YPos -= (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
         player->prevAnimation  = player->animation;
         player->frame          = 0;

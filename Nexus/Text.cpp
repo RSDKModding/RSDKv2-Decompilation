@@ -37,7 +37,7 @@ void EditTextMenuEntry(TextMenu *menu, const char *text, int rowID)
             menu->textData[pos] -= 21;
         if (menu->textData[pos] > '9' && menu->textData[pos] < 'f')
             menu->textData[pos] -= '@';
-        ++menu->entrySize[menu->rowCount];
+        ++menu->entrySize[rowID];
         pos++;
     }
 }

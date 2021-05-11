@@ -22,7 +22,6 @@ struct ModInfo {
     std::string version;
     std::map<std::string, std::string> fileMap;
     std::string folder;
-    bool useScripts;
     bool active;
 };
 #endif
@@ -37,7 +36,6 @@ extern char modsPath[0x100];
 extern ModInfo modList[MOD_MAX];
 extern int modCount;
 #endif
-extern bool forceUseScripts;
 
 inline int GetGlobalVariableByName(const char *name)
 {

@@ -1143,7 +1143,7 @@ void SetPlayerScreenPositionCDStyle(Player *player)
 
     if (!player->gravity) {
         if (player->direction) {
-            if (player->animation == 8 || player->animation == 9 || player->speed < -0x5F5C2) {
+            if (player->animation == ANI_PEELOUT || player->animation == ANI_SPINDASH || player->speed < -0x5F5C2) {
                 if (cameraLag < 64)
                     cameraLag += 2;
             }
@@ -1153,7 +1153,7 @@ void SetPlayerScreenPositionCDStyle(Player *player)
                     cameraLag -= 2;
             }
         }
-        else if (player->animation == 8 || player->animation == 9 || player->speed > 0x5F5C2) {
+        else if (player->animation == ANI_PEELOUT || player->animation == ANI_SPINDASH || player->speed > 0x5F5C2) {
             if (cameraLag > -64)
                 cameraLag -= 2;
         }

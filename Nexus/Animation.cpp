@@ -97,9 +97,9 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
                 FileRead(&hitbox->bottom[d], 1);
             }
         }
-        playerScriptList[playerID].startWalkSpeed  = playerScriptList[playerID].animations[5].speed - 20;
-        playerScriptList[playerID].startRunSpeed   = playerScriptList[playerID].animations[6].speed;
-        playerScriptList[playerID].startJumpSpeed  = playerScriptList[playerID].animations[10].speed - 48;
+        playerScriptList[playerID].startWalkSpeed  = playerScriptList[playerID].animations[ANI_WALKING].speed - 20;
+        playerScriptList[playerID].startRunSpeed   = playerScriptList[playerID].animations[ANI_RUNNING].speed;
+        playerScriptList[playerID].startJumpSpeed  = playerScriptList[playerID].animations[ANI_JUMPING].speed - 48;
 
         CloseFile();
     }

@@ -12,7 +12,6 @@ char modsPath[0x100];
 
 ModInfo modList[MOD_MAX];
 int modCount = 0;
-bool forceUseScripts = false;
 #endif
 
 void InitUserdata()
@@ -62,9 +61,9 @@ void InitUserdata()
         ini.SetInteger("Keyboard 1", "Down", inputDevice[INPUT_DOWN].keyMappings = SDL_SCANCODE_DOWN);
         ini.SetInteger("Keyboard 1", "Left", inputDevice[INPUT_LEFT].keyMappings = SDL_SCANCODE_LEFT);
         ini.SetInteger("Keyboard 1", "Right", inputDevice[INPUT_RIGHT].keyMappings = SDL_SCANCODE_RIGHT);
-        ini.SetInteger("Keyboard 1", "A", inputDevice[INPUT_BUTTONA].keyMappings = SDL_SCANCODE_Z);
-        ini.SetInteger("Keyboard 1", "B", inputDevice[INPUT_BUTTONB].keyMappings = SDL_SCANCODE_X);
-        ini.SetInteger("Keyboard 1", "C", inputDevice[INPUT_BUTTONC].keyMappings = SDL_SCANCODE_C);
+        ini.SetInteger("Keyboard 1", "A", inputDevice[INPUT_BUTTONA].keyMappings = SDL_SCANCODE_A);
+        ini.SetInteger("Keyboard 1", "B", inputDevice[INPUT_BUTTONB].keyMappings = SDL_SCANCODE_S);
+        ini.SetInteger("Keyboard 1", "C", inputDevice[INPUT_BUTTONC].keyMappings = SDL_SCANCODE_D);
         ini.SetInteger("Keyboard 1", "Start", inputDevice[INPUT_START].keyMappings = SDL_SCANCODE_RETURN);
 
         ini.SetComment("Controller 1", "IC1Comment", "Controller Mappings for P1 (Based on: https://wiki.libsdl.org/SDL_GameControllerButton)");
@@ -84,9 +83,9 @@ void InitUserdata()
         ini.SetInteger("Keyboard 1", "Down", inputDevice[INPUT_DOWN].keyMappings = SDLK_DOWN);
         ini.SetInteger("Keyboard 1", "Left", inputDevice[INPUT_LEFT].keyMappings = SDLK_LEFT);
         ini.SetInteger("Keyboard 1", "Right", inputDevice[INPUT_RIGHT].keyMappings = SDLK_RIGHT);
-        ini.SetInteger("Keyboard 1", "A", inputDevice[INPUT_BUTTONA].keyMappings = SDLK_z);
-        ini.SetInteger("Keyboard 1", "B", inputDevice[INPUT_BUTTONB].keyMappings = SDLK_x);
-        ini.SetInteger("Keyboard 1", "C", inputDevice[INPUT_BUTTONC].keyMappings = SDLK_c);
+        ini.SetInteger("Keyboard 1", "A", inputDevice[INPUT_BUTTONA].keyMappings = SDLK_a);
+        ini.SetInteger("Keyboard 1", "B", inputDevice[INPUT_BUTTONB].keyMappings = SDLK_s);
+        ini.SetInteger("Keyboard 1", "C", inputDevice[INPUT_BUTTONC].keyMappings = SDLK_d);
         ini.SetInteger("Keyboard 1", "Start", inputDevice[INPUT_START].keyMappings = SDLK_RETURN);
 
         ini.SetComment("Controller 1", "IC1Comment", "Controller Mappings for P1 (Based on: https://wiki.libsdl.org/SDL_GameControllerButton)");
@@ -164,11 +163,11 @@ void InitUserdata()
         if (!ini.GetInteger("Keyboard 1", "Right", &inputDevice[INPUT_RIGHT].keyMappings))
             inputDevice[3].keyMappings = SDL_SCANCODE_RIGHT;
         if (!ini.GetInteger("Keyboard 1", "A", &inputDevice[INPUT_BUTTONA].keyMappings))
-            inputDevice[4].keyMappings = SDL_SCANCODE_Z;
+            inputDevice[4].keyMappings = SDL_SCANCODE_A;
         if (!ini.GetInteger("Keyboard 1", "B", &inputDevice[INPUT_BUTTONB].keyMappings))
-            inputDevice[5].keyMappings = SDL_SCANCODE_X;
+            inputDevice[5].keyMappings = SDL_SCANCODE_S;
         if (!ini.GetInteger("Keyboard 1", "C", &inputDevice[INPUT_BUTTONC].keyMappings))
-            inputDevice[6].keyMappings = SDL_SCANCODE_C;
+            inputDevice[6].keyMappings = SDL_SCANCODE_D;
         if (!ini.GetInteger("Keyboard 1", "Start", &inputDevice[INPUT_START].keyMappings))
             inputDevice[7].keyMappings = SDL_SCANCODE_RETURN;
 
@@ -200,11 +199,11 @@ void InitUserdata()
         if (!ini.GetInteger("Keyboard 1", "Right", &inputDevice[INPUT_RIGHT].keyMappings))
             inputDevice[3].keyMappings = SDLK_RIGHT;
         if (!ini.GetInteger("Keyboard 1", "A", &inputDevice[INPUT_BUTTONA].keyMappings))
-            inputDevice[4].keyMappings = SDLK_z;
+            inputDevice[4].keyMappings = SDLK_a;
         if (!ini.GetInteger("Keyboard 1", "B", &inputDevice[INPUT_BUTTONB].keyMappings))
-            inputDevice[5].keyMappings = SDLK_x;
+            inputDevice[5].keyMappings = SDLK_s;
         if (!ini.GetInteger("Keyboard 1", "C", &inputDevice[INPUT_BUTTONC].keyMappings))
-            inputDevice[6].keyMappings = SDLK_c;
+            inputDevice[6].keyMappings = SDLK_d;
         if (!ini.GetInteger("Keyboard 1", "Start", &inputDevice[INPUT_START].keyMappings))
             inputDevice[7].keyMappings = SDLK_RETURN;
 
@@ -337,7 +336,6 @@ void writeSettings() {
 void initMods()
 {
     modCount        = 0;
-    forceUseScripts = false;
 
     char modBuf[0x100];
     sprintf(modBuf, "%smods/", modsPath);
@@ -361,7 +359,7 @@ void initMods()
                     FileIO *f = fOpen(mod_inifile.c_str(), "r");
                     if (f) {
                         fClose(f);
-                        IniParser modSettings(mod_inifile.c_str());
+                        IniParser *modSettings = new IniParser(mod_inifile.c_str());
 
                         info->name    = "Unnamed Mod";
                         info->desc    = "";
@@ -372,27 +370,27 @@ void initMods()
                         char infoBuf[0x100];
                         // Name
                         StrCopy(infoBuf, "");
-                        modSettings.GetString("", "Name", infoBuf);
+                        modSettings->GetString("", "Name", infoBuf);
                         if (!StrComp(infoBuf, ""))
                             info->name = infoBuf;
                         // Desc
                         StrCopy(infoBuf, "");
-                        modSettings.GetString("", "Description", infoBuf);
+                        modSettings->GetString("", "Description", infoBuf);
                         if (!StrComp(infoBuf, ""))
                             info->desc = infoBuf;
                         // Author
                         StrCopy(infoBuf, "");
-                        modSettings.GetString("", "Author", infoBuf);
+                        modSettings->GetString("", "Author", infoBuf);
                         if (!StrComp(infoBuf, ""))
                             info->author = infoBuf;
                         // Version
                         StrCopy(infoBuf, "");
-                        modSettings.GetString("", "Version", infoBuf);
+                        modSettings->GetString("", "Version", infoBuf);
                         if (!StrComp(infoBuf, ""))
                             info->version = infoBuf;
 
                         info->active = false;
-                        modSettings.GetBool("", "Active", &info->active);
+                        modSettings->GetBool("", "Active", &info->active);
 
                         // Check for Data replacements
                         std::filesystem::path dataPath(modDir + "/Data");
@@ -423,10 +421,15 @@ void initMods()
                                                 buffer[i - tokenPos] = modBuf[i] == '\\' ? '/' : modBuf[i];
                                             }
 
-                                            printLog(modBuf);
                                             std::string path(buffer);
+                                            char pathLower[0x100];
+                                            memset(pathLower, 0, sizeof(char) * 0x100);
+                                            for (int c = 0; c < path.size(); ++c) {
+                                                pathLower[c] = tolower(path.c_str()[c]);
+                                            }
+
                                             std::string modPath(modBuf);
-                                            info->fileMap.insert(std::pair<std::string, std::string>(path, modBuf));
+                                            info->fileMap.insert(std::pair<std::string, std::string>(pathLower, modBuf));
                                         }
                                     }
                                 }
@@ -436,12 +439,9 @@ void initMods()
                             }
                         }
 
-                        info->useScripts = false;
-                        modSettings.GetBool("", "TxtScripts", &info->useScripts);
-                        if (info->useScripts && info->active)
-                            forceUseScripts = true;
-
                         modCount++;
+
+                        delete modSettings;
                     }
                 }
             }
@@ -472,8 +472,6 @@ void saveMods()
                 modSettings->SetString("", "Description", (char *)info->desc.c_str());
                 modSettings->SetString("", "Author", (char *)info->author.c_str());
                 modSettings->SetString("", "Version", (char *)info->version.c_str());
-                if (info->useScripts)
-                    modSettings->SetBool("", "TxtScripts", info->useScripts);
                 modSettings->SetBool("", "Active", info->active);
 
                 modSettings->Write(mod_inifile.c_str());
