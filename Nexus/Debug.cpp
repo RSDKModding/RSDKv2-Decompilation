@@ -9,7 +9,7 @@ void InitSystemMenu()
     ReleaseStageSfx();
     fadeMode = 0;
 
-    if (Engine.usingBinFile && !Engine.devMenu) {
+    if (Engine.usingBinFile) {
         ClearGraphicsData();
         for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
@@ -114,7 +114,7 @@ void ProcessSystemMenu()
             else if (keyPress.B) {
                 ClearGraphicsData();
                 ClearAnimationData();
-                LoadPalette("MasterPalette.act", 0, 256);
+                LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
                 activeStageList   = 0;
                 stageMode         = STAGEMODE_LOAD;
                 Engine.gameMode   = ENGINE_MAINGAME;

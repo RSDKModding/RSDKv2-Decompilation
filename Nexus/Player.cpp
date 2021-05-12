@@ -186,13 +186,19 @@ void SetMovementStats(PlayerMovementStats *stats)
 
 void DefaultAirMovement(Player *player)
 {
+    if (player->YVelocity > -0x40000 && player->YVelocity < 0)
+        player->speed -= player->speed >> 5;
+
     if (player->speed <= -player->stats.topSpeed) {
-        if (player->left)
+        if (player->left) {
             player->direction = FLIP_X;
+        }
     }
-    else if (player->left) {
-        player->speed -= player->stats.airAcceleration;
-        player->direction = FLIP_X;
+    else {
+        if (player->left) {
+            player->speed -= player->stats.airAcceleration;
+            player->direction = FLIP_X;
+        }
     }
 
     if (player->speed >= player->stats.topSpeed) {
@@ -200,14 +206,8 @@ void DefaultAirMovement(Player *player)
             player->direction = FLIP_NONE;
     }
     else if (player->right) {
-        player->speed += player->stats.airAcceleration;
         player->direction = FLIP_NONE;
-    }
-
-    if (player->YVelocity > -0x4000) {
-        if (player->YVelocity < 0) {
-            player->speed -= player->speed >> 5;
-        }
+        player->speed += player->stats.airAcceleration;
     }
 }
 
@@ -248,7 +248,7 @@ void DefaultGravityTrue(Player *player)
 
 void DefaultGroundMovement(Player *player)
 {
-    if ((sbyte)player->frictionLoss <= 0) {
+    if ((signed int)player->frictionLoss <= 0) {
         if (player->left && player->speed > -player->stats.topSpeed) {
             if (player->speed <= 0) {
                 player->speed -= player->stats.acceleration;
@@ -370,7 +370,7 @@ void DefaultGroundMovement(Player *player)
 void DefaultJumpAction(Player *player)
 {
     player->frictionLoss  = 0;
-    player->gravity       = 1;
+    player->gravity       = true;
     player->XVelocity     = (player->speed * cosVal256[player->angle] + player->stats.jumpStrength * sinVal256[player->angle]) >> 8;
     player->YVelocity     = (player->speed * sinVal256[player->angle] + -player->stats.jumpStrength * cosVal256[player->angle]) >> 8;
     player->speed         = player->XVelocity;
@@ -388,6 +388,7 @@ void DefaultRollingMovement(Player *player)
         player->speed += player->stats.rollingDeceleration;
     if (player->left && player->speed > 0)
         player->speed -= player->stats.rollingDeceleration;
+
     if (player->speed < 0) {
         player->speed += player->stats.airDeceleration;
         if (player->speed > 0)
@@ -403,14 +404,14 @@ void DefaultRollingMovement(Player *player)
 
     if (player->speed <= 0) {
         if (sinVal256[player->angle] >= 0) {
-            player->speed = (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8) + player->speed;
+            player->speed += (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8);
         }
         else {
             player->speed += 0x5000 * sinVal256[player->angle] >> 8;
         }
     }
     else if (sinVal256[player->angle] <= 0) {
-        player->speed = (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8) + player->speed;
+        player->speed += (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8);
     }
     else {
         player->speed += 0x5000 * sinVal256[player->angle] >> 8;

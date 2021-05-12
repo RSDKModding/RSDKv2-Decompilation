@@ -892,7 +892,7 @@ void ProcessTracedCollision(Player *player)
             player->YPos  = (sensors[4].YPos - collisionBottom) << 16;
             player->angle = sensors[4].angle;
         }
-        else if (sensors[5].collided ) {
+        else if (sensors[5].collided) {
             player->YPos  = (sensors[5].YPos - collisionBottom) << 16;
             player->angle = sensors[5].angle;
         }

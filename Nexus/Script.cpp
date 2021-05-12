@@ -23,7 +23,11 @@ int jumpTableDataPos    = 0;
 int jumpTableDataOffset = 0;
 
 #define ALIAS_COUNT       (0x80)
+#if !RETRO_USE_ORIGINAL_CODE
+#define COMMONALIAS_COUNT (25)
+#else
 #define COMMONALIAS_COUNT (14)
+#endif
 int aliasCount = 0;
 int lineID     = 0;
 
@@ -301,7 +305,14 @@ AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
                             AliasInfo("MENU_2", "1"),
                             AliasInfo("C_TOUCH", "0"),
                             AliasInfo("C_BOX", "1"),
-                            AliasInfo("C_PLATFORM", "2") };
+                            AliasInfo("C_PLATFORM", "2"),
+#if !RETRO_USE_ORIGINAL_CODE
+    AliasInfo("INK_NONE", "0"),      AliasInfo("INK_BLEND", "1"),   AliasInfo("INK_TINT", "2"),
+    AliasInfo("FX_SCALE", "0"),      AliasInfo("FX_ROTATE", "1"),   AliasInfo("FX_INK", "2"),
+    AliasInfo("FX_TINT", "3"),       AliasInfo("FLIP_NONE", "0"),   AliasInfo("FLIP_X", "1"),
+    AliasInfo("FLIP_Y", "2"),        AliasInfo("FLIP_XY", "3"),
+#endif
+};
 
 
 const char scriptEvaluationTokens[][0x4] = {
@@ -2007,7 +2018,8 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             }
             case FUNC_ATAN2: {
-                scriptEng.operands[0] = ArcTanLookup(scriptEng.operands[1], scriptEng.operands[2]);
+                opcodeSize = 0;
+                //doesn't exist
                 break;
             }
             case FUNC_INTERPOLATE:

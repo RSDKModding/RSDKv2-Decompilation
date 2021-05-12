@@ -32,7 +32,7 @@ extern int fadeMode;
 
 #define RGB888_TO_RGB565(r, g, b) ((b) >> 3) | (((g) >> 2) << 5) | (((r) >> 3) << 11)
 
-#define PACK_RGB888(r, g, b) (((b) << 16) | ((g) << 8) | ((b) << 0))
+#define PACK_RGB888(r, g, b) ((0xFF << 24) | ((r) << 16) | ((g) << 8) | ((b) << 0))
 
 void LoadPalette(const char *filePath, int startIndex, int endIndex);
 

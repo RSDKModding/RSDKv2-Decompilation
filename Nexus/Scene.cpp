@@ -244,7 +244,7 @@ void LoadStageFiles(void)
     if (!CheckCurrentStageFolder(stageListPosition)) {
         printLog("Loading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][stageListPosition].name);
         ReleaseStageSfx();
-        LoadPalette("MasterPalette.act", 0, 256);
+        LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         ClearScriptData();
         for (int i = SPRITESHEETS_MAX; i > 0; i--) RemoveGraphicsFile((char *)"", i - 1);
 

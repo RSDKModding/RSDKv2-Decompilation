@@ -60,6 +60,10 @@ bool processEvents()
                     case SDLK_ESCAPE:
                         if (Engine.devMenu)
                             Engine.gameMode = ENGINE_INITSYSMENU;
+                        else {
+                            Engine.gameMode = ENGINE_EXITGAME;
+                            return false;
+                        }
                         break;
                     case SDLK_F4:
                         Engine.isFullScreen ^= 1;

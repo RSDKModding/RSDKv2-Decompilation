@@ -6,16 +6,11 @@
 #define MEM_ZERO(x)  memset(&(x), 0, sizeof((x)))
 #define MEM_ZEROP(x) memset((x), 0, sizeof(*(x)))
 
-extern int sinM[0x200];
-extern int cosM[0x200];
-
 extern int sinVal512[0x200];
 extern int cosVal512[0x200];
 
 extern int sinVal256[0x100];
 extern int cosVal256[0x100];
-
-extern byte atanVal256[0x100 * 0x100];
 
 // Setup Angles
 void CalculateTrigAngles();
@@ -50,8 +45,5 @@ inline int cos256(int angle)
     angle &= 0xFF;
     return cosVal256[angle];
 }
-
-// Get Arc Tan value
-byte ArcTanLookup(int X, int Y);
 
 #endif // !MATH_H
