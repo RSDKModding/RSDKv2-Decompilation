@@ -83,6 +83,9 @@ void LoadPlayerFromList(byte characterID, byte playerID)
                 LoadPlayerAnimation(strBuf, playerID);
                 SetFileInfo(&info);
             }
+            FileRead(&strLen, 1);
+            FileRead(&strBuf, strLen); // player name
+            strBuf[strLen] = '\0';
         }
         CloseFile();
     }
