@@ -33,7 +33,7 @@ SOURCES = \
 	  
 ifeq ($(FORCE_CASE_INSENSITIVE),1)
   CXXFLAGS_ALL += -DFORCE_CASE_INSENSITIVE
-  SOURCES += RSDKv3/fcaseopen.c
+  SOURCES += Nexus/fcaseopen.c
 endif
 
 ifeq ($(USE_HW_REN),1)
