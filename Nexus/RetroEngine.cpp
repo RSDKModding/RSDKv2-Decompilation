@@ -244,14 +244,6 @@ void RetroEngine::Run()
             continue;
         }
         frameEnd = SDL_GetPerformanceCounter();
-
-        refreshRatio = (float)targetRefreshRate / (frequency / frameDelta);
-
-        frameInter += refreshRatio;
-        if (frameInter >= 1.0f) {
-            logicUpCnt = (int)floorf(frameInter); // get logic update count
-            frameInter -= logicUpCnt;             // shave off the whole
-        }
 #endif
 
         for (int s = 0; s < gameSpeed; ++s) {
@@ -278,7 +270,6 @@ void RetroEngine::Run()
 
         FlipScreen();
         frameStep  = false;
-        logicUpCnt = 0;
     }
 
     ReleaseAudioDevice();

@@ -12,19 +12,19 @@ SceneInfo stageList[STAGELIST_MAX][0x100];
 
 int stageMode = STAGEMODE_LOAD;
 
-int cameraStyle    = 0;
-int cameraEnabled  = false;
-int cameraAdjustY  = 0;
-int xScrollOffset  = 0;
-int yScrollOffset  = 0;
-int yScrollA       = 0;
-int yScrollB       = SCREEN_YSIZE;
-int xScrollA       = 0;
-int xScrollB       = SCREEN_XSIZE;
-int yScrollMove    = 0;
-int earthquakeX    = 0;
-int earthquakeY    = 0;
-int cameraLag      = 0;
+int cameraStyle   = 0;
+int cameraEnabled = false;
+int cameraAdjustY = 0;
+int xScrollOffset = 0;
+int yScrollOffset = 0;
+int yScrollA      = 0;
+int yScrollB      = SCREEN_YSIZE;
+int xScrollA      = 0;
+int xScrollB      = SCREEN_XSIZE;
+int yScrollMove   = 0;
+int earthquakeX   = 0;
+int earthquakeY   = 0;
+int cameraLag     = 0;
 
 int xBoundary1    = 0;
 int newXBoundary1 = 0;
@@ -46,7 +46,7 @@ int lastXSize = -1;
 bool pauseEnabled     = true;
 bool timeEnabled      = true;
 bool debugMode        = false;
-int frameCounter        = 0;
+int frameCounter      = 0;
 int stageMilliseconds = 0;
 int stageSeconds      = 0;
 int stageMinutes      = 0;
@@ -97,14 +97,14 @@ void ProcessStage(void)
             xScrollA      = 0;
             xScrollB      = SCREEN_XSIZE;
             yScrollMove   = 0;
-            earthquakeX  = 0;
-            earthquakeY  = 0;
+            earthquakeX   = 0;
+            earthquakeY   = 0;
 
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 MEM_ZERO(playerList[i]);
-                playerList[i].visible            = true;
-                playerList[i].gravity            = 1; // Air
-                playerList[i].tileCollisions     = true;
+                playerList[i].visible           = true;
+                playerList[i].gravity           = 1; // Air
+                playerList[i].tileCollisions    = true;
                 playerList[i].objectInteraction = true;
             }
             pauseEnabled      = false;
@@ -147,32 +147,7 @@ void ProcessStage(void)
             }
 
             // Update
-            for (int i = 0; i < Engine.logicUpCnt; ++i) {
-                memcpy(objectEntityList_LAST, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
-                memcpy(objectEntityList, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
-                ProcessObjects();
-
-                Engine.drawLock = true;
-                DrawObjectList(0);
-                DrawObjectList(1);
-                DrawObjectList(2);
-                DrawObjectList(3);
-                DrawObjectList(4);
-                DrawObjectList(5);
-                DrawObjectList(6);
-                Engine.drawLock = false;
-                memcpy(objectEntityList_NEXT, objectEntityList, sizeof(Entity) * ENTITY_COUNT);
-            }
-
-            for (objectLoop = 0; objectLoop < ENTITY_COUNT; ++objectLoop) {
-                Entity *entity      = &objectEntityList[objectLoop];
-                Entity *entity_LAST = &objectEntityList_LAST[objectLoop];
-                Entity *entity_NEXT = &objectEntityList_NEXT[objectLoop];
-                if (entity_LAST->type == entity_NEXT->type) {
-                    entity->XPos = entity_LAST->XPos + ((entity_NEXT->XPos - entity_LAST->XPos) * Engine.frameInter);
-                    entity->YPos = entity_LAST->YPos + ((entity_NEXT->YPos - entity_LAST->YPos) * Engine.frameInter);
-                }
-            }
+            ProcessObjects();
 
             if (objectEntityList[0].type == OBJ_TYPE_PLAYER) {
                 if (cameraEnabled) {
@@ -198,7 +173,7 @@ void ProcessStage(void)
             lastYSize = -1;
             CheckKeyDown(&keyDown, 0xFF);
             CheckKeyPress(&keyPress, 0xFF);
-            
+
             if (keyPress.C) {
                 keyPress.C = false;
                 if (timeEnabled) {
@@ -247,7 +222,7 @@ void LoadStageFiles(void)
     FileInfo info;
     byte fileBuffer  = 0;
     byte fileBuffer2 = 0;
-    int scriptID    = 2;
+    int scriptID     = 2;
     char strBuffer[0x100];
 
     if (!CheckCurrentStageFolder(stageListPosition)) {
@@ -340,15 +315,15 @@ void LoadStageFiles(void)
     for (int i = 0; i < TRACK_COUNT; ++i) SetMusicTrack((char *)"", i, false);
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         MEM_ZERO(objectEntityList[i]);
-        objectEntityList[i].drawOrder      = 3;
-        objectEntityList[i].scale          = 512;
+        objectEntityList[i].drawOrder = 3;
+        objectEntityList[i].scale     = 512;
     }
     LoadActLayout();
     ProcessStartupObjects();
     xScrollA = (playerList[0].XPos >> 16) - SCREEN_CENTERX;
-    xScrollB                 = (playerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
+    xScrollB = (playerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
     yScrollA = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP;
-    yScrollB                 = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP + SCREEN_YSIZE;
+    yScrollB = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP + SCREEN_YSIZE;
 }
 int LoadActFile(const char *ext, int stageID, FileInfo *info)
 {
@@ -432,7 +407,7 @@ void LoadActLayout()
         FileRead(&fileBuffer, 1);
         int objectCount = fileBuffer;
         FileRead(&fileBuffer, 1);
-        objectCount = (objectCount << 8) + fileBuffer;
+        objectCount    = (objectCount << 8) + fileBuffer;
         Entity *object = &objectEntityList[32];
         for (int i = 0; i < objectCount; ++i) {
             FileRead(&fileBuffer, 1);
@@ -527,7 +502,6 @@ void LoadStageBackground()
             stageLayouts[i].scrollSpeed = fileBuffer << 10;
             stageLayouts[i].scrollPos   = 0;
 
-            
             memset(stageLayouts[i].tiles, 0, TILELAYER_CHUNK_MAX * sizeof(ushort));
             byte *lineScrollPtr = stageLayouts[i].lineScroll;
             memset(stageLayouts[i].lineScroll, 0, 0x7FFF);
@@ -583,8 +557,8 @@ void LoadStageChunks()
             tiles128x128.direction[i] = (byte)(entry[0] >> 2);
             entry[0] -= 4 * (entry[0] >> 2);
 
-            tiles128x128.tileIndex[i]         = entry[1] + (entry[0] << 8);
-            tiles128x128.gfxDataPos[i]        = tiles128x128.tileIndex[i] << 8;
+            tiles128x128.tileIndex[i]  = entry[1] + (entry[0] << 8);
+            tiles128x128.gfxDataPos[i] = tiles128x128.tileIndex[i] << 8;
 
             tiles128x128.collisionFlags[0][i] = entry[2] >> 4;
             tiles128x128.collisionFlags[1][i] = entry[2] - ((entry[2] >> 4) << 4);
@@ -598,7 +572,7 @@ void LoadStageCollisions()
     if (LoadStageFile("CollisionMasks.bin", stageListPosition, &info)) {
 
         byte fileBuffer = 0;
-        int tileIndex  = 0;
+        int tileIndex   = 0;
         for (int t = 0; t < 1024; ++t) {
             for (int p = 0; p < 2; ++p) {
                 FileRead(&fileBuffer, 1);
@@ -720,7 +694,7 @@ void LoadStageCollisions()
                         id <<= 1;
                     }
 
-                    //LWall rotations
+                    // LWall rotations
                     for (int c = 0; c < TILE_SIZE; ++c) {
                         int h = 0;
                         while (h > -1) {
@@ -738,7 +712,7 @@ void LoadStageCollisions()
                         }
                     }
 
-                    //RWall rotations
+                    // RWall rotations
                     for (int c = 0; c < TILE_SIZE; ++c) {
                         int h = TILE_SIZE - 1;
                         while (h < TILE_SIZE) {
@@ -780,8 +754,8 @@ void LoadStageGIFFile(int stageID)
         height += (fileBuffer << 8);
 
         FileRead(&fileBuffer, 1); // Palette Size
-        int has_pallete = (fileBuffer & 0x80) >> 7;
-        int colors = ((fileBuffer & 0x70) >> 4) + 1;
+        int has_pallete  = (fileBuffer & 0x80) >> 7;
+        int colors       = ((fileBuffer & 0x70) >> 4) + 1;
         int palette_size = (fileBuffer & 0x7) + 1;
         if (palette_size > 0)
             palette_size = 1 << palette_size;
@@ -789,8 +763,7 @@ void LoadStageGIFFile(int stageID)
         FileRead(&fileBuffer, 1); // BG Colour index (thrown away)
         FileRead(&fileBuffer, 1); // Pixel aspect ratio (thrown away)
 
-        if (palette_size == 256)
-        {
+        if (palette_size == 256) {
             byte clr[3];
 
             for (int c = 0; c < 0x80; ++c) FileRead(clr, 3);
@@ -881,7 +854,7 @@ void LoadStageGFXFile(int stageID)
 void ResetBackgroundSettings()
 {
     for (int i = 0; i < LAYER_COUNT; ++i) {
-        stageLayouts[i].scrollPos          = 0;
+        stageLayouts[i].scrollPos = 0;
     }
 
     for (int i = 0; i < PARALLAX_COUNT; ++i) {
@@ -1411,9 +1384,9 @@ void SetPlayerLockedScreenPosition(Player *player)
         }
     }
 
-    int yscrollA     = yScrollA;
-    int yscrollB     = yScrollB;
-    int adjustY      = cameraAdjustY + playerYPos;
+    int yscrollA = yScrollA;
+    int yscrollB = yScrollB;
+    int adjustY  = cameraAdjustY + playerYPos;
     if (player->lookPos + adjustY <= yScrollA + SCREEN_SCROLL_UP) {
         player->screenYPos = adjustY - yScrollA - earthquakeY;
         yScrollOffset      = earthquakeY + yscrollA;
