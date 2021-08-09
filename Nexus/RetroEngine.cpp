@@ -45,13 +45,6 @@ bool processEvents()
                 break;
             case SDL_CONTROLLERDEVICEADDED: controllerInit(Engine.sdlEvents.cdevice.which); break;
             case SDL_CONTROLLERDEVICEREMOVED: controllerClose(Engine.sdlEvents.cdevice.which); break;
-            case SDL_WINDOWEVENT_CLOSE:
-                if (Engine.window) {
-                    SDL_DestroyWindow(Engine.window);
-                    Engine.window = NULL;
-                }
-                Engine.gameMode = ENGINE_EXITGAME;
-                return false;
             case SDL_APP_TERMINATING: Engine.gameMode = ENGINE_EXITGAME; break;
 #endif
             case SDL_KEYDOWN:
@@ -237,19 +230,29 @@ void RetroEngine::Init()
 
 void RetroEngine::Run()
 {
-    uint frameStart, frameEnd = SDL_GetTicks();
+    const Uint64 frequency = SDL_GetPerformanceFrequency();
+    Uint64 frameStart = SDL_GetPerformanceCounter(), frameEnd = SDL_GetPerformanceCounter();
     float frameDelta = 0.0f;
 
     while (running) {
-        frameStart = SDL_GetTicks();
-        frameDelta = frameStart - frameEnd;
-
-        if (frameDelta < 1000.0f / (float)refreshRate)
-            SDL_Delay(1000.0f / (float)refreshRate - frameDelta);
-
-        frameEnd = SDL_GetTicks();
-
         running = processEvents();
+
+#if !RETRO_USE_ORIGINAL_CODE
+        frameStart = SDL_GetPerformanceCounter();
+        frameDelta = frameStart - frameEnd;
+        if (frameDelta < frequency / (float)refreshRate) {
+            continue;
+        }
+        frameEnd = SDL_GetPerformanceCounter();
+
+        refreshRatio = (float)targetRefreshRate / (frequency / frameDelta);
+
+        frameInter += refreshRatio;
+        if (frameInter >= 1.0f) {
+            logicUpCnt = (int)floorf(frameInter); // get logic update count
+            frameInter -= logicUpCnt;             // shave off the whole
+        }
+#endif
 
         for (int s = 0; s < gameSpeed; ++s) {
             ProcessInput();
@@ -270,12 +273,12 @@ void RetroEngine::Run()
                     case ENGINE_EXITGAME: running = false; break;
                     default: break;
                 }
-
-                FlipScreen();
-                frameStep = false;
             }
         }
 
+        FlipScreen();
+        frameStep  = false;
+        logicUpCnt = 0;
     }
 
     ReleaseAudioDevice();
@@ -283,7 +286,7 @@ void RetroEngine::Run()
     writeSettings();
     saveMods();
 
-#if RETRO_USING_SDL2
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2
     SDL_Quit();
 #endif
 }

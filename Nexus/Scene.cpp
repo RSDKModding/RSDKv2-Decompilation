@@ -84,7 +84,6 @@ byte tilesetGFXData[TILESET_SIZE];
 
 void ProcessStage(void)
 {
-    int updateMax = 0; 
     switch (stageMode) {
         case STAGEMODE_LOAD: // Startup
             fadeMode = 0;
@@ -118,6 +117,9 @@ void ProcessStage(void)
             stageMode         = STAGEMODE_NORMAL;
             ResetBackgroundSettings();
             LoadStageFiles();
+
+            memcpy(objectEntityList_LAST, objectEntityList, sizeof(Entity) * ENTITY_COUNT);
+            memcpy(objectEntityList_NEXT, objectEntityList, sizeof(Entity) * ENTITY_COUNT);
             break;
         case STAGEMODE_NORMAL:
             if (fadeMode > 0)
@@ -144,17 +146,32 @@ void ProcessStage(void)
                 stageMilliseconds = 100 * frameCounter / Engine.refreshRate;
             }
 
-            updateMax = 1;
-            /*updateMax = Engine.renderFrameIndex;
-            if (Engine.refreshRate >= Engine.targetRefreshRate) {
-                updateMax = 0;
-                if (Engine.frameCount % Engine.skipFrameIndex < Engine.renderFrameIndex)
-                    updateMax = 1;
-            }*/
-
             // Update
-            for (int i = 0; i < updateMax; ++i) {
+            for (int i = 0; i < Engine.logicUpCnt; ++i) {
+                memcpy(objectEntityList_LAST, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
+                memcpy(objectEntityList, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
                 ProcessObjects();
+
+                Engine.drawLock = true;
+                DrawObjectList(0);
+                DrawObjectList(1);
+                DrawObjectList(2);
+                DrawObjectList(3);
+                DrawObjectList(4);
+                DrawObjectList(5);
+                DrawObjectList(6);
+                Engine.drawLock = false;
+                memcpy(objectEntityList_NEXT, objectEntityList, sizeof(Entity) * ENTITY_COUNT);
+            }
+
+            for (objectLoop = 0; objectLoop < ENTITY_COUNT; ++objectLoop) {
+                Entity *entity      = &objectEntityList[objectLoop];
+                Entity *entity_LAST = &objectEntityList_LAST[objectLoop];
+                Entity *entity_NEXT = &objectEntityList_NEXT[objectLoop];
+                if (entity_LAST->type == entity_NEXT->type) {
+                    entity->XPos = entity_LAST->XPos + ((entity_NEXT->XPos - entity_LAST->XPos) * Engine.frameInter);
+                    entity->YPos = entity_LAST->YPos + ((entity_NEXT->YPos - entity_LAST->YPos) * Engine.frameInter);
+                }
             }
 
             if (objectEntityList[0].type == OBJ_TYPE_PLAYER) {
@@ -171,6 +188,7 @@ void ProcessStage(void)
             }
 
             DrawStageGFX();
+            memcpy(objectEntityList, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
             break;
         case STAGEMODE_PAUSED:
             if (fadeMode > 0)
@@ -195,18 +213,8 @@ void ProcessStage(void)
                     stageMilliseconds = 100 * frameCounter / Engine.refreshRate;
                 }
 
-                updateMax = 1;
-                /*updateMax = Engine.renderFrameIndex;
-                if (Engine.refreshRate >= Engine.targetRefreshRate) {
-                    updateMax = 0;
-                    if (Engine.frameCount % Engine.skipFrameIndex < Engine.renderFrameIndex)
-                        updateMax = 1;
-                }*/
-
                 // Update
-                for (int i = 0; i < updateMax; ++i) {
-                    ProcessObjects();
-                }
+                ProcessObjects();
 
                 if (objectEntityList[0].type == OBJ_TYPE_PLAYER) {
                     if (cameraEnabled) {
@@ -226,6 +234,7 @@ void ProcessStage(void)
                 stageMode = STAGEMODE_NORMAL;
                 ResumeSound();
             }
+            memcpy(objectEntityList, objectEntityList_NEXT, sizeof(Entity) * ENTITY_COUNT);
             break;
     }
     Engine.frameCount++;
