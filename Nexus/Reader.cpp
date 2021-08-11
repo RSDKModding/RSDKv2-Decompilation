@@ -478,6 +478,11 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
             printLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
+        fileInfo->fileBuffer = (byte *)malloc(fileInfo->vFileSize);
+        FileRead2(fileInfo, fileInfo->fileBuffer, fileInfo->vFileSize, false);
+        fileInfo->readPos        = 0;
+        fileInfo->bufferPosition = 0;
+        fClose(fileInfo->cFileHandle);
     }
     else {
         StrCopy(fileInfo->fileName, filePathBuf);
@@ -495,6 +500,11 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos           = readPos;
         fileInfo->virtualFileOffset = 0;
         fileInfo->bufferPosition    = 0;
+        fileInfo->fileBuffer        = (byte *)malloc(fileInfo->vFileSize);
+        FileRead2(fileInfo, fileInfo->fileBuffer, fileInfo->vFileSize, false);
+        fileInfo->readPos        = 0;
+        fileInfo->bufferPosition = 0;
+        fClose(fileInfo->cFileHandle);
         fileInfo->encrypted         = false;
     }
     fileInfo->bufferPosition = 0;
@@ -539,36 +549,36 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     // readSize             = 0;
     fileInfo->readPos = 0;
 
-    FileRead2(fileInfo, &fileBuffer, 1);
+    FileRead2(fileInfo, &fileBuffer, 1, false);
     headerSize = fileBuffer;
-    FileRead2(fileInfo, &fileBuffer, 1);
+    FileRead2(fileInfo, &fileBuffer, 1, false);
     headerSize += fileBuffer << 8;
-    FileRead2(fileInfo, &fileBuffer, 1);
+    FileRead2(fileInfo, &fileBuffer, 1, false);
     headerSize += fileBuffer << 16;
-    FileRead2(fileInfo, &fileBuffer, 1);
+    FileRead2(fileInfo, &fileBuffer, 1, false);
     headerSize += fileBuffer << 24;
 
-    FileRead2(fileInfo, &fileBuffer, 1);
+    FileRead2(fileInfo, &fileBuffer, 1, false);
     dirCount = fileBuffer;
 
     i                  = 0;
     fileOffset         = 0;
     int nextFileOffset = 0;
     while (i < dirCount) {
-        FileRead2(fileInfo, &fileBuffer, 1);
+        FileRead2(fileInfo, &fileBuffer, 1, false);
         for (j = 0; j < fileBuffer; ++j) {
-            FileRead2(fileInfo, &stringBuffer[j], 1);
+            FileRead2(fileInfo, &stringBuffer[j], 1, false);
         }
         stringBuffer[j] = 0;
 
         if (StrComp(fullFilename, stringBuffer)) {
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             fileOffset = fileBuffer;
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             fileOffset += fileBuffer << 8;
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             fileOffset += fileBuffer << 16;
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             fileOffset += fileBuffer << 24;
 
             // Grab info for next dir to know when we've found an error
@@ -577,18 +587,18 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
                 nextFileOffset = fileSize - headerSize; // There is no next dir, so just make this the EOF
             }
             else {
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 for (j = 0; j < fileBuffer; ++j) {
-                    FileRead2(fileInfo, &stringBuffer[j], 1);
+                    FileRead2(fileInfo, &stringBuffer[j], 1, false);
                 }
 
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 nextFileOffset = fileBuffer;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 nextFileOffset += fileBuffer << 8;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 nextFileOffset += fileBuffer << 16;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 nextFileOffset += fileBuffer << 24;
             }
 
@@ -596,10 +606,10 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
         }
         else {
             fileOffset = -1;
-            FileRead2(fileInfo, &fileBuffer, 1);
-            FileRead2(fileInfo, &fileBuffer, 1);
-            FileRead2(fileInfo, &fileBuffer, 1);
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             ++i;
         }
     }
@@ -615,11 +625,11 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
         fileInfo->virtualFileOffset = fileOffset + headerSize;
         i                           = 0;
         while (i < 1) {
-            FileRead2(fileInfo, &fileBuffer, 1);
+            FileRead2(fileInfo, &fileBuffer, 1, false);
             ++fileInfo->virtualFileOffset;
             j = 0;
             while (j < fileBuffer) {
-                FileRead2(fileInfo, &stringBuffer[j], 1);
+                FileRead2(fileInfo, &stringBuffer[j], 1, false);
                 ++j;
                 ++fileInfo->virtualFileOffset;
             }
@@ -627,25 +637,25 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
 
             if (StrComp(filename, stringBuffer)) {
                 i = 1;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j = fileBuffer;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 8;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 16;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 24;
                 fileInfo->virtualFileOffset += 4;
                 fileInfo->vFileSize = j;
             }
             else {
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j = fileBuffer;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 8;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 16;
-                FileRead2(fileInfo, &fileBuffer, 1);
+                FileRead2(fileInfo, &fileBuffer, 1, false);
                 j += fileBuffer << 24;
                 fileInfo->virtualFileOffset += 4;
                 fileInfo->virtualFileOffset += j;
@@ -668,62 +678,56 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     return false;
 }
 
-size_t FileRead2(FileInfo *info, void *dest, int size)
+size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer)
 {
     byte *data = (byte *)dest;
     int rPos   = (int)GetFilePosition2(info);
     memset(data, 0, size);
 
-    if (rPos <= info->fileSize) {
-        if (Engine.usingBinFile && !Engine.forceFolder) {
-            int rSize = 0;
-            if (rPos + size <= info->fileSize)
-                rSize = size;
-            else
-                rSize = info->fileSize - rPos;
+    if (fromBuffer) {
+        if (info->readPos + size >= info->vFileSize)
+            size = info->vFileSize - info->readPos;
+        memcpy(dest, &info->fileBuffer[info->readPos], size);
+        info->readPos += size;
+        info->bufferPosition = 0;
+        return size;
+    }
+    else {
+        if (rPos <= info->fileSize) {
+            if (Engine.usingBinFile && !Engine.forceFolder) {
+                int rSize = 0;
+                if (rPos + size <= info->fileSize)
+                    rSize = size;
+                else
+                    rSize = info->fileSize - rPos;
 
-            size_t result = fRead(data, 1u, rSize, info->cFileHandle);
-            info->readPos += rSize;
-            info->bufferPosition = 0;
+                size_t result = fRead(data, 1u, rSize, info->cFileHandle);
+                info->readPos += rSize;
+                info->bufferPosition = 0;
 
-            while (size > 0) {
-                data++;
-                --size;
+                while (size > 0) {
+                    data++;
+                    --size;
+                }
+
+                return result;
             }
+            else {
+                int rSize = 0;
+                if (rPos + size <= info->fileSize)
+                    rSize = size;
+                else
+                    rSize = info->fileSize - rPos;
 
-            return result;
-        }
-        else {
-            int rSize = 0;
-            if (rPos + size <= info->fileSize)
-                rSize = size;
-            else
-                rSize = info->fileSize - rPos;
-
-            size_t result = fRead(data, 1u, rSize, info->cFileHandle);
-            info->readPos += rSize;
-            info->bufferPosition = 0;
-            return result;
+                size_t result = fRead(data, 1u, rSize, info->cFileHandle);
+                info->readPos += rSize;
+                info->bufferPosition = 0;
+                return result;
+            }
         }
     }
     return 0;
 }
 
-size_t GetFilePosition2(FileInfo *info)
-{
-    if (Engine.usingBinFile)
-        return info->bufferPosition + info->readPos - info->virtualFileOffset;
-    else
-        return info->bufferPosition + info->readPos;
-}
-
-void SetFilePosition2(FileInfo *info, int newPos)
-{
-    if (Engine.usingBinFile) {
-        info->readPos = info->virtualFileOffset + newPos;
-    }
-    else {
-        info->readPos = newPos;
-    }
-    fSeek(info->cFileHandle, info->readPos, SEEK_SET);
-}
+size_t GetFilePosition2(FileInfo *info) { return info->readPos; }
+void SetFilePosition2(FileInfo *info, int newPos) { info->readPos = newPos; }

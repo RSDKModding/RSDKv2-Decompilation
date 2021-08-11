@@ -119,7 +119,7 @@ void ProcessSystemMenu()
                     Engine.running = false;
                 }
             }
-            else if (keyPress.B) {
+            else if (keyPress.B && Engine.usingBinFile) {
                 ClearGraphicsData();
                 ClearAnimationData();
                 LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);

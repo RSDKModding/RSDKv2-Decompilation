@@ -199,6 +199,7 @@ void ProcessStage(void)
                         SetPlayerLockedScreenPosition(&playerList[0]);
                     }
                 }
+                DrawStageGFX();
             }
 
             if (pauseEnabled && keyPress.start) {
