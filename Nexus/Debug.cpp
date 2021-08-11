@@ -312,7 +312,7 @@ void ProcessSystemMenu()
 
                     char buffer[0x100];
                     int visible = (modList.size() - modOffset) > 18 ? (modOffset + 18) : modList.size();
-                    for (int m = modOffset; m < modList.size(); ++m) {
+                    for (int m = modOffset; m < visible; ++m) {
                         StrCopy(buffer, modList[m].name.c_str());
                         StrAdd(buffer, ": ");
                         StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
