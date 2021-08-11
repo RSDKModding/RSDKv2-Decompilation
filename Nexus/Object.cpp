@@ -3,11 +3,6 @@
 int objectLoop    = 0;
 int curObjectType = 0;
 Entity objectEntityList[ENTITY_COUNT];
-#if !RETRO_USE_ORIGINAL_CODE
-Entity objectEntityList_LAST[ENTITY_COUNT];
-Entity objectEntityList_NEXT[ENTITY_COUNT];
-#endif
-
 
 int OBJECT_BORDER_X1       = 0x80;
 int OBJECT_BORDER_X2       = 0;
