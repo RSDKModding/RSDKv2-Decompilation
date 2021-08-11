@@ -49,6 +49,8 @@ void InitSystemMenu()
         gameMenu[0].selectionCount = 2;
         gameMenu[0].selection1     = 0;
         gameMenu[0].selection2     = 7;
+
+        ProcessSystemMenu();
     }
 }
 void ProcessSystemMenu()

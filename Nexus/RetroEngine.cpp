@@ -101,12 +101,11 @@ bool processEvents()
                     case SDLK_F2:
                         if (Engine.devMenu) {
                             stageListPosition--;
-                            if (stageListPosition < 0) {
+                            while (stageListPosition < 0) {
                                 activeStageList--;
 
-                                if (activeStageList < 0) {
+                                if (activeStageList < 0)
                                     activeStageList = 3;
-                                }
                                 stageListPosition = stageListCount[activeStageList] - 1;
                             }
                             stageMode       = STAGEMODE_LOAD;
@@ -116,14 +115,13 @@ bool processEvents()
                     case SDLK_F3:
                         if (Engine.devMenu) {
                             stageListPosition++;
-                            if (stageListPosition >= stageListCount[activeStageList]) {
+                            while (stageListPosition >= stageListCount[activeStageList]) {
                                 activeStageList++;
 
                                 stageListPosition = 0;
 
-                                if (activeStageList >= 4) {
+                                if (activeStageList >= 4)
                                     activeStageList = 0;
-                                }
                             }
                             stageMode       = STAGEMODE_LOAD;
                             Engine.gameMode = ENGINE_MAINGAME;
