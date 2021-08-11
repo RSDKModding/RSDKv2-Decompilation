@@ -76,7 +76,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         pathLower[c] = tolower(filePathBuf[c]);
     }
 
-    for (int m = 0; m < modCount; ++m) {
+    for (int m = 0; m < modList.size(); ++m) {
         if (modList[m].active) {
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {
@@ -436,7 +436,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     }
 
 #if RETRO_USE_MOD_LOADER
-    for (int m = 0; m < modCount; ++m) {
+    for (int m = 0; m < modList.size(); ++m) {
         if (modList[m].active) {
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {

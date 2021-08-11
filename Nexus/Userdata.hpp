@@ -33,8 +33,7 @@ extern char globalVariableNames[GLOBALVAR_COUNT][0x20];
 #if RETRO_USE_MOD_LOADER
 extern char gamePath[0x100];
 extern char modsPath[0x100];
-extern ModInfo modList[MOD_MAX];
-extern int modCount;
+extern std::vector<ModInfo> modList;
 #endif
 
 inline int GetGlobalVariableByName(const char *name)
@@ -59,7 +58,10 @@ inline void SetGlobalVariableByName(const char *name, int value)
 void InitUserdata();
 void writeSettings();
 
+#if RETRO_USE_MOD_LOADER
 void initMods();
+bool loadMod(ModInfo *info, std::string modsPath, std::string folder, bool active);
 void saveMods();
+#endif
 
 #endif //!USERDATA_H
