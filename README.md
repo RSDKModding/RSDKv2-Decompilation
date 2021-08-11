@@ -31,6 +31,9 @@ A Full Decompilation of Sonic Nexus (2008), a Retro Engine game made by Taxman.
 * Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`
 * Then run `make CXXFLAGS=-O2 -j5` (-j switch is optional but will make building faster, it's based on the number of cores you have +1 so 8 cores wold be -j9)
 
+## Switch:
+* Head on over to [cosmic's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Decomp-Switch) and follow the installation instructions in the readme.
+
 ## Other platforms:
 Currently the only "officially" supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it, so the codebase is very multiplatform.
 If you've cloned this repo and ported it to a platform not on the list or made some changes you'd like to see added to this repo, submit a pull request and it'll most likely be added
