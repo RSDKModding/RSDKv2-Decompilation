@@ -337,10 +337,10 @@ void ProcessSystemMenu()
 
             char buffer[0x100];
             if (keyPress.A || keyPress.start /*|| keyPress.left || keyPress.right*/) {
-                modList[gameMenu[1].selection1].active ^= 1; 
-                StrCopy(buffer, modList[gameMenu[1].selection1].name.c_str());
+                modList[modOffset + gameMenu[1].selection1].active ^= 1; 
+                StrCopy(buffer, modList[modOffset + gameMenu[1].selection1].name.c_str());
                 StrAdd(buffer, ": ");
-                StrAdd(buffer, (modList[gameMenu[1].selection1].active ? "  Active" : "Inactive"));
+                StrAdd(buffer, (modList[modOffset + gameMenu[1].selection1].active ? "  Active" : "Inactive"));
                 for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                 EditTextMenuEntry(&gameMenu[1], buffer, gameMenu[1].selection1);
             }
