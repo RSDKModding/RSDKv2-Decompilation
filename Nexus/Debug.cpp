@@ -253,9 +253,9 @@ void ProcessSystemMenu()
         }
         case DEVMENU_STAGESEL: // Selecting Stage
         {
-            if (keyPress.down == 1)
+            if (keyPress.down)
                 ++gameMenu[1].selection1;
-            if (keyPress.up == 1)
+            if (keyPress.up)
                 --gameMenu[1].selection1;
             if (gameMenu[1].selection1 == gameMenu[1].rowCount)
                 gameMenu[1].selection1 = 0;
@@ -293,9 +293,9 @@ void ProcessSystemMenu()
 #if RETRO_USE_MOD_LOADER
         case DEVMENU_MODMENU: // Mod Menu
         {
-            if (keyPress.down == 1)
+            if (keyPress.down)
                 ++gameMenu[1].selection1;
-            if (keyPress.up == 1)
+            if (keyPress.up)
                 --gameMenu[1].selection1;
 
             if (keyPress.left || keyPress.right) {
@@ -332,7 +332,7 @@ void ProcessSystemMenu()
                 }
             }
 
-            if (gameMenu[1].selection1 == gameMenu[1].rowCount)
+            if (gameMenu[1].selection1 >= gameMenu[1].rowCount)
                 gameMenu[1].selection1 = 0;
             if (gameMenu[1].selection1 < 0)
                 gameMenu[1].selection1 = gameMenu[1].rowCount - 1;

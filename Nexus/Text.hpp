@@ -18,8 +18,8 @@ struct TextMenu {
     byte rowCount;
     byte alignment;
     byte selectionCount;
-    byte selection1;
-    byte selection2;
+    sbyte selection1;
+    sbyte selection2;
 };
 
 extern TextMenu gameMenu[TEXTMENU_COUNT];
