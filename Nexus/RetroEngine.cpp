@@ -51,8 +51,30 @@ bool processEvents()
                 switch (Engine.sdlEvents.key.keysym.sym) {
                     default: break;
                     case SDLK_ESCAPE:
-                        if (Engine.devMenu)
+                        if (Engine.devMenu) {
+#if RETRO_USE_MOD_LOADER
+                            // hacky patch because people can escape
+                            if (Engine.gameMode == ENGINE_SYSMENU && stageMode == DEVMENU_MODMENU) {
+                                // Reload entire engine
+                                Engine.LoadGameConfig("Data/Game/GameConfig.bin");
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+                                if (Engine.window) {
+                                    char gameTitle[0x40];
+                                    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.usingBinFile ? "" : " (Using Data Folder)");
+                                    SDL_SetWindowTitle(Engine.window, gameTitle);
+                                }
+#endif
+
+                                ReleaseStageSfx();
+                                ReleaseGlobalSfx();
+                                LoadGlobalSfx();
+
+                                saveMods();
+                            }
+#endif
+
                             Engine.gameMode = ENGINE_INITSYSMENU;
+                        }
                         else {
                             Engine.gameMode = ENGINE_EXITGAME;
                             return false;
