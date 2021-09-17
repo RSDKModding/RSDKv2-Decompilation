@@ -1,5 +1,6 @@
 #include "RetroEngine.hpp"
 #include <math.h>
+#include <time.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
@@ -13,6 +14,7 @@ int cosVal256[256];
 
 void CalculateTrigAngles()
 {
+    srand(time(NULL));
 
     for (int i = 0; i < 0x200; ++i) {
         float Val       = sinf(((float)i / 256) * M_PI);
