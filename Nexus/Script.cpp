@@ -890,42 +890,41 @@ void CheckCaseNumber(char *text)
     if (FindStringToken(text, "case", 1))
         return;
 
-    char dest[128];
-    int destStrPos = 0;
+    char caseString[128];
+    int caseStrPos = 0;
     char caseChar  = text[4];
     if (text[4]) {
-        int textPos    = 5;
+        int textPos = 5;
         do {
             if (caseChar != ':')
-                dest[destStrPos++] = caseChar;
+                caseString[caseStrPos++] = caseChar;
             caseChar = text[textPos++];
         } while (caseChar);
     }
     else {
-        destStrPos = 0;
+        caseStrPos = 0;
     }
-    dest[destStrPos] = 0;
-    int aliasVarID   = 0;
-    if (aliasCount) {
-        aliasVarID = 0;
-        do {
-            while (!StrComp(dest, aliases[aliasVarID].name)) {
-                if (aliasCount <= ++aliasVarID)
-                    goto CONV_VAL;
-            }
-            StrCopy(dest, aliases[aliasVarID++].value);
-        } while (aliasCount > aliasVarID);
+    caseString[caseStrPos] = 0;
+
+    for (int a = 0; a < aliasCount; ++a) {
+        if (StrComp(aliases[a].name, caseString)) {
+            StrCopy(caseString, aliases[a].value);
+            break;
+        }
     }
 
-CONV_VAL:
-    if (ConvertStringToInteger(dest, &aliasVarID) != 1)
-        return;
-    int stackValue = jumpTableStack[jumpTableStackPos];
-    if (aliasVarID < jumpTableData[stackValue])
-        jumpTableData[stackValue] = aliasVarID;
-    stackValue++;
-    if (aliasVarID > jumpTableData[stackValue])
-        jumpTableData[stackValue] = aliasVarID;
+    int caseID = 0;
+    if (ConvertStringToInteger(caseString, &caseID)) {
+        int stackValue = jumpTableStack[jumpTableStackPos];
+        if (caseID < jumpTableData[stackValue])
+            jumpTableData[stackValue] = caseID;
+        stackValue++;
+        if (caseID > jumpTableData[stackValue])
+            jumpTableData[stackValue] = caseID;
+    }
+    else {
+        printLog("WARNING: unable to convert case string \"%s\" to int, on line %d", caseString, lineID);
+    }
 }
 bool ReadSwitchCase(char *text)
 {
@@ -1011,7 +1010,7 @@ bool ConvertStringToInteger(char *text, int *value)
     if (*text != '+' && !(*text >= '0' && *text <= '9') && *text != '-')
         return false;
     int strLength = StrLength(text) - 1;
-    int charVal   = 0;
+    uint charVal  = 0;
     if (*text == '-') {
         negative = true;
         charID   = 1;
@@ -1023,15 +1022,31 @@ bool ConvertStringToInteger(char *text, int *value)
     }
 
     if (text[charID] == '0') {
-        if (text[charID + 1] == 'x' || text[charID + 1] == 'X') {
+        if (text[charID + 1] == 'x' || text[charID + 1] == 'X')
+            base = 0x10;
+        else if (text[charID + 1] == 'b' || text[charID + 1] == 'B')
+            base = 0b10;
+        else if (text[charID + 1] == 'o' || text[charID + 1] == 'O')
+            base = 0010; // base 8
+
+        if (base != 10) {
             charID += 2;
             strLength -= 2;
-            base = 0x10;
         }
     }
 
     while (strLength > -1) {
-        if (text[charID] < '0' || text[charID] > (base == 10 ? '9' : (base == 0x10 ? 'F' : '1'))) {
+        bool flag = text[charID] < '0';
+        if (!flag) {
+            if (base == 0x10 && text[charID] > 'f')
+                flag = true;
+            if (base == 0010 && text[charID] > '7')
+                flag = true;
+            if (base == 0b10 && text[charID] > '1')
+                flag = true;
+        }
+
+        if (flag) {
             return 0;
         }
         if (strLength <= 0) {
@@ -1155,7 +1170,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 FileRead(&curChar, 1);
                 if (readMode == READMODE_STRING) {
                     if (curChar == '\t' || curChar == '\r' || curChar == '\n' || curChar == ';' || readMode >= READMODE_COMMENTLINE) {
-                        if ((curChar == '\n' && prevChar != '\r') || (curChar == '\n' && prevChar == '\r')) {
+                        if ((curChar == '\n' && prevChar != '\r') || (curChar == '\n' && prevChar == '\r') || curChar == ';') {
                             readMode            = READMODE_ENDLINE;
                             scriptText[textPos] = 0;
                         }
@@ -1175,7 +1190,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 }
                 else if (curChar == ' ' || curChar == '\t' || curChar == '\r' || curChar == '\n' || curChar == ';'
                          || readMode >= READMODE_COMMENTLINE) {
-                    if ((curChar == '\n' && prevChar != '\r') || (curChar == '\n' && prevChar == '\r')) {
+                    if ((curChar == '\n' && prevChar != '\r') || (curChar == '\n' && prevChar == '\r') || curChar == ';') {
                         readMode            = READMODE_ENDLINE;
                         scriptText[textPos] = 0;
                     }
