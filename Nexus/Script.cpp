@@ -24,7 +24,7 @@ int jumpTableDataOffset = 0;
 
 #define ALIAS_COUNT       (0x80)
 #if !RETRO_USE_ORIGINAL_CODE
-#define COMMONALIAS_COUNT (25)
+#define COMMONALIAS_COUNT (22)
 #else
 #define COMMONALIAS_COUNT (14)
 #endif
@@ -308,7 +308,6 @@ AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
                             AliasInfo("C_PLATFORM", "2"),
 #if !RETRO_USE_ORIGINAL_CODE
     AliasInfo("INK_NONE", "0"),      AliasInfo("INK_BLEND", "1"),   AliasInfo("INK_TINT", "2"),
-    AliasInfo("FX_SCALE", "0"),      AliasInfo("FX_ROTATE", "1"),   AliasInfo("FX_INK", "2"),
     AliasInfo("FX_TINT", "3"),       AliasInfo("FLIP_NONE", "0"),   AliasInfo("FLIP_X", "1"),
     AliasInfo("FLIP_Y", "2"),        AliasInfo("FLIP_XY", "3"),
 #endif
