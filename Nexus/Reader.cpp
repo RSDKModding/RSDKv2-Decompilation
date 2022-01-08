@@ -76,6 +76,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         pathLower[c] = tolower(filePathBuf[c]);
     }
 
+#if RETRO_USE_MOD_LOADER
     for (int m = 0; m < modList.size(); ++m) {
         if (modList[m].active) {
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
@@ -90,6 +91,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
             }
         }
     }
+#endif
 
 #if RETRO_PLATFORM == RETRO_OSX
     if (addPath) {

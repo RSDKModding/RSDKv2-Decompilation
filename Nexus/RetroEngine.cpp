@@ -208,7 +208,9 @@ void RetroEngine::Init()
 {
     CalculateTrigAngles();
     InitUserdata();
+#if RETRO_USE_MOD_LOADER
     initMods();
+#endif
     char dest[0x200];
 #if RETRO_PLATFORM == RETRO_UWP
     static char resourcePath[256] = { 0 };
@@ -250,29 +252,14 @@ void RetroEngine::Init()
 
 void RetroEngine::Run()
 {
-    const Uint64 frequency = SDL_GetPerformanceFrequency();
-    Uint64 frameStart = SDL_GetPerformanceCounter(), frameEnd = SDL_GetPerformanceCounter();
-    Uint64 frameStartBlunt = SDL_GetTicks(), frameEndBlunt = SDL_GetTicks();
-    float frameDelta = 0.0f;
-    float frameDeltaBlunt = 0.0f;
+    unsigned long long targetFreq = SDL_GetPerformanceFrequency() / Engine.refreshRate;
+    unsigned long long curTicks   = 0;
     
     while (running) {
 #if !RETRO_USE_ORIGINAL_CODE
-        frameStartBlunt = SDL_GetTicks();
-        frameDeltaBlunt = frameStartBlunt - frameEndBlunt;
-        ++frameDeltaBlunt;
-        if (frameDeltaBlunt < 1000.0f / (float)refreshRate) {
-            SDL_Delay(1000.0f / (float)refreshRate - frameDeltaBlunt);
+        if (SDL_GetPerformanceCounter() < curTicks + targetFreq)
             continue;
-        }        
-        
-        frameStart = SDL_GetPerformanceCounter();
-        frameDelta = frameStart - frameEnd;
-        if (frameDelta < frequency / (float)refreshRate) {
-            continue;
-        }
-        frameEnd = SDL_GetPerformanceCounter();
-        frameEndBlunt = SDL_GetTicks();
+        curTicks = SDL_GetPerformanceCounter();
 #endif
         running = processEvents();
 
@@ -305,7 +292,9 @@ void RetroEngine::Run()
     ReleaseAudioDevice();
     ReleaseRenderDevice();
     writeSettings();
+#if RETRO_USE_MOD_LOADER
     saveMods();
+#endif
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     SDL_Quit();

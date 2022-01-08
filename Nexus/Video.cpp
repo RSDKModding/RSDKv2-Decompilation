@@ -11,7 +11,7 @@ bool videoPlaying     = false;
 void UpdateVideoFrame()
 {
     if (videoPlaying) {
-        if (videoFrameCount > currentVideoFrame) {
+        if (currentVideoFrame < videoFrameCount) {
             GFXSurface *surface = &gfxSurface[videoSurface];
             byte fileBuffer     = 0;
             ushort fileBuffer2  = 0;
@@ -44,7 +44,9 @@ void UpdateVideoFrame()
                 int c = 0x80;
                 do {
                     ++c;
-                    FileRead(&fileBuffer, 3);
+                    FileRead(&fileBuffer, 1);
+                    FileRead(&fileBuffer, 1);
+                    FileRead(&fileBuffer, 1);
                 } while (c != 0x100);
             }
             ReadGifPictureData(surface->width, surface->height, interlaced, graphicData, surface->dataPosition);
