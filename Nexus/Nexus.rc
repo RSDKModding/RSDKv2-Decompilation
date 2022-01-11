@@ -61,8 +61,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0
- PRODUCTVERSION 1,0,0
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -77,13 +77,12 @@ BEGIN
     BEGIN
         BLOCK "0c0904b0"
         BEGIN
-            VALUE "CompanyName", "RSDKv3/Sonic CD (2011) By Christian 'The Taxman' Whitehead, Decompilation by Rubberduckycooly"
-            VALUE "FileDescription", "RSDKv3"
+            VALUE "CompanyName", "RSDKv2/Sonic Nexus (2008) By Christian 'The Taxman' Whitehead, Decompilation by Rubberduckycooly"
+            VALUE "FileDescription", "RSDKv2"
             VALUE "FileVersion", "1.0.0"
-            VALUE "InternalName", "SonicCD.exe"
-            VALUE "LegalCopyright", ""
-            VALUE "OriginalFilename", "SonicCD.exe"
-            VALUE "ProductName", "RSDKv3"
+            VALUE "InternalName", "Nexus.exe"
+            VALUE "OriginalFilename", "Nexus.exe"
+            VALUE "ProductName", "RSDKv2"
             VALUE "ProductVersion", "1.0.0"
         END
     END
@@ -92,15 +91,6 @@ BEGIN
         VALUE "Translation", 0xc09, 1200
     END
 END
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-//IDI_ICON1               ICON                    "win.ico"
 
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
