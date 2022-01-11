@@ -150,7 +150,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="win.ico">
+    <Image Include="Nexus.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

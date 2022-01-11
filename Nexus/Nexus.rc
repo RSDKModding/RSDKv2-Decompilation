@@ -44,6 +44,8 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
+IDI_ICON1 ICON "Nexus.ico"
+
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
