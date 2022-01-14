@@ -38,7 +38,7 @@ void UpdateVideoFrame()
             FileRead(&fileBuffer2, 2); // IMAGE TOP
             FileRead(&fileBuffer2, 2); // IMAGE WIDTH
             FileRead(&fileBuffer2, 2); // IMAGE HEIGHT
-            FileRead(&fileBuffer, 1); // PaletteType
+            FileRead(&fileBuffer, 1);  // PaletteType
             bool interlaced = (fileBuffer & 0x40) >> 6;
             if (fileBuffer >> 7 == 1) {
                 int c = 0x80;

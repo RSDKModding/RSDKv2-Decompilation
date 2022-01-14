@@ -6,7 +6,7 @@ int textMenuSurfaceNo = 0;
 void SetupTextMenu(TextMenu *menu, int rowCount)
 {
     menu->textDataPos = 0;
-    menu->rowCount     = rowCount;
+    menu->rowCount    = rowCount;
 }
 void AddTextMenuEntry(TextMenu *menu, const char *text)
 {
@@ -75,12 +75,12 @@ void LoadConfigListText(TextMenu *menu, int listNo)
         // Variables
         FileRead(&count, 1);
         for (int v = 0; v < count; ++v) {
-            //Var Name
+            // Var Name
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen);
             strBuf[strLen] = 0;
 
-            //Var Value
+            // Var Value
             FileRead(&fileBuffer, 1);
             FileRead(&fileBuffer, 1);
             FileRead(&fileBuffer, 1);
@@ -111,7 +111,7 @@ void LoadConfigListText(TextMenu *menu, int listNo)
             FileRead(&strBuf, strLen);
             strBuf[strLen] = 0;
 
-            if (listNo == 0) //Player List
+            if (listNo == 0) // Player List
                 AddTextMenuEntry(menu, strBuf);
         }
 
@@ -120,26 +120,26 @@ void LoadConfigListText(TextMenu *menu, int listNo)
             byte stageCnt = 0;
             FileRead(&stageCnt, 1);
             for (int s = 0; s < stageCnt; ++s) {
-                //Stage Folder
+                // Stage Folder
                 FileRead(&strLen, 1);
                 FileRead(&strBuf, strLen);
                 strBuf[strLen] = 0;
 
-                //Stage ID
+                // Stage ID
                 FileRead(&strLen, 1);
                 FileRead(&strBuf, strLen);
                 strBuf[strLen] = 0;
 
-                //Stage Name
+                // Stage Name
                 FileRead(&strLen, 1);
                 FileRead(&strBuf, strLen);
                 strBuf[strLen] = '\0';
 
-                //IsHighlighted
+                // IsHighlighted
                 FileRead(&fileBuffer, 1);
                 if (listNo == c) {
-                    menu->entryHighlight[s] = fileBuffer;
                     AddTextMenuEntry(menu, strBuf);
+                    menu->entryHighlight[menu->rowCount - 1] = fileBuffer;
                 }
             }
         }
