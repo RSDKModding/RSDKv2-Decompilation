@@ -411,6 +411,17 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
             }
         }
 
+#if !RETRO_USE_ORIGINAL_CODE
+        if (strlen(Engine.startSceneFolder) && strlen(Engine.startSceneID)) {
+            SceneInfo *scene = &stageList[STAGELIST_BONUS][0xFE]; // slot 0xFF is used for "none" startStage
+            strcpy(scene->name, "_RSDK_SCENE");
+            strcpy(scene->folder, Engine.startSceneFolder);
+            strcpy(scene->id, Engine.startSceneID);
+            startList_Game  = STAGELIST_BONUS;
+            startStage_Game = 0xFE;
+        }
+#endif
+
         CloseFile();
         return true;
     }

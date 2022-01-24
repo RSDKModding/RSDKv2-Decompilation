@@ -39,11 +39,14 @@ void InitUserdata()
     if (!file) {
         ini.SetBool("Dev", "DevMenu", Engine.devMenu = false);
         ini.SetBool("Dev", "EngineDebugMode", engineDebugMode = false);
-        ini.SetInteger("Dev", "StartingCategory", Engine.startList = 0);
-        ini.SetInteger("Dev", "StartingScene", Engine.startStage = 0);
+        ini.SetInteger("Dev", "StartingCategory", Engine.startList = 0xFF);
+        ini.SetInteger("Dev", "StartingScene", Engine.startStage = 0xFF);
         ini.SetInteger("Dev", "FastForwardSpeed", Engine.fastForwardSpeed = 8);
         sprintf(Engine.dataFile, "%s", "Data.bin");
         ini.SetString("Dev", "DataFile", Engine.dataFile);
+
+        Engine.startList_Game  = Engine.startList;
+        Engine.startStage_Game = Engine.startStage;
 
         ini.SetBool("Window", "FullScreen", Engine.startFullScreen = DEFAULT_FULLSCREEN);
         ini.SetBool("Window", "Borderless", Engine.borderless = false);
@@ -112,11 +115,14 @@ void InitUserdata()
         if (!ini.GetBool("Dev", "EngineDebugMode", &engineDebugMode))
             engineDebugMode = false;
         if (!ini.GetInteger("Dev", "StartingCategory", &Engine.startList))
-            Engine.startList = 0;
+            Engine.startList = 0xFF;
         if (!ini.GetInteger("Dev", "StartingScene", &Engine.startStage))
-            Engine.startStage = 0;
+            Engine.startStage = 0xFF;
         if (!ini.GetInteger("Dev", "FastForwardSpeed", &Engine.fastForwardSpeed))
             Engine.fastForwardSpeed = 8;
+
+        Engine.startList_Game  = Engine.startList;
+        Engine.startStage_Game = Engine.startStage;
 
         if (!ini.GetString("Dev", "DataFile", Engine.dataFile))
             StrCopy(Engine.dataFile, "Data.bin");

@@ -13,15 +13,16 @@ void InitSystemMenu()
     ReleaseStageSfx();
     fadeMode = 0;
 
-    if (Engine.usingBinFile) {
+    if (Engine.usingBinFile
+        || ((Engine.startList_Game != 0xFF && Engine.startList_Game) || (Engine.startStage_Game != 0xFF && Engine.startStage_Game))) {
         ClearGraphicsData();
         for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         LoadPlayerFromList(0, 0);
-        activeStageList   = 0;
-        stageMode         = 0;
-        Engine.gameMode   = ENGINE_MAINGAME;
-        stageListPosition = 0;
+        Engine.gameMode = ENGINE_MAINGAME;
+        stageMode       = STAGEMODE_LOAD;
+        activeStageList = Engine.startList_Game == 0xFF ? 0 : Engine.startList_Game;
+        stageListPosition = Engine.startStage_Game == 0xFF ? 0 : Engine.startStage_Game;
     }
     else {
         Engine.gameMode = ENGINE_SYSMENU;
