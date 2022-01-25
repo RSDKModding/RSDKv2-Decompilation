@@ -1,42 +1,42 @@
 # Sonic Nexus (2008, RSDK) Decompilation
 A Full Decompilation of Sonic Nexus (2008), a Retro Engine game made by Taxman.
 
-# How to build:
-## Windows:
-* Clone the repo, then follow the instructions in the [depencencies readme for Windows](./dependencies/windows/dependencies.txt) to setup dependencies, then build via the Visual Studio solution
-* or grab a prebuilt executable from the releases section, or if you have a github account, from the Github Actions tab. Be warned, these may or may not introduce issues so keep that in mind.
+Without assets from the game, this decompilation will not run. You can download the game [here](https://info.sonicretro.org/Sonic_Nexus).
 
-## Windows UWP (Phone, Xbox, etc.):
-* Clone the repo, then follow the instructions in the [depencencies readme for Windows](./dependencies/windows/dependencies.txt) and [depencencies readme for UWP](./dependencies/win-uwp/dependencies.txt) to setup dependencies, then build and deploy via the UWP Visual Studio solution.
-* After install copy your `Data.rsdk` and `videos` folder into the apps localstate folder
+# Additional Tweaks
+* Added a built in mod loader, allowing to easily create and play mods.
+* There is now a `settings.ini` file that the game uses to load all settings, similar to Sonic Mania.
+* Dev menu can now be accessed from anywhere by pressing the `ESC` key if enabled in the config.
+* The `F12` pause, `F11` step over & fast forward debug features from Sonic Mania have all been ported and are enabled if `devMenu` is enabled in the config.
 
-## Windows via MSYS2 (64-bit Only):
+# How to build
+## Windows
+* Clone the repo, then follow the instructions in the [depencencies readme for Windows](./dependencies/windows/dependencies.txt) to setup dependencies, then build via the visual studio solution.
+* Alternatively, you can grab a prebuilt executable from the releases section.
 
-* Download the newest version of the MSYS2 installer from [here](https://www.msys2.org/) and install it.
-* Run the MINGW64 prompt (from the windows Start Menu/MSYS2 64-bit/MSYS2 MinGW 64-bit), when the program starts enter `pacman -Syuu` in the prompt and hit Enter. Press `Y` when it asks if you want to update packages. If it asks you to close the prompt, do so, then restart it and run the same command again. This updates the packages to their latest versions.
-* Now install the dependencies with the following command: `pacman -S pkg-config make git mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-libogg mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libtheora`
+## Mac
+* Clone the repo, follow the instructions in the [depencencies readme for Mac](./dependencies/mac/dependencies.txt) to setup dependencies, then build via the Xcode project.
+
+## Linux
+* To setup your build enviroment and library dependecies, run the following commands:
+  * Ubuntu (Mint, Pop!_OS, etc...): `sudo apt install build-essential git libsdl2-dev libvorbis-dev libogg-dev libtheora-dev`
+  * Arch Linux: `sudo pacman -S base-devel git sdl2 libvorbis libogg libtheora`
 * Clone the repo with the following command: `git clone https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation.git`
-* Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`
-* Then run `make CXXFLAGS=-O2 CXX=x86_64-w64-mingw32-g++ STATIC=1 -j5` (-j switch is optional but will make building faster, it's based on the number of cores you have +1 so 8 cores wold be -j9)
+* Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`.
+* Then run `make CXXFLAGS=-O2 -j5`.
+  * If your distro is using gcc 8.x.x, then add the argument `LIBS=-lstdc++fs`.
+  * The `CXXFLAGS` option can be removed if you do not want optimizations.
+  * -j switch is optional, but will make building faster by running it parallel on multiple cores (8 cores would be -j9.)
 
-## Mac:
-* Clone the repo, then follow the instructions in the [depencencies readme for Mac](./dependencies/mac/dependencies.txt) to setup dependencies, then build via the Xcode project
-* or grab a prebuilt executable from the releases section
+## Unofficial Branches
+Follow the installation instructions in the readme of each branch.
+* For the **Nintendo Switch**, go to [LittlePlanetCD's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Decomp-Switch).
+  
+Because these branches are unofficial, we can't provide support for them and they may not be up-to-date.
 
-## Linux:
-* To setup your build enviroment and library dependecies run the following commands:
-* Ubuntu (Mint, Pop!_OS, etc...): `sudo apt install build-essential git libsdl2-dev libvorbis-dev libogg-dev libtheora-dev`
-* Arch Linux: `sudo pacman -S base-devel git sdl2 libvorbis libogg libtheora`
-* Clone the repo with the following command: `git clone https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation.git`
-* Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`
-* Then run `make CXXFLAGS=-O2 -j5` (-j switch is optional but will make building faster, it's based on the number of cores you have +1 so 8 cores wold be -j9)
-
-## Switch:
-* Head on over to [cosmic's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Decomp-Switch) and follow the installation instructions in the readme.
-
-## Other platforms:
-Currently the only "officially" supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it, so the codebase is very multiplatform.
-If you've cloned this repo and ported it to a platform not on the list or made some changes you'd like to see added to this repo, submit a pull request and it'll most likely be added
+## Other Platforms
+Currently the only supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it (as well as tinyxml2 for the mod API), so the codebase is very multiplatform.
+If you're able to, you can clone this repo and port it to a platform not on the list.
 
 # Contact:
 Join the [Retro Engine Modding Discord Server](https://dc.railgun.works/retroengine) for any extra questions you may need to know about the decompilation or modding it.
