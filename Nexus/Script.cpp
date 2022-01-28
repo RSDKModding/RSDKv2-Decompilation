@@ -2111,20 +2111,27 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             }
             case FUNC_DRAWACTNAME: {
                 opcodeSize = 0;
+                int charID = 0;
+
                 switch (scriptEng.operands[3]) {
                     default: break;
-                    case 1: {
-                        int charID = 0;
-                        if (scriptEng.operands[4] == 1 && titleCardText[charID]) {
+
+                    case 1: // Draw Word 1
+                        charID = 0;
+
+                        // Draw the first letter as a capital letter, the rest are lowercase (if scriptEng.operands[4] is true, otherwise they're all
+                        // uppercase)
+                        if (scriptEng.operands[4] == 1 && titleCardText[charID] != 0) {
                             int character = titleCardText[charID];
                             if (character == ' ')
                                 character = 0;
                             if (character == '-')
                                 character = 0;
-                            if (character > '/' && character < ':')
+                            if (character >= '0' && character <= '9')
                                 character -= 22;
                             if (character > '9' && character < 'f')
                                 character -= 'A';
+
                             if (character <= -1) {
                                 scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                             }
@@ -2135,9 +2142,11 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                                            spriteFrame->width, spriteFrame->height, spriteFrame->sprX, spriteFrame->sprY, scriptInfo->spriteSheetID);
                                 scriptEng.operands[1] += spriteFrame->width + scriptEng.operands[6];
                             }
+
                             scriptEng.operands[0] += 26;
                             charID++;
                         }
+
                         while (titleCardText[charID] != 0 && titleCardText[charID] != '-') {
                             int character = titleCardText[charID];
                             if (character == ' ')
@@ -2161,16 +2170,19 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             charID++;
                         }
                         break;
-                    }
-                    case 2: {
-                        int charID = titleCardWord2;
+
+                    case 2: // Draw Word 2
+                        charID = titleCardWord2;
+
+                        // Draw the first letter as a capital letter, the rest are lowercase (if scriptEng.operands[4] is true, otherwise they're all
+                        // uppercase)
                         if (scriptEng.operands[4] == 1 && titleCardText[charID] != 0) {
                             int character = titleCardText[charID];
                             if (character == ' ')
                                 character = 0;
                             if (character == '-')
                                 character = 0;
-                            if (character > '/' && character < ':')
+                            if (character >= '0' && character <= '9')
                                 character -= 22;
                             if (character > '9' && character < 'f')
                                 character -= 'A';
@@ -2187,18 +2199,19 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             scriptEng.operands[0] += 26;
                             charID++;
                         }
+
                         while (titleCardText[charID] != 0) {
                             int character = titleCardText[charID];
                             if (character == ' ')
                                 character = 0;
                             if (character == '-')
                                 character = 0;
-                            if (character > '/' && character < ':')
+                            if (character >= '0' && character <= '9')
                                 character -= 22;
                             if (character > '9' && character < 'f')
                                 character -= 'A';
                             if (character <= -1) {
-                                scriptEng.operands[1] = scriptEng.operands[1] + scriptEng.operands[5] + scriptEng.operands[6];
+                                scriptEng.operands[1] += scriptEng.operands[5] + scriptEng.operands[6];
                             }
                             else {
                                 character += scriptEng.operands[0];
@@ -2210,7 +2223,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                             charID++;
                         }
                         break;
-                    }
                 }
                 break;
             }
