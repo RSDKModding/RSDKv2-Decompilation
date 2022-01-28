@@ -30,7 +30,7 @@ Without assets from the game, this decompilation will not run. You can download 
 
 ## Unofficial Branches
 Follow the installation instructions in the readme of each branch.
-* For the **Nintendo Switch**, go to [LittlePlanetCD's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Decomp-Switch).
+* For the **Nintendo Switch**, go to [LittlePlanetCD's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Switch).
   
 Because these branches are unofficial, we can't provide support for them and they may not be up-to-date.
 
