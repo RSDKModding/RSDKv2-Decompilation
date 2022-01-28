@@ -35,8 +35,7 @@ Follow the installation instructions in the readme of each branch.
 Because these branches are unofficial, we can't provide support for them and they may not be up-to-date.
 
 ## Other Platforms
-Currently the only supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it (as well as tinyxml2 for the mod API), so the codebase is very multiplatform.
-If you're able to, you can clone this repo and port it to a platform not on the list.
+Currently the only supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it, so the codebase is very multiplatform. If you're able to, you can clone this repo and port it to a platform not on the list.
 
 # Contact:
 Join the [Retro Engine Modding Discord Server](https://dc.railgun.works/retroengine) for any extra questions you may need to know about the decompilation or modding it.
