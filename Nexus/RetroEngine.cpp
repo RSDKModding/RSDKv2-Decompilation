@@ -156,8 +156,10 @@ bool processEvents()
                         break;
 
                     case SDLK_F5:
-                        if (Engine.devMenu)
-                            stageMode = STAGEMODE_LOAD;
+                        if (Engine.devMenu) {
+                            currentStageFolder[0] = 0; // reload all assets & scripts
+                            stageMode             = STAGEMODE_LOAD;
+                        }
                         break;
 
 #if RETRO_PLATFORM == RETRO_OSX
