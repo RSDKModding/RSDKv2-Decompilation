@@ -5,11 +5,6 @@
 #define SURFACE_MAX      (24)
 #define GFXDATA_MAX      (0x400000)
 
-#define BLENDTABLE_YSIZE (0x100)
-#define BLENDTABLE_XSIZE (0x100)
-#define BLENDTABLE_SIZE  (BLENDTABLE_XSIZE * BLENDTABLE_YSIZE)
-#define TINTTABLE_SIZE   (0x100)
-
 #define DRAWLAYER_COUNT (0x7)
 
 enum FlipFlags { FLIP_NONE, FLIP_X, FLIP_Y, FLIP_XY };
@@ -31,12 +26,12 @@ struct GFXSurface {
 extern int SCREEN_XSIZE;
 extern int SCREEN_CENTERX;
 
-extern byte blendLookupTable[BLENDTABLE_SIZE];
+extern byte blendLookupTable[0x100 * 0x100];
 
-extern byte tintTable0[TINTTABLE_SIZE];
-extern byte tintTable1[TINTTABLE_SIZE];
-extern byte tintTable2[TINTTABLE_SIZE];
-extern byte tintTable3[TINTTABLE_SIZE];
+extern byte tintTable0[0x100];
+extern byte tintTable1[0x100];
+extern byte tintTable2[0x100];
+extern byte tintTable3[0x100];
 
 extern DrawListEntry drawListEntries[DRAWLAYER_COUNT];
 
@@ -55,7 +50,7 @@ inline void ClearGraphicsData()
 }
 void ClearScreen(byte index);
 
-void SetScreenSize(int width, int height);
+void SetScreenSize(int width, int lineSize);
 
 void SetBlendTable(ushort alpha, byte type, byte a3, byte a4);
 void SetTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte tableID);

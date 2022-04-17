@@ -3,12 +3,12 @@
 int SCREEN_XSIZE   = 320;
 int SCREEN_CENTERX = 320 / 2;
 
-byte blendLookupTable[BLENDTABLE_SIZE];
+byte blendLookupTable[0x100 * 0x100];
 
-byte tintTable0[TINTTABLE_SIZE];
-byte tintTable1[TINTTABLE_SIZE];
-byte tintTable2[TINTTABLE_SIZE];
-byte tintTable3[TINTTABLE_SIZE];
+byte tintTable0[0x100];
+byte tintTable1[0x100];
+byte tintTable2[0x100];
+byte tintTable3[0x100];
 
 DrawListEntry drawListEntries[DRAWLAYER_COUNT];
 
@@ -157,13 +157,13 @@ void FlipScreen()
     if (Engine.gameMode == ENGINE_EXITGAME)
         return;
 
-    // Clear the screen. This is needed to keep the
-    // pillarboxes in fullscreen from displaying garbage data.
+        // Clear the screen. This is needed to keep the
+        // pillarboxes in fullscreen from displaying garbage data.
 #if RETRO_USING_SDL2
     SDL_RenderClear(Engine.renderer);
 #endif
 
-    int pitch      = 0;
+    int pitch    = 0;
     void *pixels = NULL;
 
     switch (Engine.colourMode) {
@@ -174,14 +174,14 @@ void FlipScreen()
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                                 = palette8F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                                 = palette8WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
@@ -189,14 +189,14 @@ void FlipScreen()
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                                 = palette8[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                                 = palette8W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
@@ -258,20 +258,20 @@ void FlipScreen()
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                                   = palette32F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        byte r                                     = (clr >> 16) & 0xFF;
-                        byte g                                     = (clr >> 8) & 0xFF;
-                        byte b                                     = (clr >> 0) & 0xFF;
+                        uint clr                            = palette32F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        byte r                              = (clr >> 16) & 0xFF;
+                        byte g                              = (clr >> 8) & 0xFF;
+                        byte b                              = (clr >> 0) & 0xFF;
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                                   = palette32WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        byte r                                     = (clr >> 16) & 0xFF;
-                        byte g                                     = (clr >> 8) & 0xFF;
-                        byte b                                     = (clr >> 0) & 0xFF;
+                        uint clr                            = palette32WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        byte r                              = (clr >> 16) & 0xFF;
+                        byte g                              = (clr >> 8) & 0xFF;
+                        byte b                              = (clr >> 0) & 0xFF;
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
@@ -279,20 +279,20 @@ void FlipScreen()
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                                   = palette32[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        byte r                                     = (clr >> 16) & 0xFF;
-                        byte g                                     = (clr >> 8) & 0xFF;
-                        byte b                                     = (clr >> 0) & 0xFF;
+                        uint clr                            = palette32[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        byte r                              = (clr >> 16) & 0xFF;
+                        byte g                              = (clr >> 8) & 0xFF;
+                        byte b                              = (clr >> 0) & 0xFF;
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                                   = palette32W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
-                        byte r                                     = (clr >> 16) & 0xFF;
-                        byte g                                     = (clr >> 8) & 0xFF;
-                        byte b                                     = (clr >> 0) & 0xFF;
+                        uint clr                            = palette32W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        byte r                              = (clr >> 16) & 0xFF;
+                        byte g                              = (clr >> 8) & 0xFF;
+                        byte b                              = (clr >> 0) & 0xFF;
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(r, g, b);
                     }
                 }
@@ -346,19 +346,13 @@ void ClearScreen(byte index)
     }
 }
 
-void SetScreenSize(int width, int height)
+void SetScreenSize(int width, int lineSize)
 {
     SCREEN_XSIZE        = width;
     SCREEN_CENTERX      = (width / 2);
     SCREEN_SCROLL_LEFT  = SCREEN_CENTERX - 8;
     SCREEN_SCROLL_RIGHT = SCREEN_CENTERX + 8;
     OBJECT_BORDER_X2    = width + 0x80;
-
-    // SCREEN_YSIZE               = height;
-    // SCREEN_CENTERY             = (height / 2);
-    // SCREEN_SCROLL_UP    = (height / 2) - 8;
-    // SCREEN_SCROLL_DOWN  = (height / 2) + 8;
-    // OBJECT_BORDER_Y2   = height + 0x100;
 }
 
 void DrawObjectList(int Layer)
@@ -443,9 +437,9 @@ void SetBlendTable(ushort alpha, byte type, byte a3, byte a4)
         case 0:
             for (int y = 0; y < 256; ++y) {
                 for (int x = 0; x < 256; ++x) {
-                    ushort mixR = (ushort)((255 - alpha) * palette8[y].r + alpha * palette8[x].r) >> 8;
-                    ushort mixG = (ushort)((255 - alpha) * palette8[y].g + alpha * palette8[x].g) >> 8;
-                    ushort mixB = (ushort)((255 - alpha) * palette8[y].b + alpha * palette8[x].b) >> 8;
+                    ushort mixR = (ushort)((0xFF - alpha) * palette8[y].r + alpha * palette8[x].r) >> 8;
+                    ushort mixG = (ushort)((0xFF - alpha) * palette8[y].g + alpha * palette8[x].g) >> 8;
+                    ushort mixB = (ushort)((0xFF - alpha) * palette8[y].b + alpha * palette8[x].b) >> 8;
                     int index   = 0;
                     int r       = -1;
                     int g       = -1;
@@ -492,22 +486,22 @@ void SetTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte table
         case 0:
             for (int i = 0; i < 256; ++i) {
                 byte val     = (byte)((palette8[i].b + palette8[i].g + palette8[i].r) / 3);
-                tintTable[i] = a5 + a4 * ((ushort)((255 - alpha) * val + alpha * a2) >> 8) / 256;
+                tintTable[i] = a5 + a4 * ((ushort)((0xFF - alpha) * val + alpha * a2) >> 8) / 256;
             }
             break;
         case 1:
             for (int i = 0; i < 256; ++i) {
-                tintTable[i] = a5 + a4 * ((ushort)((255 - alpha) * palette8[i].r + alpha * a2) >> 8) / 256;
+                tintTable[i] = a5 + a4 * ((ushort)((0xFF - alpha) * palette8[i].r + alpha * a2) >> 8) / 256;
             }
             break;
         case 2:
             for (int i = 0; i < 256; ++i) {
-                tintTable[i] = a5 + a4 * ((ushort)((255 - alpha) * palette8[i].g + alpha * a2) >> 8) / 256;
+                tintTable[i] = a5 + a4 * ((ushort)((0xFF - alpha) * palette8[i].g + alpha * a2) >> 8) / 256;
             }
             break;
         case 3:
             for (int i = 0; i < 256; ++i) {
-                tintTable[i] = a5 + a4 * ((ushort)((255 - alpha) * palette8[i].b + alpha * a2) >> 8) / 256;
+                tintTable[i] = a5 + a4 * ((ushort)((0xFF - alpha) * palette8[i].b + alpha * a2) >> 8) / 256;
             }
             break;
         default: break;
@@ -518,8 +512,8 @@ void DrawHLineScrollLayer(int layerID)
 {
     TileLayer *layer   = &stageLayouts[activeTileLayers[layerID]];
     int screenwidth16  = (SCREEN_XSIZE >> 4) - 1;
-    int layerwidth     = layer->width;
-    int layerheight    = layer->height;
+    int layerwidth     = layer->xsize;
+    int layerheight    = layer->ysize;
     bool aboveMidPoint = layerID >= tLayerMidPoint;
 
     byte *lineScroll;
@@ -540,7 +534,7 @@ void DrawHLineScrollLayer(int layerID)
         deformationDataW = &bgDeformationData3[(byte)(yscrollOffset + waterDrawPos + bgDeformationOffsetW)];
     }
     else { // FG Layer
-        lastXSize     = layer->width;
+        lastXSize     = layer->xsize;
         yscrollOffset = yScrollOffset;
         lineScroll    = layer->lineScroll;
         for (int i = 0; i < PARALLAX_COUNT; ++i) hParallax.linePos[i] = xScrollOffset;
@@ -629,6 +623,7 @@ void DrawHLineScrollLayer(int layerID)
                             ++gfxDataPtr;
                         }
                         break;
+
                     case FLIP_X:
                         gfxDataPtr = &tilesetGFXData[tileOffsetYFlipX + tiles128x128.gfxDataPos[chunk] - tilePxXPos];
                         while (tilePxLineCnt--) {
@@ -638,6 +633,7 @@ void DrawHLineScrollLayer(int layerID)
                             --gfxDataPtr;
                         }
                         break;
+
                     case FLIP_Y:
                         gfxDataPtr = &tilesetGFXData[tileOffsetYFlipY + tiles128x128.gfxDataPos[chunk] + tilePxXPos];
                         while (tilePxLineCnt--) {
@@ -647,6 +643,7 @@ void DrawHLineScrollLayer(int layerID)
                             ++gfxDataPtr;
                         }
                         break;
+
                     case FLIP_XY:
                         gfxDataPtr = &tilesetGFXData[tileOffsetYFlipXY + tiles128x128.gfxDataPos[chunk] - tilePxXPos];
                         while (tilePxLineCnt--) {
@@ -668,7 +665,7 @@ void DrawHLineScrollLayer(int layerID)
             int chunkTileX   = ((chunkX & 0x7F) >> 4) + 1;
             int tilesPerLine = screenwidth16;
             while (tilesPerLine--) {
-                if (chunkTileX <= 7) {
+                if (chunkTileX < 8) {
                     ++chunk;
                 }
                 else {
@@ -749,6 +746,7 @@ void DrawHLineScrollLayer(int layerID)
                             ++pixelBufferPtr;
                             ++gfxDataPtr;
                             break;
+
                         case FLIP_X:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipX];
                             if (*gfxDataPtr > 0)
@@ -816,6 +814,7 @@ void DrawHLineScrollLayer(int layerID)
                             ++pixelBufferPtr;
                             --gfxDataPtr;
                             break;
+
                         case FLIP_Y:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipY];
                             if (*gfxDataPtr > 0)
@@ -883,6 +882,7 @@ void DrawHLineScrollLayer(int layerID)
                             ++pixelBufferPtr;
                             ++gfxDataPtr;
                             break;
+
                         case FLIP_XY:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipXY];
                             if (*gfxDataPtr > 0)
@@ -953,20 +953,21 @@ void DrawHLineScrollLayer(int layerID)
                     }
                 }
                 else {
-                    pixelBufferPtr += 0x10;
+                    pixelBufferPtr += TILE_SIZE;
                 }
                 ++chunkTileX;
             }
 
             // Draw any remaining tiles
             while (lineRemain > 0) {
-                if (chunkTileX++ <= 7) {
+                if (chunkTileX++ < 8) {
                     ++chunk;
                 }
                 else {
                     chunkTileX = 0;
                     if (++chunkXPos == layerwidth)
                         chunkXPos = 0;
+
                     chunk = (layer->tiles[chunkXPos + (chunkY << 8)] << 6) + 8 * tileY;
                 }
 
@@ -983,6 +984,7 @@ void DrawHLineScrollLayer(int layerID)
                                 ++gfxDataPtr;
                             }
                             break;
+
                         case FLIP_X:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipX];
                             while (tilePxLineCnt--) {
@@ -992,6 +994,7 @@ void DrawHLineScrollLayer(int layerID)
                                 --gfxDataPtr;
                             }
                             break;
+
                         case FLIP_Y:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipY];
                             while (tilePxLineCnt--) {
@@ -1001,6 +1004,7 @@ void DrawHLineScrollLayer(int layerID)
                                 ++gfxDataPtr;
                             }
                             break;
+
                         case FLIP_XY:
                             gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipXY];
                             while (tilePxLineCnt--) {
@@ -1010,6 +1014,7 @@ void DrawHLineScrollLayer(int layerID)
                                 --gfxDataPtr;
                             }
                             break;
+
                         default: break;
                     }
                 }
@@ -1018,11 +1023,12 @@ void DrawHLineScrollLayer(int layerID)
                 }
             }
 
-            if (++tileY16 > TILE_SIZE - 1) {
+            if (++tileY16 >= TILE_SIZE) {
                 tileY16 = 0;
                 ++tileY;
             }
-            if (tileY > 7) {
+
+            if (tileY >= 8) {
                 if (++chunkY == layerheight) {
                     chunkY = 0;
                     scrollIndex -= 0x80 * layerheight;
@@ -1034,9 +1040,13 @@ void DrawHLineScrollLayer(int layerID)
 }
 void DrawVLineScrollLayer(int layerID)
 {
-    TileLayer *layer   = &stageLayouts[activeTileLayers[layerID]];
-    int layerwidth     = layer->width;
-    int layerheight    = layer->height;
+
+    TileLayer *layer = &stageLayouts[activeTileLayers[layerID]];
+    if (!layer->xsize || !layer->ysize)
+        return;
+
+    int layerwidth     = layer->xsize;
+    int layerheight    = layer->ysize;
     bool aboveMidPoint = layerID >= tLayerMidPoint;
 
     byte *lineScroll;
@@ -1055,7 +1065,7 @@ void DrawVLineScrollLayer(int layerID)
         deformationData = &bgDeformationData2[(byte)(xscrollOffset + bgDeformationOffset)];
     }
     else { // FG Layer
-        lastYSize            = layer->height;
+        lastYSize            = layer->ysize;
         xscrollOffset        = xScrollOffset;
         lineScroll           = layer->lineScroll;
         vParallax.linePos[0] = yScrollOffset;
@@ -1067,12 +1077,12 @@ void DrawVLineScrollLayer(int layerID)
         if (lastYSize != layerheight) {
             int fullLayerheight = layerheight << 7;
             for (int i = 0; i < vParallax.entryCount; ++i) {
-                vParallax.linePos[i] = xScrollOffset * vParallax.parallaxFactor[i] >> 7;
-                vParallax.scrollPos[i] += vParallax.scrollSpeed[i];
+                vParallax.linePos[i] = yScrollOffset * vParallax.parallaxFactor[i] >> 7;
+
+                vParallax.scrollPos[i] += vParallax.scrollPos[i] << 16;
                 if (vParallax.scrollPos[i] > fullLayerheight << 16)
                     vParallax.scrollPos[i] -= fullLayerheight << 16;
-                if (vParallax.scrollPos[i] < 0)
-                    vParallax.scrollPos[i] += fullLayerheight << 16;
+
                 vParallax.linePos[i] += vParallax.scrollPos[i] >> 16;
                 vParallax.linePos[i] %= fullLayerheight;
             }
@@ -1086,95 +1096,103 @@ void DrawVLineScrollLayer(int layerID)
     if (tileXPos < 0)
         tileXPos += layerheight << 7;
     byte *scrollIndex = &lineScroll[tileXPos];
+    int chunkX        = tileXPos >> 7;
     int tileX16       = tileXPos & 0xF;
     int tileX         = (tileXPos & 0x7F) >> 4;
 
     // Draw Above Water (if applicable)
-    int drawableLines = waterDrawPos;
+    int drawableLines = SCREEN_XSIZE;
     while (drawableLines--) {
         int chunkY = vParallax.linePos[*scrollIndex];
         if (vParallax.deform[*scrollIndex])
             chunkY += *deformationData;
         ++deformationData;
         ++scrollIndex;
+
         int fullLayerHeight = layerheight << 7;
         if (chunkY < 0)
             chunkY += fullLayerHeight;
         if (chunkY >= fullLayerHeight)
             chunkY -= fullLayerHeight;
+
         int chunkYPos         = chunkY >> 7;
         int tileY             = chunkY & 0xF;
-        int tileYPxRemain     = 0x10 - tileY;
-        int chunk             = (layer->tiles[chunkY + (chunkY >> 7 << 8)] << 6) + tileX + 8 * ((chunkY & 0x7F) >> 4);
+        int tileYPxRemain     = TILE_SIZE - tileY;
+        int chunk             = (layer->tiles[chunkX + (chunkY >> 7 << 8)] << 6) + tileX + 8 * ((chunkY & 0x7F) >> 4);
         int tileOffsetXFlipX  = 0xF - tileX16;
         int tileOffsetXFlipY  = tileX16 + SCREEN_YSIZE;
         int tileOffsetXFlipXY = 0xFF - tileX16;
         int lineRemain        = SCREEN_YSIZE;
 
         byte *gfxDataPtr  = NULL;
-        int tilePxLineCnt = 0;
+        int tilePxLineCnt = tileYPxRemain;
 
         // Draw the first tile to the left
         if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
-            tilePxLineCnt = 0x10 - tileY;
             lineRemain -= tilePxLineCnt;
             switch (tiles128x128.direction[chunk]) {
                 case FLIP_NONE:
-                    gfxDataPtr = &tilesetGFXData[0x10 * tileY + tileX16 + tiles128x128.gfxDataPos[chunk]];
+                    gfxDataPtr = &tilesetGFXData[TILE_SIZE * tileY + tileX16 + tiles128x128.gfxDataPos[chunk]];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
                     }
                     break;
+
                 case FLIP_X:
-                    gfxDataPtr = &tilesetGFXData[0x10 * tileY + tileOffsetXFlipX + tiles128x128.gfxDataPos[chunk]];
+                    gfxDataPtr = &tilesetGFXData[TILE_SIZE * tileY + tileOffsetXFlipX + tiles128x128.gfxDataPos[chunk]];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
                     }
                     break;
+
                 case FLIP_Y:
-                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipY + tiles128x128.gfxDataPos[chunk] - 0x10 * tileY];
+                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipY + tiles128x128.gfxDataPos[chunk] - TILE_SIZE * tileY];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
                     }
                     break;
+
                 case FLIP_XY:
-                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipXY + tiles128x128.gfxDataPos[chunk] - 16 * tileY];
+                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipXY + tiles128x128.gfxDataPos[chunk] - TILE_SIZE * tileY];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
                     }
                     break;
+
                 default: break;
             }
         }
         else {
             pixelBufferPtr += SCREEN_XSIZE * tileYPxRemain;
-            lineRemain -= tileYPxRemain;
+            lineRemain -= tilePxLineCnt;
         }
 
         // Draw the bulk of the tiles
         int chunkTileY   = ((chunkY & 0x7F) >> 4) + 1;
-        int tilesPerLine = 14;
+        int tilesPerLine = (SCREEN_YSIZE >> 4) - 1;
+
         while (tilesPerLine--) {
-            if (chunkTileY <= 7) {
+            if (chunkTileY < 8) {
                 chunk += 8;
             }
             else {
                 if (++chunkYPos == layerheight)
                     chunkYPos = 0;
+
                 chunkTileY = 0;
-                chunk      = (layer->tiles[chunkY + (chunkYPos << 8)] << 6) + tileX;
+                chunk      = (layer->tiles[chunkX + (chunkYPos << 8)] << 6) + tileX;
             }
             lineRemain -= TILE_SIZE;
 
@@ -1186,349 +1204,417 @@ void DrawVLineScrollLayer(int layerID)
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
                         break;
+
                     case FLIP_X:
                         gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipX];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
+                        gfxDataPtr += TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr += 0x10;
                         break;
+
                     case FLIP_Y:
                         gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipY];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
                         break;
+
                     case FLIP_XY:
                         gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipXY];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
+                        gfxDataPtr -= TILE_SIZE;
+
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
-                        gfxDataPtr -= 0x10;
                         break;
                 }
             }
             else {
-                pixelBufferPtr += 0x10;
+                pixelBufferPtr += SCREEN_XSIZE * TILE_SIZE;
             }
             ++chunkTileY;
         }
 
         // Draw any remaining tiles
         while (lineRemain > 0) {
-            if (chunkTileY++ <= 7) {
+            if (chunkTileY < 8) {
                 chunk += 8;
             }
             else {
-                chunkTileY = 0;
                 if (++chunkYPos == layerheight)
                     chunkYPos = 0;
+
                 chunkTileY = 0;
-                chunk      = (layer->tiles[chunkY + (chunkYPos << 8)] << 6) + tileX;
+                chunk      = (layer->tiles[chunkX + (chunkYPos << 8)] << 6) + tileX;
             }
 
             tilePxLineCnt = lineRemain >= TILE_SIZE ? TILE_SIZE : lineRemain;
             lineRemain -= tilePxLineCnt;
+
             if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
                 switch (tiles128x128.direction[chunk]) {
                     case FLIP_NONE:
-                        gfxDataPtr = &tilesetGFXData[0x10 * tileY + tileX16 + tiles128x128.gfxDataPos[chunk]];
+                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileX16];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             pixelBufferPtr += SCREEN_XSIZE;
-                            gfxDataPtr += 0x10;
+                            gfxDataPtr += TILE_SIZE;
                         }
                         break;
+
                     case FLIP_X:
-                        gfxDataPtr = &tilesetGFXData[0x10 * tileY + tileOffsetXFlipX + tiles128x128.gfxDataPos[chunk]];
+                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipX];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             pixelBufferPtr += SCREEN_XSIZE;
-                            gfxDataPtr += 0x10;
+                            gfxDataPtr += TILE_SIZE;
                         }
                         break;
+
                     case FLIP_Y:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetXFlipY + tiles128x128.gfxDataPos[chunk] - 0x10 * tileY];
+                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipY];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             pixelBufferPtr += SCREEN_XSIZE;
-                            gfxDataPtr -= 0x10;
+                            gfxDataPtr -= TILE_SIZE;
                         }
                         break;
+
                     case FLIP_XY:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetXFlipXY + tiles128x128.gfxDataPos[chunk] - 16 * tileY];
+                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipXY];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             pixelBufferPtr += SCREEN_XSIZE;
-                            gfxDataPtr -= 0x10;
+                            gfxDataPtr -= TILE_SIZE;
                         }
                         break;
+
                     default: break;
                 }
             }
             else {
-                pixelBufferPtr += SCREEN_XSIZE * tileYPxRemain;
+                pixelBufferPtr += SCREEN_XSIZE * tilePxLineCnt;
             }
+            chunkTileY++;
         }
 
-        if (++tileX16 > 0xF) {
+        if (++tileX16 >= TILE_SIZE) {
             tileX16 = 0;
             ++tileX;
         }
-        if (tileX > 7) {
-            if (++chunkY == layerwidth) {
-                chunkY = 0;
+
+        if (tileX >= 8) {
+            if (++chunkX == layerwidth) {
+                chunkX = 0;
                 scrollIndex -= 0x80 * layerwidth;
             }
             tileX = 0;
         }
+
+        pixelBufferPtr -= (SCREEN_XSIZE * SCREEN_YSIZE) - 1;
     }
 }
 void Draw3DCloudLayer(int layerID) { TileLayer *layer = &stageLayouts[activeTileLayers[layerID]]; }
