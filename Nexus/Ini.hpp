@@ -23,9 +23,9 @@ public:
             hasSection = false;
             type       = INI_ITEM_STRING;
         }
-        char section[0x20];
+        char section[0x40];
         bool hasSection = false;
-        char key[0x40];
+        char key[0x100];
         char value[0x100];
         byte type = INI_ITEM_STRING;
     };
