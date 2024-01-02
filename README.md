@@ -9,24 +9,53 @@ Without assets from the game, this decompilation will not run. You can download 
 * Dev menu can now be accessed from anywhere by pressing the `ESC` key if enabled in the config.
 * The `F12` pause, `F11` step over & fast forward debug features from Sonic Mania have all been ported and are enabled if `devMenu` is enabled in the config.
 
-# How to build
-## Windows
-* Clone the repo, then follow the instructions in the [depencencies readme for Windows](./dependencies/windows/dependencies.txt) to setup dependencies, then build via the visual studio solution.
-* Alternatively, you can grab a prebuilt executable from the releases section.
+This project uses [CMake](https://cmake.org/), a versatile building system that supports many different compilers and platforms. You can download CMake [here](https://cmake.org/download/). **(Make sure to enable the feature to add CMake to the system PATH during the installation!)**
 
-## Mac
+## Get the source code
+
+In order to clone the repository, you need to install Git, which you can get [here](https://git-scm.com/downloads).
+
+Clone the repo, using:
+`git clone https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation.git`
+
+If you've already cloned the repo, run this command inside of the repository:
+```git submodule update --init```
+
+## Follow the build steps
+
+### Windows
+To handle dependencies, you'll need to install [Visual Studio Community](https://visualstudio.microsoft.com/downloads/) (make sure to install the `Desktop development with C++` package during the installation) and [vcpkg](https://github.com/microsoft/vcpkg#quick-start-windows).
+
+After installing those, run the following in Command Prompt (make sure to replace `[vcpkg root]` with the path to the vcpkg installation!):
+- `[vcpkg root]\vcpkg.exe install glew sdl2 libogg libtheora libvorbis --triplet=x64-windows-static` (If you're compiling a 32-bit build, replace `x64-windows-static` with `x86-windows-static`.)
+
+Finally, follow the [compilation steps below](#compiling) using `-DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_PREFIX_PATH=[vcpkg root]/installed/x64-windows-static/` as arguments for `cmake -B build`.
+  - Make sure to replace each instance of `[vcpkg root]` with the path to the vcpkg installation!
+  - If you're compiling a 32-bit build, replace each instance of `x64-windows-static` with `x86-windows-static`.
+
+### Mac
 * Clone the repo, follow the instructions in the [depencencies readme for Mac](./dependencies/mac/dependencies.txt) to setup dependencies, then build via the Xcode project.
 
-## Linux
-* To setup your build enviroment and library dependecies, run the following commands:
-  * Ubuntu (Mint, Pop!_OS, etc...): `sudo apt install build-essential git libsdl2-dev libvorbis-dev libogg-dev libtheora-dev`
-  * Arch Linux: `sudo pacman -S base-devel git sdl2 libvorbis libogg libtheora`
-* Clone the repo with the following command: `git clone https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation.git`
-* Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`.
-* Then run `make CXXFLAGS=-O2 -j5`.
-  * If your distro is using gcc 8.x.x, then add the argument `LIBS=-lstdc++fs`.
-  * The `CXXFLAGS` option can be removed if you do not want optimizations.
-  * -j switch is optional, but will make building faster by running it parallel on multiple cores (8 cores would be -j9.)
+### Linux
+Install the following dependencies: then follow the [compilation steps below](#compiling):
+- **pacman (Arch):** `sudo pacman -S base-devel cmake glew sdl2 libogg libtheora libvorbis`
+- **apt (Debian/Ubuntu):** `sudo apt install build-essential cmake libglew-dev libglfw3-dev libsdl2-dev libogg-dev libtheora-dev libvorbis-dev`
+- **rpm (Fedora):** `sudo dnf install make gcc cmake glew-devel glfw-devel sdl2-devel libogg-devel libtheora-devel libvorbis-devel zlib-devel`
+- **apk (Alpine/PostmarketOS)** `sudo apk add build-base cmake glew-dev glfw-dev sdl2-dev libogg-dev libtheora-dev libvorbis-dev`
+- Your favorite package manager here, [make a pull request](https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation/fork/)
+  
+### Compiling
+
+Compiling is as simple as typing the following in the root repository directory:
+```
+cmake -B build
+cmake --build build --config release
+```
+
+The resulting build will be located somewhere in `build/` depending on your system.
+
+The following cmake arguments are available when compiling:
+- Use these on the first `cmake -B build` step like so: `cmake -B build -DRETRO_DISABLE_PLUS=on`
 
 ## Unofficial Branches
 Follow the installation instructions in the readme of each branch.
