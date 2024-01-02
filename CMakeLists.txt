@@ -28,7 +28,7 @@ set(RETRO_FILES
     Nexus/Math.cpp
     Nexus/Object.cpp
     Nexus/Palette.cpp
-	Nexus/Player.cpp
+    Nexus/Player.cpp
     Nexus/Reader.cpp
     Nexus/RetroEngine.cpp
     Nexus/Scene.cpp
@@ -37,7 +37,7 @@ set(RETRO_FILES
     Nexus/String.cpp
     Nexus/Text.cpp
     Nexus/Userdata.cpp
-	Nexus/Video.cpp
+    Nexus/Video.cpp
 )
 
 if(NOT PLATFORM)
