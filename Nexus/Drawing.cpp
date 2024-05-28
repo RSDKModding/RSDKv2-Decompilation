@@ -1634,7 +1634,7 @@ void DrawTintRectangle(int XPos, int YPos, int width, int height, byte tintID)
         height += YPos;
         YPos = 0;
     }
-    if (width <= 0 || height <= 0)
+    if (width < 0 || height < 0)
         return;
 
     byte *tintTable = NULL;
@@ -1649,7 +1649,7 @@ void DrawTintRectangle(int XPos, int YPos, int width, int height, byte tintID)
     int yOffset = SCREEN_XSIZE - width;
     for (byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];; pixelBufferPtr += yOffset) {
         height--;
-        if (!height)
+        if (height < 0)
             break;
         int w = width;
         while (w--) {

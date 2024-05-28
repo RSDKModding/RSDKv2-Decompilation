@@ -43,7 +43,7 @@ void SetFade(byte r, byte g, byte b, ushort a, int start, int end)
         a = 255;
     if (end < 256)
         ++end;
-    for (int i = start; i < end; ++i) {
+    for (int i = start; i <= end; ++i) {
         byte red     = (ushort)(r * a + (0xFF - a) * palette8[i].r) >> 8;
         byte green   = (ushort)(g * a + (0xFF - a) * palette8[i].g) >> 8;
         byte blue    = (ushort)(b * a + (0xFF - a) * palette8[i].b) >> 8;
