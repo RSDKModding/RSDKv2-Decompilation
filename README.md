@@ -1,4 +1,4 @@
-# Sonic Nexus (2008, RSDK) Decompilation
+# RSDKv2 Decompilation
 A Full Decompilation of Sonic Nexus (2008), a Retro Engine game made by Taxman.
 
 Without assets from the game, this decompilation will not run. You can download the game [here](https://info.sonicretro.org/Sonic_Nexus).
