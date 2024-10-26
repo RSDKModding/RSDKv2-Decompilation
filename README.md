@@ -1,7 +1,8 @@
 # RSDKv2 Decompilation
-A Full Decompilation of Sonic Nexus (2008), a Retro Engine game made by Taxman.
 
-Without assets from the game, this decompilation will not run. You can download the game [here](https://info.sonicretro.org/Sonic_Nexus).
+A complete decompilation of Retro Engine v2.
+
+Without assets from the Sonic Nexus 2008 demo, this decompilation will not run. You can download the game [here](https://info.sonicretro.org/Sonic_Nexus).
 
 # Additional Tweaks
 * Added a built in mod loader, allowing to easily create and play mods.
@@ -21,7 +22,7 @@ Without assets from the game, this decompilation will not run. You can download 
 * To setup your build enviroment and library dependecies, run the following commands:
   * Ubuntu (Mint, Pop!_OS, etc...): `sudo apt install build-essential git libsdl2-dev libvorbis-dev libogg-dev libtheora-dev`
   * Arch Linux: `sudo pacman -S base-devel git sdl2 libvorbis libogg libtheora`
-* Clone the repo with the following command: `git clone https://github.com/Rubberduckycooly/Sonic-Nexus-Decompilation.git`
+* Clone the repo with the following command: `git clone https://github.com/RSDKModding/RSDKv2-Decompilation.git`
 * Go into the repo you just cloned with `cd Sonic-Nexus-Decompilation`.
 * Then run `make CXXFLAGS=-O2 -j5`.
   * If your distro is using gcc 8.x.x, then add the argument `LIBS=-lstdc++fs`.
