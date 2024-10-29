@@ -1,5 +1,3 @@
-# Ported from the RSDKv3 Decomp
-
 find_package(PkgConfig REQUIRED)
 
 add_executable(RetroEngine ${RETRO_FILES})
@@ -58,18 +56,4 @@ if(RETRO_USE_MOD_LOADER)
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
     )
-endif()
-
-if(USE_HW_REN)
-    pkg_check_modules(GLEW glew)
-
-    if(NOT GLEW_FOUND)
-        message(NOTICE "could not find glew, attempting to build from source")
-
-    else()
-        message("found GLEW")
-        target_link_libraries(RetroEngine ${GLEW_STATIC_LIBRARIES})
-        target_link_options(RetroEngine PRIVATE ${GLEW_STATIC_LDLIBS_OTHER})
-        target_compile_options(RetroEngine PRIVATE ${GLEW_STATIC_CFLAGS})
-    endif()
 endif()
