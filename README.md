@@ -19,6 +19,7 @@ Without assets from the Sonic Nexus 2008 demo, this decompilation will not run. 
 * Clone the repo, follow the instructions in the [depencencies readme for Mac](./dependencies/mac/dependencies.txt) to setup dependencies, then build via the Xcode project.
 
 ## Linux
+### Make
 * To setup your build enviroment and library dependecies, run the following commands:
   * Ubuntu (Mint, Pop!_OS, etc...): `sudo apt install build-essential git libsdl2-dev libvorbis-dev libogg-dev libtheora-dev`
   * Arch Linux: `sudo pacman -S base-devel git sdl2 libvorbis libogg libtheora`
@@ -28,6 +29,21 @@ Without assets from the Sonic Nexus 2008 demo, this decompilation will not run. 
   * If your distro is using gcc 8.x.x, then add the argument `LIBS=-lstdc++fs`.
   * The `CXXFLAGS` option can be removed if you do not want optimizations.
   * -j switch is optional, but will make building faster by running it parallel on multiple cores (8 cores would be -j9.)
+
+### CMake
+* Install the following dependencies depending on your platform through your terminal:
+  * **pacman (Arch):** `sudo pacman -S base-devel cmake glew sdl2 libogg libtheora libvorbis`
+  * **apt (Debian/Ubuntu):** `sudo apt install build-essential cmake libglew-dev libglfw3-dev libsdl2-dev libogg-dev libtheora-dev libvorbis-dev`
+  * **rpm (Fedora):** `sudo dnf install make gcc cmake glew-devel glfw-devel sdl2-devel libogg-devel libtheora-devel libvorbis-devel zlib-devel`
+  * **apk (Alpine/PostmarketOS)** `sudo apk add build-base cmake glew-dev glfw-dev sdl2-dev libogg-dev libtheora-dev libvorbis-dev`
+  * Your favorite package manager here, [make a pull request](https://github.com/RSDKModding/RSDKv2-Decompilation/fork)
+
+
+* Then just run the following in the root repository directory:
+  ```
+  cmake -B build
+  cmake --build build --config release
+  ```
 
 ## Unofficial Branches
 Follow the installation instructions in the readme of each branch.
