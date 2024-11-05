@@ -187,31 +187,27 @@ void SetMovementStats(PlayerMovementStats *stats)
     stats->rollingDeceleration = 0x2000;
 }
 
-void DefaultAirMovement(Player *player)
+void DefaultAirMovement(Player* player)
 {
-    if (player->YVelocity > -0x40000 && player->YVelocity < 0)
-        player->speed -= player->speed >> 5;
-
     if (player->speed <= -player->stats.topSpeed) {
-        if (player->left) {
+        if (player->left)
             player->direction = FLIP_X;
-        }
     }
-    else {
-        if (player->left) {
-            player->speed -= player->stats.airAcceleration;
-            player->direction = FLIP_X;
-        }
+    else if (player->left) {
+        player->speed -= player->stats.airAcceleration;
+        player->direction = FLIP_X;
     }
-
     if (player->speed >= player->stats.topSpeed) {
         if (player->right)
             player->direction = FLIP_NONE;
     }
     else if (player->right) {
-        player->direction = FLIP_NONE;
         player->speed += player->stats.airAcceleration;
+        player->direction = FLIP_NONE;
     }
+
+    if (player->YVelocity > -0x40001 && player->YVelocity < 1)
+        player->speed -= player->speed >> 5;
 }
 
 void DefaultGravityFalse(Player *player)
