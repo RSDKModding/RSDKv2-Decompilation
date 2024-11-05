@@ -13,16 +13,25 @@ void InitSystemMenu()
     ReleaseStageSfx();
     fadeMode = 0;
 
+#if !RETRO_USE_ORIGINAL_CODE
     if (Engine.usingBinFile
         || ((Engine.startList_Game != 0xFF && Engine.startList_Game) || (Engine.startStage_Game != 0xFF && Engine.startStage_Game))) {
+#else
+    if (Engine.usingBinFile) {
+#endif
         ClearGraphicsData();
         for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         LoadPlayerFromList(0, 0);
         Engine.gameMode = ENGINE_MAINGAME;
         stageMode       = STAGEMODE_LOAD;
+#if !RETRO_USE_ORIGINAL_CODE
         activeStageList = Engine.startList_Game == 0xFF ? 0 : Engine.startList_Game;
         stageListPosition = Engine.startStage_Game == 0xFF ? 0 : Engine.startStage_Game;
+#else
+        activeStageList = 0;
+        stageListPosition = 0;
+#endif
     }
     else {
         Engine.gameMode = ENGINE_SYSMENU;
@@ -30,6 +39,7 @@ void InitSystemMenu()
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         textMenuSurfaceNo = 0;
         LoadGIFFile("Data/Game/SystemText.gif", 0);
+        stageMode = DEVMENU_MAIN;
         SetupTextMenu(&gameMenu[0], 0);
         AddTextMenuEntry(&gameMenu[0], "RETRO SONIC DEFAULT MENU");
         AddTextMenuEntry(&gameMenu[0], " ");
@@ -45,25 +55,26 @@ void InitSystemMenu()
         AddTextMenuEntry(&gameMenu[0], " ");
 #endif
         AddTextMenuEntry(&gameMenu[0], "QUIT");
-        stageMode                  = DEVMENU_MAIN;
         gameMenu[0].alignment      = 2;
         gameMenu[0].selectionCount = 2;
         gameMenu[0].selection1     = 0;
         gameMenu[0].selection2     = 7;
-
-        ProcessSystemMenu();
     }
 }
 void ProcessSystemMenu()
 {
     ClearScreen(0xF0);
+#if !RETRO_USE_ORIGINAL_CODE
     keyDown.start = false;
     keyDown.B     = false;
     keyDown.up    = false;
     keyDown.down  = false;
     CheckKeyDown(&keyDown, 0xFF);
     CheckKeyPress(&keyPress, 0xFF);
-
+#else
+    CheckKeyPress(&keyPress, 0x83);
+#endif
+    
     switch (stageMode) {
         case DEVMENU_MAIN: // Main Menu
         {
@@ -79,7 +90,11 @@ void ProcessSystemMenu()
                 gameMenu[0].selection2 = (RETRO_USE_MOD_LOADER ? 11 : 9);
 
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX, 72);
+#if !RETRO_USE_ORIGINAL_CODE
             if (keyPress.start || keyPress.A) {
+#else
+            if (keyPress.start) {
+#endif
                 if (gameMenu[0].selection2 == 7) {
                     SetupTextMenu(&gameMenu[0], 0);
                     AddTextMenuEntry(&gameMenu[0], "CHOOSE A PLAYER");
@@ -117,9 +132,10 @@ void ProcessSystemMenu()
                 }
 #endif
                 else {
-                    Engine.running = false;
+                    Engine.gameMode = ENGINE_EXITGAME;
                 }
             }
+#if !RETRO_USE_ORIGINAL_CODE
             else if (keyPress.B && Engine.usingBinFile) {
                 ClearGraphicsData();
                 ClearAnimationData();
@@ -129,6 +145,7 @@ void ProcessSystemMenu()
                 Engine.gameMode   = ENGINE_MAINGAME;
                 stageListPosition = 0;
             }
+#endif
             break;
         }
         case DEVMENU_PLAYERSEL: // Selecting Player
@@ -145,7 +162,11 @@ void ProcessSystemMenu()
 
             DrawTextMenu(&gameMenu[0], SCREEN_CENTERX - 4, 72);
             DrawTextMenu(&gameMenu[1], SCREEN_CENTERX - 40, 96);
+#if !RETRO_USE_ORIGINAL_CODE
             if (keyPress.start || keyPress.A) {
+#else
+            if (keyPress.start) {
+#endif
                 LoadPlayerFromList(gameMenu[1].selection1, 0);
                 SetupTextMenu(&gameMenu[0], 0);
                 AddTextMenuEntry(&gameMenu[0], "SELECT A STAGE LIST");
@@ -162,6 +183,7 @@ void ProcessSystemMenu()
                 gameMenu[0].selection2 = 3;
                 stageMode              = DEVMENU_STAGELISTSEL;
             }
+#if !RETRO_USE_ORIGINAL_CODE
             else if (keyPress.B) {
                 stageMode = DEVMENU_MAIN;
                 SetupTextMenu(&gameMenu[0], 0);
@@ -185,6 +207,7 @@ void ProcessSystemMenu()
                 gameMenu[0].selection1       = 0;
                 gameMenu[0].selection2       = 7;
             }
+#endif
             break;
         }
         case DEVMENU_STAGELISTSEL: // Selecting Category
@@ -226,7 +249,11 @@ void ProcessSystemMenu()
                 default: break;
             }
 
+#if !RETRO_USE_ORIGINAL_CODE
             if ((keyPress.start || keyPress.A) && nextMenu) {
+#else
+            if (keyPress.start && nextMenu) {
+#endif
                 SetupTextMenu(&gameMenu[0], 0);
                 AddTextMenuEntry(&gameMenu[0], "SELECT A STAGE");
                 SetupTextMenu(&gameMenu[1], 0);
@@ -239,9 +266,10 @@ void ProcessSystemMenu()
                 gameMenu[0].selectionCount   = 1;
                 stageMode                  = DEVMENU_STAGESEL;
             }
+#if !RETRO_USE_ORIGINAL_CODE
             else if (keyPress.B) {
                 SetupTextMenu(&gameMenu[0], 0);
-                AddTextMenuEntry(&gameMenu[0], "SELECT A PLAYER");
+                AddTextMenuEntry(&gameMenu[0], "CHOOSE A PLAYER");
                 SetupTextMenu(&gameMenu[1], 0);
                 LoadConfigListText(&gameMenu[1], 0);
                 gameMenu[0].alignment      = 2;
@@ -250,6 +278,7 @@ void ProcessSystemMenu()
                 gameMenu[1].selection1     = 0;
                 stageMode                  = DEVMENU_PLAYERSEL;
             }
+#endif
             break;
         }
         case DEVMENU_STAGESEL: // Selecting Stage
@@ -271,6 +300,7 @@ void ProcessSystemMenu()
                 Engine.gameMode   = ENGINE_MAINGAME;
                 stageListPosition = gameMenu[1].selection1;
             }
+#if !RETRO_USE_ORIGINAL_CODE
             else if (keyPress.B) {
                 SetupTextMenu(&gameMenu[0], 0);
                 AddTextMenuEntry(&gameMenu[0], "SELECT A STAGE LIST");
@@ -289,6 +319,7 @@ void ProcessSystemMenu()
                 gameMenu[0].selectionCount = 2;
                 stageMode                  = DEVMENU_STAGELISTSEL;
             }
+#endif
             break;
         }
 #if RETRO_USE_MOD_LOADER
