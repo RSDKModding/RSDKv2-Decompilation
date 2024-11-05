@@ -8,11 +8,6 @@ int collisionBottom = 0;
 
 CollisionSensor sensors[6];
 
-inline Hitbox *getPlayerHitbox(PlayerScript *script)
-{
-    return &hitboxList[script->animations[playerList[activePlayer].animation].frames[playerList[activePlayer].frame].hitboxID];
-}
-
 void FindFloorPosition(Player *player, CollisionSensor *sensor, int startY)
 {
     int c     = 0;
