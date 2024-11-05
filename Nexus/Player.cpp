@@ -382,7 +382,6 @@ void DefaultJumpAction(Player *player)
 
 void DefaultRollingMovement(Player *player)
 {
-
     if (player->right && player->speed < 0)
         player->speed += player->stats.rollingDeceleration;
     if (player->left && player->speed > 0)
@@ -469,10 +468,10 @@ void ProcessPlayerAnimation(Player *player)
                 break;
         }
     }
-    if ((signed int)player->animationSpeed <= 0)
-        player->animationTimer += script->animations[player->animation].speed;
-    else
+    if (player->animationSpeed)
         player->animationTimer += player->animationSpeed;
+    else
+        player->animationTimer += script->animations[player->animation].speed;
     if (player->animation != player->prevAnimation) {
         if (player->animation == ANI_JUMPING)
             player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
