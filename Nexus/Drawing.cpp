@@ -2183,7 +2183,7 @@ void DrawTextMenu(void *menu, int XPos, int YPos)
         }
     }
     switch (tMenu->alignment) {
-        case 0:
+        case MENU_ALIGN_LEFT:
             for (int i = 0; i < tMenu->rowCount; ++i) {
                 switch (tMenu->selectionCount) {
                     case 1:
@@ -2210,7 +2210,7 @@ void DrawTextMenu(void *menu, int XPos, int YPos)
                 YPos += 8;
             }
             return;
-        case 1:
+        case MENU_ALIGN_RIGHT:
             for (int i = 0; i < tMenu->rowCount; ++i) {
                 int textX = XPos - (tMenu->entrySize[i] << 3);
                 switch (tMenu->selectionCount) {
@@ -2238,7 +2238,7 @@ void DrawTextMenu(void *menu, int XPos, int YPos)
                 YPos += 8;
             }
             return;
-        case 2:
+        case MENU_ALIGN_CENTER:
             for (int i = 0; i < tMenu->rowCount; ++i) {
                 int textX = XPos - (tMenu->entrySize[i] >> 1 << 3);
                 switch (tMenu->selectionCount) {

@@ -55,7 +55,7 @@ void InitSystemMenu()
         AddTextMenuEntry(&gameMenu[0], " ");
 #endif
         AddTextMenuEntry(&gameMenu[0], "QUIT");
-        gameMenu[0].alignment      = 2;
+        gameMenu[0].alignment      = MENU_ALIGN_CENTER;
         gameMenu[0].selectionCount = 2;
         gameMenu[0].selection1     = 0;
         gameMenu[0].selection2     = 7;
@@ -100,7 +100,7 @@ void ProcessSystemMenu()
                     AddTextMenuEntry(&gameMenu[0], "CHOOSE A PLAYER");
                     SetupTextMenu(&gameMenu[1], 0);
                     LoadConfigListText(&gameMenu[1], 0);
-                    gameMenu[1].alignment      = 0;
+                    gameMenu[1].alignment      = MENU_ALIGN_LEFT;
                     gameMenu[1].selectionCount = 1;
                     gameMenu[1].selection1     = 0;
                     stageMode                  = DEVMENU_PLAYERSEL;
@@ -122,13 +122,13 @@ void ProcessSystemMenu()
                     }
 
                     modOffset                  = 0;
-                    gameMenu[1].alignment      = 1;
+                    gameMenu[1].alignment      = MENU_ALIGN_RIGHT;
                     gameMenu[1].selectionCount = 3;
                     gameMenu[1].selection1     = 0;
 
-                    gameMenu[0].alignment        = 2;
+                    gameMenu[0].alignment        = MENU_ALIGN_CENTER;
                     gameMenu[0].selectionCount   = 1;
-                    stageMode                  = DEVMENU_MODMENU;
+                    stageMode                    = DEVMENU_MODMENU;
                 }
 #endif
                 else {
@@ -179,7 +179,7 @@ void ProcessSystemMenu()
                 AddTextMenuEntry(&gameMenu[0], "   SPECIAL");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], "   BONUS");
-                gameMenu[0].alignment  = 0;
+                gameMenu[0].alignment  = MENU_ALIGN_LEFT;
                 gameMenu[0].selection2 = 3;
                 stageMode              = DEVMENU_STAGELISTSEL;
             }
@@ -202,7 +202,7 @@ void ProcessSystemMenu()
 #endif
                 AddTextMenuEntry(&gameMenu[0], "QUIT");
                 stageMode                    = DEVMENU_MAIN;
-                gameMenu[0].alignment        = 2;
+                gameMenu[0].alignment        = MENU_ALIGN_CENTER;
                 gameMenu[0].selectionCount   = 2;
                 gameMenu[0].selection1       = 0;
                 gameMenu[0].selection2       = 7;
@@ -258,13 +258,13 @@ void ProcessSystemMenu()
                 AddTextMenuEntry(&gameMenu[0], "SELECT A STAGE");
                 SetupTextMenu(&gameMenu[1], 0);
                 LoadConfigListText(&gameMenu[1], ((gameMenu[0].selection2 - 3) >> 1) + 1);
-                gameMenu[1].alignment      = 1;
+                gameMenu[1].alignment      = MENU_ALIGN_RIGHT;
                 gameMenu[1].selectionCount = 3;
                 gameMenu[1].selection1     = 0;
 
-                gameMenu[0].alignment        = 2;
+                gameMenu[0].alignment        = MENU_ALIGN_CENTER;
                 gameMenu[0].selectionCount   = 1;
-                stageMode                  = DEVMENU_STAGESEL;
+                stageMode                    = DEVMENU_STAGESEL;
             }
 #if !RETRO_USE_ORIGINAL_CODE
             else if (keyPress.B) {
@@ -272,8 +272,8 @@ void ProcessSystemMenu()
                 AddTextMenuEntry(&gameMenu[0], "CHOOSE A PLAYER");
                 SetupTextMenu(&gameMenu[1], 0);
                 LoadConfigListText(&gameMenu[1], 0);
-                gameMenu[0].alignment      = 2;
-                gameMenu[1].alignment      = 0;
+                gameMenu[0].alignment      = MENU_ALIGN_CENTER;
+                gameMenu[1].alignment      = MENU_ALIGN_LEFT;
                 gameMenu[1].selectionCount = 1;
                 gameMenu[1].selection1     = 0;
                 stageMode                  = DEVMENU_PLAYERSEL;
@@ -313,7 +313,7 @@ void ProcessSystemMenu()
                 AddTextMenuEntry(&gameMenu[0], "   SPECIAL");
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], "   BONUS");
-                gameMenu[0].alignment      = 0;
+                gameMenu[0].alignment      = MENU_ALIGN_LEFT;
                 gameMenu[0].selection2     = (activeStageList << 1) + 3;
                 gameMenu[0].selection2     = gameMenu[0].selection2 == 7 ? 9 : gameMenu[0].selection2 == 9 ? 7 : gameMenu[0].selection2;
                 gameMenu[0].selectionCount = 2;
@@ -354,11 +354,11 @@ void ProcessSystemMenu()
                         AddTextMenuEntry(&gameMenu[1], buffer);
                     }
 
-                    gameMenu[1].alignment      = 1;
+                    gameMenu[1].alignment      = MENU_ALIGN_RIGHT;
                     gameMenu[1].selectionCount = 3;
                     gameMenu[1].selection1     = 0;
 
-                    gameMenu[0].alignment      = 2;
+                    gameMenu[0].alignment      = MENU_ALIGN_CENTER;
                     gameMenu[0].selectionCount = 1;
                     stageMode                  = DEVMENU_MODMENU;
                 }
@@ -395,7 +395,7 @@ void ProcessSystemMenu()
                 AddTextMenuEntry(&gameMenu[0], " ");
                 AddTextMenuEntry(&gameMenu[0], "QUIT");
                 stageMode                  = DEVMENU_MAIN;
-                gameMenu[0].alignment      = 2;
+                gameMenu[0].alignment      = MENU_ALIGN_CENTER;
                 gameMenu[0].selectionCount = 2;
                 gameMenu[0].selection1     = 0;
                 gameMenu[0].selection2     = 7;

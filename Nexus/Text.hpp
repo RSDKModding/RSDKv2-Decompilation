@@ -8,6 +8,7 @@
 #define FONTCHAR_COUNT (0x400)
 
 enum TextInfoTypes { TEXTINFO_TEXTDATA = 0, TEXTINFO_TEXTSIZE = 1, TEXTINFO_ROWCOUNT = 2 };
+enum TextMenuAlignments { MENU_ALIGN_LEFT, MENU_ALIGN_RIGHT, MENU_ALIGN_CENTER };
 
 struct TextMenu {
     char textData[TEXTDATA_COUNT];
