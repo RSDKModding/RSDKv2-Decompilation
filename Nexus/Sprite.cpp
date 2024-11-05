@@ -211,7 +211,7 @@ void ReadGifPictureData(int width, int height, bool interlaced, byte *gfxData, i
 
 int AddGraphicsFile(const char *filePath)
 {
-    char sheetPath[0x100];
+    char sheetPath[!RETRO_USE_ORIGINAL_CODE ? 0x100 : 0x40];
 
     StrCopy(sheetPath, "Data/Sprites/");
     StrAdd(sheetPath, filePath);
@@ -219,7 +219,9 @@ int AddGraphicsFile(const char *filePath)
     while (StrLength(gfxSurface[sheetID].fileName) > 0) {
         if (StrComp(gfxSurface[sheetID].fileName, sheetPath))
             return sheetID;
-        if (++sheetID == SURFACE_MAX) // Max Sheet cnt
+            // NOTE
+            // This uses SPRITESHEETS_MAX (16), while RemoveGraphicsFile, uses SURFACE_MAX (24)...
+        if (++sheetID >= SPRITESHEETS_MAX)
             return 0;
     }
     byte fileExtension = (byte)sheetPath[(StrLength(sheetPath) - 1) & 0xFF];
