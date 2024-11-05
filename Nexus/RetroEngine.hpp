@@ -17,7 +17,7 @@
 #if !RETRO_USE_ORIGINAL_CODE
 #undef RETRO_USE_MOD_LOADER
 #define RETRO_USE_MOD_LOADER (1)
-#endif //  !RETRO_USE_ORIGINAL_CODE
+#endif
 
 // ================
 // STANDARD LIBS

@@ -82,7 +82,7 @@ void ProcessSystemMenu()
             if (keyPress.start || keyPress.A) {
                 if (gameMenu[0].selection2 == 7) {
                     SetupTextMenu(&gameMenu[0], 0);
-                    AddTextMenuEntry(&gameMenu[0], "SELECT A PLAYER");
+                    AddTextMenuEntry(&gameMenu[0], "CHOOSE A PLAYER");
                     SetupTextMenu(&gameMenu[1], 0);
                     LoadConfigListText(&gameMenu[1], 0);
                     gameMenu[1].alignment      = 0;
