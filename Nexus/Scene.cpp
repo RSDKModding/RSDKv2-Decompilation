@@ -85,21 +85,15 @@ byte tilesetGFXData[TILESET_SIZE];
 void ProcessStage(void)
 {
     switch (stageMode) {
-        case STAGEMODE_LOAD: // Startup
-            fadeMode = 0;
-
+        case STAGEMODE_LOAD:
             cameraEnabled = true;
-            cameraAdjustY = 0;
             xScrollOffset = 0;
             yScrollOffset = 0;
-            yScrollA      = 0;
-            yScrollB      = SCREEN_YSIZE;
-            xScrollA      = 0;
-            xScrollB      = SCREEN_XSIZE;
-            yScrollMove   = 0;
-            earthquakeX  = 0;
-            earthquakeY  = 0;
-
+            pauseEnabled      = false;
+            timeEnabled       = false;
+            stageMilliseconds = 0;
+            stageSeconds      = 0;
+            stageMinutes      = 0;
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 MEM_ZERO(playerList[i]);
                 playerList[i].visible            = true;
@@ -107,17 +101,9 @@ void ProcessStage(void)
                 playerList[i].tileCollisions     = true;
                 playerList[i].objectInteraction = true;
             }
-            pauseEnabled      = false;
-            timeEnabled       = false;
-            frameCounter      = 0;
-            stageMilliseconds = 0;
-            stageSeconds      = 0;
-            stageMinutes      = 0;
-            Engine.frameCount = 0;
-            stageMode         = STAGEMODE_NORMAL;
-            ResetBackgroundSettings();
             LoadStageFiles();
-            //fallthrough cuz it fixes a bug looool
+            stageMode         = STAGEMODE_NORMAL;    
+            break;
         case STAGEMODE_NORMAL:
             if (fadeMode > 0)
                 fadeMode--;
@@ -208,7 +194,6 @@ void ProcessStage(void)
             }
             break;
     }
-    Engine.frameCount++;
 }
 
 void LoadStageFiles(void)
@@ -317,9 +302,9 @@ void LoadStageFiles(void)
     LoadActLayout();
     ProcessStartupObjects();
     xScrollA = (playerList[0].XPos >> 16) - SCREEN_CENTERX;
-    xScrollB                 = (playerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
+    xScrollB = (playerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
     yScrollA = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP;
-    yScrollB                 = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP + SCREEN_YSIZE;
+    yScrollB = (playerList[0].YPos >> 16) - SCREEN_SCROLL_UP + SCREEN_YSIZE;
 }
 int LoadActFile(const char *ext, int stageID, FileInfo *info)
 {

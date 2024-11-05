@@ -1,7 +1,7 @@
 #include "RetroEngine.hpp"
 
 int SCREEN_XSIZE   = 320;
-int SCREEN_CENTERX = 320 / 2;
+int SCREEN_CENTERX = SCREEN_XSIZE / 2;
 
 byte blendLookupTable[0x100 * 0x100];
 
