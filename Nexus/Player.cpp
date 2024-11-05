@@ -213,19 +213,19 @@ void DefaultAirMovement(Player* player)
 void DefaultGravityFalse(Player *player)
 {
     player->trackScroll = false;
-    player->XVelocity   = player->speed * cosVal256[player->angle] >> 8;
-    player->YVelocity   = player->speed * sinVal256[player->angle] >> 8;
+    player->XVelocity = (player->speed * cosVal256[player->angle]) >> 8;
+    player->YVelocity = (player->speed * sinVal256[player->angle]) >> 8;
 }
 
-void DefaultGravityTrue(Player *player)
+void DefaultGravityTrue(Player* player)
 {
     player->trackScroll = true;
     player->YVelocity += player->stats.gravityStrength;
-    if (player->YVelocity >= -0x40000) {
+    if (player->YVelocity >= -0x33CB0) {
         player->timer = 0;
     }
     else if (!player->jumpHold && player->timer > 0) {
-        player->timer     = 0;
+        player->timer = 0;
         player->YVelocity = -0x3C800;
         player->speed -= player->speed >> 5;
     }
