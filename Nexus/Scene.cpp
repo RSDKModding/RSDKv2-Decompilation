@@ -937,7 +937,7 @@ void SetPlayerScreenPosition(Player* player)
         xScrollOffset = playerXPos + earthquakeX - SCREEN_CENTERX;
         player->screenXPos = SCREEN_CENTERX - earthquakeX;
         if (playerXPos > xscrollB - SCREEN_CENTERX) {
-            player->screenXPos = playerXPos - (xscrollB - SCREEN_CENTERX) + earthquakeX + 160;
+            player->screenXPos = playerXPos - (xscrollB - SCREEN_CENTERX) + earthquakeX + SCREEN_CENTERX;
             xScrollOffset = xscrollB - SCREEN_XSIZE - earthquakeX;
         }
     }
