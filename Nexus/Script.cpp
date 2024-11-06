@@ -2473,12 +2473,30 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 temp->values[7]     = 0;
                 break;
             }
-            case FUNC_DEFAULTGROUNDMOVEMENT: DefaultGroundMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTAIRMOVEMENT: DefaultAirMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTROLLINGMOVEMENT: DefaultRollingMovement(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTGRAVITYTRUE: DefaultGravityTrue(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTGRAVITYFALSE: DefaultGravityFalse(&playerList[activePlayer]); break;
-            case FUNC_DEFAULTJUMPACTION: DefaultJumpAction(&playerList[activePlayer]); break;
+            case FUNC_DEFAULTGROUNDMOVEMENT:
+                opcodeSize = 0; 
+                DefaultGroundMovement(&playerList[activePlayer]); 
+                break;
+            case FUNC_DEFAULTAIRMOVEMENT:
+                opcodeSize = 0; 
+                DefaultAirMovement(&playerList[activePlayer]); 
+                break;
+            case FUNC_DEFAULTROLLINGMOVEMENT:
+                opcodeSize = 0; 
+                DefaultRollingMovement(&playerList[activePlayer]); 
+                break;
+            case FUNC_DEFAULTGRAVITYTRUE: 
+                opcodeSize = 0;
+                DefaultGravityTrue(&playerList[activePlayer]); 
+                break;
+            case FUNC_DEFAULTGRAVITYFALSE:
+                opcodeSize = 0; 
+                DefaultGravityFalse(&playerList[activePlayer]); 
+                break;
+            case FUNC_DEFAULTJUMPACTION: 
+                opcodeSize = 0;
+                DefaultJumpAction(&playerList[activePlayer]); 
+                break;
             case FUNC_SETMUSICTRACK:
                 opcodeSize = 0;
                 SetMusicTrack(scriptText, scriptEng.operands[1], scriptEng.operands[2]);
@@ -2505,33 +2523,19 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                 break;
             case FUNC_OBJECTTILECOLLISION:
                 opcodeSize = 0;
-                switch (scriptEng.operands[0]) {
-                    default: break;
-                    case CSIDE_FLOOR:
-                        ObjectFloorCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
-                        break;
-                        // case CSIDE_LWALL: ObjectLWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                        // case CSIDE_RWALL: ObjectRWallCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                        // case CSIDE_ROOF: ObjectRoofCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                }
+                if (scriptEng.operands[0] == CSIDE_FLOOR)
+                    ObjectFloorCollision(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
                 break;
             case FUNC_OBJECTTILEGRIP:
                 opcodeSize = 0;
-                switch (scriptEng.operands[0]) {
-                    default: break;
-                    case CSIDE_FLOOR:
-                        ObjectFloorGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
-                        break;
-                        // case CSIDE_LWALL: ObjectLWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                        // case CSIDE_RWALL: ObjectRWallGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                        // case CSIDE_ROOF: ObjectRoofGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]); break;
-                }
+                if (scriptEng.operands[0] == CSIDE_FLOOR)
+                    ObjectFloorGrip(scriptEng.operands[1], scriptEng.operands[2], scriptEng.operands[3]);
                 break;
             case FUNC_LOADVIDEO:
                 opcodeSize = 0;
-                // PauseSound();
+                PauseSound();
                 scriptInfo->spriteSheetID = AddGraphicsFile(scriptText);
-                // ResumeSound();
+                ResumeSound();
                 break;
             case FUNC_NEXTVIDEOFRAME:
                 opcodeSize = 0;
@@ -2699,16 +2703,8 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_MENU2SELECTION: gameMenu[1].selection1 = scriptEng.operands[i]; break;
                     case VAR_STAGEACTIVELIST: activeStageList = scriptEng.operands[i]; break;
                     case VAR_STAGELISTPOS: stageListPosition = scriptEng.operands[i]; break;
-                    case VAR_XSCROLLOFFSET:
-                        xScrollOffset = scriptEng.operands[i];
-                        xScrollA      = xScrollOffset;
-                        xScrollB      = SCREEN_XSIZE + xScrollOffset;
-                        break;
-                    case VAR_YSCROLLOFFSET:
-                        yScrollOffset = scriptEng.operands[i];
-                        yScrollA      = yScrollOffset;
-                        yScrollB      = SCREEN_YSIZE + yScrollOffset;
-                        break;
+                    case VAR_XSCROLLOFFSET: xScrollOffset = scriptEng.operands[i]; break;
+                    case VAR_YSCROLLOFFSET: yScrollOffset = scriptEng.operands[i]; break;
                     case VAR_GLOBAL: globalVariables[arrayVal] = scriptEng.operands[i]; break;
                     case VAR_STAGETIMEENABLED: timeEnabled = scriptEng.operands[i]; break;
                     case VAR_STAGEMILLISECONDS: stageMilliseconds = scriptEng.operands[i]; break;
@@ -2923,7 +2919,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_SCREENCAMERAENABLED: cameraEnabled = scriptEng.operands[i]; break;
                     case VAR_SCREENCAMERASTYLE: cameraStyle = scriptEng.operands[i]; break;
                     case VAR_MUSICVOLUME: SetMusicVolume(scriptEng.operands[i]); break;
-                    case VAR_MUSICCURRENTTRACK: break;
+                    case VAR_MUSICCURRENTTRACK: trackID = scriptEng.operands[i]; break;
                     case VAR_PLAYERVISIBLE: {
                         playerList[activePlayer].visible = scriptEng.operands[i];
                         break;

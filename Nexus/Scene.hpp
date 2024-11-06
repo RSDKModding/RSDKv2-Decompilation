@@ -63,6 +63,11 @@ enum DeformationModes {
     DEFORM_BG_WATER = 3,
 };
 
+enum CameraStyles {
+    CAMERASTYLE_FOLLOW,
+    CAMERASTYLE_EXTENDED,
+};
+
 struct SceneInfo {
     char name[0x40];
     char folder[0x40];

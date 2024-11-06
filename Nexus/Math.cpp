@@ -14,7 +14,9 @@ int cosVal256[256];
 
 void CalculateTrigAngles()
 {
+#if !RETRO_USE_ORIGINAL_CODE
     srand(time(NULL));
+#endif
 
     for (int i = 0; i < 0x200; ++i) {
         float Val       = sinf(((float)i / 256) * M_PI);
@@ -32,7 +34,7 @@ void CalculateTrigAngles()
     sinVal512[256] = 0;
     sinVal512[384] = -0x200;
 
-    for (int i = 0; i < 0x100; i++) {
+    for (int i = 0; i < 0x100; ++i) {
         sinVal256[i] = (sinVal512[i * 2] >> 1);
         cosVal256[i] = (cosVal512[i * 2] >> 1);
     }

@@ -6,13 +6,18 @@
 
 // Setting this to true removes (almost) ALL changes from the original code, the trade off is that a playable game cannot be built, it is advised to
 // be set to true only for preservation purposes
+#ifndef RETRO_USE_ORIGINAL_CODE
 #define RETRO_USE_ORIGINAL_CODE (0)
+#endif
+
+#ifndef RETRO_USE_MOD_LOADER
 #define RETRO_USE_MOD_LOADER    (0)
+#endif
 
 #if !RETRO_USE_ORIGINAL_CODE
 #undef RETRO_USE_MOD_LOADER
 #define RETRO_USE_MOD_LOADER (1)
-#endif //  !RETRO_USE_ORIGINAL_CODE
+#endif
 
 // ================
 // STANDARD LIBS
@@ -94,18 +99,11 @@ typedef unsigned int uint;
 #define RETRO_USING_SDL2 (0)
 #endif
 
-enum RetroLanguages { RETRO_EN = 0, RETRO_FR = 1, RETRO_IT = 2, RETRO_DE = 3, RETRO_ES = 4, RETRO_JP = 5 };
-
 enum RetroStates {
     ENGINE_SYSMENU         = 0,
     ENGINE_MAINGAME        = 1,
     ENGINE_INITSYSMENU     = 2,
     ENGINE_EXITGAME        = 3,
-};
-
-enum RetroBytecodeFormat {
-    BYTECODE_MOBILE = 0,
-    BYTECODE_PC     = 1,
 };
 
 // General Defines

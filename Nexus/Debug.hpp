@@ -39,7 +39,6 @@ enum DevMenuMenus {
 };
 
 void InitSystemMenu();
-void initErrorMessage();
 void ProcessSystemMenu();
 
 #endif //!DEBUG_H

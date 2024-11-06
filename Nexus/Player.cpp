@@ -187,49 +187,45 @@ void SetMovementStats(PlayerMovementStats *stats)
     stats->rollingDeceleration = 0x2000;
 }
 
-void DefaultAirMovement(Player *player)
+void DefaultAirMovement(Player* player)
 {
-    if (player->YVelocity > -0x40000 && player->YVelocity < 0)
-        player->speed -= player->speed >> 5;
-
     if (player->speed <= -player->stats.topSpeed) {
-        if (player->left) {
+        if (player->left)
             player->direction = FLIP_X;
-        }
     }
-    else {
-        if (player->left) {
-            player->speed -= player->stats.airAcceleration;
-            player->direction = FLIP_X;
-        }
+    else if (player->left) {
+        player->speed -= player->stats.airAcceleration;
+        player->direction = FLIP_X;
     }
-
     if (player->speed >= player->stats.topSpeed) {
         if (player->right)
             player->direction = FLIP_NONE;
     }
     else if (player->right) {
-        player->direction = FLIP_NONE;
         player->speed += player->stats.airAcceleration;
+        player->direction = FLIP_NONE;
     }
+
+    if (player->YVelocity > -0x40001 && player->YVelocity < 1)
+        player->speed -= player->speed >> 5;
 }
 
 void DefaultGravityFalse(Player *player)
 {
     player->trackScroll = false;
-    player->XVelocity   = player->speed * cosVal256[player->angle] >> 8;
-    player->YVelocity   = player->speed * sinVal256[player->angle] >> 8;
+    player->XVelocity = (player->speed * cosVal256[player->angle]) >> 8;
+    player->YVelocity = (player->speed * sinVal256[player->angle]) >> 8;
 }
 
-void DefaultGravityTrue(Player *player)
+void DefaultGravityTrue(Player* player)
 {
     player->trackScroll = true;
     player->YVelocity += player->stats.gravityStrength;
-    if (player->YVelocity >= -0x40000) {
+    if (player->YVelocity >= -0x33CB0) {
         player->timer = 0;
     }
     else if (!player->jumpHold && player->timer > 0) {
-        player->timer     = 0;
+        player->timer = 0;
         player->YVelocity = -0x3C800;
         player->speed -= player->speed >> 5;
     }
@@ -386,7 +382,6 @@ void DefaultJumpAction(Player *player)
 
 void DefaultRollingMovement(Player *player)
 {
-
     if (player->right && player->speed < 0)
         player->speed += player->stats.rollingDeceleration;
     if (player->left && player->speed > 0)
@@ -473,10 +468,10 @@ void ProcessPlayerAnimation(Player *player)
                 break;
         }
     }
-    if ((signed int)player->animationSpeed <= 0)
-        player->animationTimer += script->animations[player->animation].speed;
-    else
+    if (player->animationSpeed)
         player->animationTimer += player->animationSpeed;
+    else
+        player->animationTimer += script->animations[player->animation].speed;
     if (player->animation != player->prevAnimation) {
         if (player->animation == ANI_JUMPING)
             player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
