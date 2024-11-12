@@ -341,12 +341,10 @@ void ProcessSystemMenu() {
                     SetupTextMenu(&GameMenu[1], 0);
 
                     char buffer[0x100];
-                    int visible = (modList.size() - modOffset) > 18 ? (modOffset + 18) : modList.size();
-                    for (int m = modOffset; m < visible; ++m) {
+                    for (int m = 0; m < modList.size(); ++m) {
                         StrCopy(buffer, modList[m].name.c_str());
                         StrAdd(buffer, ": ");
                         StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
-                        for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                         AddTextMenuEntry(&GameMenu[1], buffer);
                     }
 
@@ -366,7 +364,7 @@ void ProcessSystemMenu() {
                 GameMenu[1].selection1 = GameMenu[1].rowCount - 1;
 
             char buffer[0x100];
-            if (GKeyPress.A || GKeyPress.start) {
+            if (GameMenu[1].selection1 < modList.size() && (GKeyPress.A || GKeyPress.start || GKeyPress.left || GKeyPress.right)) {
                 modList[modOffset + GameMenu[1].selection1].active ^= 1;
                 StrCopy(buffer, modList[modOffset + GameMenu[1].selection1].name.c_str());
                 StrAdd(buffer, ": ");
