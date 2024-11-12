@@ -345,6 +345,7 @@ void ProcessSystemMenu() {
                         StrCopy(buffer, modList[m].name.c_str());
                         StrAdd(buffer, ": ");
                         StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
+                        for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                         AddTextMenuEntry(&GameMenu[1], buffer);
                     }
 
