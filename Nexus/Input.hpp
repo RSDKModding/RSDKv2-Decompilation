@@ -87,7 +87,7 @@ extern byte keyState[SDLK_LAST];
 extern SDL_Joystick *controller;
 #endif
 
-void ProcessInput();
+void ReadInputDevice();
 #endif
 
 void CheckKeyPress(InputData *input, byte Flags);

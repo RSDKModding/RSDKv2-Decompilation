@@ -216,7 +216,7 @@ void controllerClose(byte controllerID)
     }
 }
 
-void ProcessInput()
+void ReadInputDevice()
 {
 #if RETRO_USING_SDL2
     int length           = 0;

@@ -283,7 +283,7 @@ void RetroEngine::Run()
         running = processEvents();
 
         for (int s = 0; s < gameSpeed; ++s) {
-            ProcessInput();
+            ReadInputDevice();
 
             if (!masterPaused || frameStep) {
                 switch (gameMode) {
