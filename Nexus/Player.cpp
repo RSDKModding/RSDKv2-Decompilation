@@ -187,7 +187,7 @@ void SetMovementStats(PlayerMovementStats *stats)
     stats->rollingDeceleration = 0x2000;
 }
 
-void DefaultAirMovement(Player* player)
+void ProcessDefaultAirMovement(Player* player)
 {
     if (player->speed <= -player->stats.topSpeed) {
         if (player->left)
@@ -210,14 +210,14 @@ void DefaultAirMovement(Player* player)
         player->speed -= player->speed >> 5;
 }
 
-void DefaultGravityFalse(Player *player)
+void ProcessDefaultGravityFalse(Player *player)
 {
     player->trackScroll = false;
     player->XVelocity = (player->speed * cosVal256[player->angle]) >> 8;
     player->YVelocity = (player->speed * sinVal256[player->angle]) >> 8;
 }
 
-void DefaultGravityTrue(Player* player)
+void ProcessDefaultGravityTrue(Player* player)
 {
     player->trackScroll = true;
     player->YVelocity += player->stats.gravityStrength;
@@ -245,7 +245,7 @@ void DefaultGravityTrue(Player* player)
     }
 }
 
-void DefaultGroundMovement(Player *player)
+void ProcessDefaultGroundMovement(Player *player)
 {
     if ((signed int)player->frictionLoss <= 0) {
         if (player->left && player->speed > -player->stats.topSpeed) {
@@ -366,7 +366,7 @@ void DefaultGroundMovement(Player *player)
     }
 }
 
-void DefaultJumpAction(Player *player)
+void ProcessDefaultJumpAction(Player *player)
 {
     player->frictionLoss  = 0;
     player->gravity       = true;
@@ -380,7 +380,7 @@ void DefaultJumpAction(Player *player)
     player->timer         = 1;
 }
 
-void DefaultRollingMovement(Player *player)
+void ProcessDefaultRollingMovement(Player *player)
 {
     if (player->right && player->speed < 0)
         player->speed += player->stats.rollingDeceleration;

@@ -126,12 +126,12 @@ void ProcessPlayerControl(Player *player);
 
 void SetMovementStats(PlayerMovementStats *stats);
 
-void DefaultAirMovement(Player *player);
-void DefaultGravityFalse(Player *player);
-void DefaultGravityTrue(Player *player);
-void DefaultGroundMovement(Player *player);
-void DefaultJumpAction(Player *player);
-void DefaultRollingMovement(Player *player);
+void ProcessDefaultAirMovement(Player *player);
+void ProcessDefaultGravityFalse(Player *player);
+void ProcessDefaultGravityTrue(Player *player);
+void ProcessDefaultGroundMovement(Player *player);
+void ProcessDefaultJumpAction(Player *player);
+void ProcessDefaultRollingMovement(Player *player);
 void ProcessDebugMode(Player *player);
 
 void ProcessPlayerAnimation(Player *player);
