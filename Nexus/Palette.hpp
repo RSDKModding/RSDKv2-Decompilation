@@ -11,22 +11,22 @@ struct Colour {
 };
 
 // Palettes (as RGB888 Colours)
-extern uint TilePalette32[PALETTE_SIZE];   // Normal
-extern uint TilePaletteW32[PALETTE_SIZE];  // Water
-extern uint TilePalette32F[PALETTE_SIZE];  // Fade
-extern uint TilePaletteW32F[PALETTE_SIZE]; // Water Flash
+extern uint TilePalette32[PALETTE_SIZE];
+extern uint TilePaletteW32[PALETTE_SIZE];
+extern uint TilePalette32F[PALETTE_SIZE];
+extern uint TilePaletteW32F[PALETTE_SIZE];
 
 // Palettes (as RGB565 Colours)
-extern ushort TilePalette16[PALETTE_SIZE];   // Normal
-extern ushort TilePaletteW16[PALETTE_SIZE];  // Water
-extern ushort TilePalette16F[PALETTE_SIZE];  // Fade
-extern ushort TilePaletteW16F[PALETTE_SIZE]; // Water Flash
+extern ushort TilePalette16[PALETTE_SIZE];
+extern ushort TilePaletteW16[PALETTE_SIZE];
+extern ushort TilePalette16F[PALETTE_SIZE];
+extern ushort TilePaletteW16F[PALETTE_SIZE];
 
 // Water Flash Palettes (as RGB888 Colours)
-extern Colour TilePalette[PALETTE_SIZE];   // Normal
-extern Colour TilePaletteW[PALETTE_SIZE];  // Water
-extern Colour TilePaletteF[PALETTE_SIZE];  // Fade
-extern Colour TilePaletteWF[PALETTE_SIZE]; // Water Flash
+extern Colour TilePalette[PALETTE_SIZE];
+extern Colour TilePaletteW[PALETTE_SIZE];
+extern Colour TilePaletteF[PALETTE_SIZE];
+extern Colour TilePaletteWF[PALETTE_SIZE];
 
 extern int PaletteMode;
 

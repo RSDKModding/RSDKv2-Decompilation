@@ -1,22 +1,22 @@
 #include "RetroEngine.hpp"
 
 // Palettes (as RGB888 Colours)
-uint TilePalette32[PALETTE_SIZE];   // Normal
-uint TilePaletteW32[PALETTE_SIZE];  // Water
-uint TilePalette32F[PALETTE_SIZE];  // Fade
-uint TilePaletteW32F[PALETTE_SIZE]; // Water Flash
+uint TilePalette32[PALETTE_SIZE];
+uint TilePaletteW32[PALETTE_SIZE];
+uint TilePalette32F[PALETTE_SIZE];
+uint TilePaletteW32F[PALETTE_SIZE];
 
 // Palettes (as RGB565 Colours)
-ushort TilePalette16[PALETTE_SIZE];   // Normal
-ushort TilePaletteW16[PALETTE_SIZE];  // Water
-ushort TilePalette16F[PALETTE_SIZE];  // Fade
-ushort TilePaletteW16F[PALETTE_SIZE]; // Water Flash
+ushort TilePalette16[PALETTE_SIZE];
+ushort TilePaletteW16[PALETTE_SIZE];
+ushort TilePalette16F[PALETTE_SIZE];
+ushort TilePaletteW16F[PALETTE_SIZE];
 
 // Palettes (as RGB888 Colours)
-Colour TilePalette[PALETTE_SIZE];   // Normal
-Colour TilePaletteW[PALETTE_SIZE];  // Water
-Colour TilePaletteF[PALETTE_SIZE];  // Fade
-Colour TilePaletteWF[PALETTE_SIZE]; // Water Flash
+Colour TilePalette[PALETTE_SIZE];
+Colour TilePaletteW[PALETTE_SIZE];
+Colour TilePaletteF[PALETTE_SIZE];
+Colour TilePaletteWF[PALETTE_SIZE];
 
 int PaletteMode = 0;
 
@@ -51,9 +51,9 @@ void SetFade(byte r, byte g, byte b, ushort a, int start, int end) {
         TilePaletteF[i].g = green;
         TilePaletteF[i].b = blue;
 
-        red                = (ushort)(r * a + (0xFF - a) * TilePalette[i].r) >> 8;
-        green              = (ushort)(g * a + (0xFF - a) * TilePalette[i].g) >> 8;
-        blue               = (ushort)(b * a + (0xFF - a) * TilePalette[i].b) >> 8;
+        red                = (ushort)(r * a + (0xFF - a) * TilePaletteW[i].r) >> 8;
+        green              = (ushort)(g * a + (0xFF - a) * TilePaletteW[i].g) >> 8;
+        blue               = (ushort)(b * a + (0xFF - a) * TilePaletteW[i].b) >> 8;
         TilePaletteW16F[i] = RGB888_TO_RGB565(red, green, blue);
         TilePaletteW32F[i] = PACK_RGB888(red, green, blue);
         TilePaletteWF[i].r = red;
