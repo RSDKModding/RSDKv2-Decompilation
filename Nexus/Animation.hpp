@@ -34,7 +34,7 @@ struct Hitbox {
 };
 
 extern SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
-extern int scriptFrameCount;
+extern int ScriptFramesNo;
 
 extern SpriteFrame animFrames[SPRITEFRAME_COUNT];
 extern Hitbox PlayerCBoxes[HITBOX_COUNT];

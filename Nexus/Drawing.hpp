@@ -33,7 +33,7 @@ extern byte TintLookupTable2[0x100];
 extern byte TintLookupTable3[0x100];
 extern byte TintLookupTable4[0x100];
 
-extern DrawListEntry drawListEntries[DRAWLAYER_COUNT];
+extern DrawListEntry ObjectDrawOrderList[DRAWLAYER_COUNT];
 
 extern int gfxDataPosition;
 extern GFXSurface gfxSurface[SURFACE_MAX];

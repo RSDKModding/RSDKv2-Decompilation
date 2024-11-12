@@ -5,8 +5,8 @@ int modOffset = 0;
 #endif
 
 void InitSystemMenu() {
-    xScrollOffset = 0;
-    yScrollOffset = 0;
+    XScrollOffset = 0;
+    YScrollOffset = 0;
     StopMusic();
     StopAllSfx();
     ReleaseStageSfx();
@@ -26,10 +26,10 @@ void InitSystemMenu() {
         StageMode       = STAGEMODE_LOAD;
 #if !RETRO_USE_ORIGINAL_CODE
         activeStageList   = Engine.startList_Game == 0xFF ? 0 : Engine.startList_Game;
-        stageListPosition = Engine.startStage_Game == 0xFF ? 0 : Engine.startStage_Game;
+        StageListPosition = Engine.startStage_Game == 0xFF ? 0 : Engine.startStage_Game;
 #else
         activeStageList   = 0;
-        stageListPosition = 0;
+        StageListPosition = 0;
 #endif
     } else {
         Engine.GameMode = ENGINE_SYSMENU;
@@ -140,7 +140,7 @@ void ProcessSystemMenu() {
                 activeStageList   = 0;
                 StageMode         = STAGEMODE_LOAD;
                 Engine.GameMode   = ENGINE_MAINGAME;
-                stageListPosition = 0;
+                StageListPosition = 0;
             }
 #endif
             break;
@@ -295,7 +295,7 @@ void ProcessSystemMenu() {
                 debugMode         = GKeyDown.A;
                 StageMode         = STAGEMODE_LOAD;
                 Engine.GameMode   = ENGINE_MAINGAME;
-                stageListPosition = GameMenu[1].selection1;
+                StageListPosition = GameMenu[1].selection1;
             }
 #if !RETRO_USE_ORIGINAL_CODE
             else if (GKeyPress.B) {

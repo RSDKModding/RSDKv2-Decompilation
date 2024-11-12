@@ -10,7 +10,7 @@ byte TintLookupTable2[0x100];
 byte TintLookupTable3[0x100];
 byte TintLookupTable4[0x100];
 
-DrawListEntry drawListEntries[DRAWLAYER_COUNT];
+DrawListEntry ObjectDrawOrderList[DRAWLAYER_COUNT];
 
 int gfxDataPosition;
 GFXSurface gfxSurface[SURFACE_MAX];
@@ -53,7 +53,7 @@ int InitRenderDevice() {
     SDL_SetRenderDrawBlendMode(Engine.renderer, SDL_BLENDMODE_BLEND);
 
     int colourMode = 0;
-    if (Engine.colourMode == 1)
+    if (Engine.ColourMode == 1)
         colourMode = SDL_PIXELFORMAT_RGB565;
     else
         colourMode = SDL_PIXELFORMAT_RGB888;
@@ -163,7 +163,7 @@ void FlipScreen() {
     int pitch    = 0;
     void *pixels = NULL;
 
-    switch (Engine.colourMode) {
+    switch (Engine.ColourMode) {
         case 0: // 8-bit
         {
             uint *frameBuffer = new uint[SCREEN_XSIZE * SCREEN_YSIZE];
@@ -340,26 +340,26 @@ void SetScreenSize(int width, int lineSize) {
 }
 
 void DrawObjectList(int Layer) {
-    int size = drawListEntries[Layer].listSize;
+    int size = ObjectDrawOrderList[Layer].listSize;
     for (int i = 0; i < size; ++i) {
-        objectLoop = drawListEntries[Layer].entityRefs[i];
-        int type   = ObjectEntityList[objectLoop].type;
+        ObjectLoop = ObjectDrawOrderList[Layer].entityRefs[i];
+        int type   = ObjectEntityList[ObjectLoop].type;
 
         if (type == OBJ_TYPE_PLAYER) {
-            Player *player = &PlayerList[objectLoop];
+            Player *player = &PlayerList[ObjectLoop];
             ProcessPlayerAnimationChange(player);
             if (player->visible) {
                 DrawPlayer(player, &PlayerScriptList[player->type].animations[player->animation].frames[player->frame]);
             }
         } else if (type) {
             PlayerNo = 0;
-            if (scriptData[objectScriptList[type].subDraw.scriptCodePtr] > 0)
+            if (ScriptData[objectScriptList[type].subDraw.scriptCodePtr] > 0)
                 ProcessScript(objectScriptList[type].subDraw.scriptCodePtr, objectScriptList[type].subDraw.jumpTablePtr, SUB_DRAW);
         }
     }
 }
 void DrawStageGFX() {
-    waterDrawPos = waterLevel - yScrollOffset;
+    waterDrawPos = waterLevel - YScrollOffset;
 
     if (waterDrawPos < 0)
         waterDrawPos = 0;
@@ -500,7 +500,7 @@ void DrawHLineScrollLayer(int layerID) {
 
     int yscrollOffset = 0;
     if (activeTileLayers[layerID]) { // BG Layer
-        int yScroll    = yScrollOffset * layer->parallaxFactor >> 6;
+        int yScroll    = YScrollOffset * layer->parallaxFactor >> 6;
         int fullheight = layerheight << 7;
         layer->scrollPos += layer->scrollSpeed;
         if (layer->scrollPos > fullheight << 16)
@@ -511,19 +511,19 @@ void DrawHLineScrollLayer(int layerID) {
         deformationData  = &bgDeformationData2[(byte)(yscrollOffset + bgDeformationOffset)];
         deformationDataW = &bgDeformationData3[(byte)(yscrollOffset + waterDrawPos + bgDeformationOffsetW)];
     } else { // FG Layer
-        lastXSize     = layer->xsize;
-        yscrollOffset = yScrollOffset;
+        LastXSize     = layer->xsize;
+        yscrollOffset = YScrollOffset;
         lineScroll    = layer->lineScroll;
-        for (int i = 0; i < PARALLAX_COUNT; ++i) hParallax.linePos[i] = xScrollOffset;
+        for (int i = 0; i < PARALLAX_COUNT; ++i) hParallax.linePos[i] = XScrollOffset;
         deformationData  = &bgDeformationData0[(byte)(yscrollOffset + fgDeformationOffset)];
         deformationDataW = &bgDeformationData1[(byte)(yscrollOffset + waterDrawPos + fgDeformationOffsetW)];
     }
 
     if (layer->type == LAYER_HSCROLL) {
-        if (lastXSize != layerwidth) {
+        if (LastXSize != layerwidth) {
             int fullLayerwidth = layerwidth << 7;
             for (int i = 0; i < hParallax.entryCount; ++i) {
-                hParallax.linePos[i] = xScrollOffset * hParallax.parallaxFactor[i] >> 7;
+                hParallax.linePos[i] = XScrollOffset * hParallax.parallaxFactor[i] >> 7;
                 hParallax.scrollPos[i] += hParallax.scrollSpeed[i];
                 if (hParallax.scrollPos[i] > fullLayerwidth << 16)
                     hParallax.scrollPos[i] -= fullLayerwidth << 16;
@@ -533,7 +533,7 @@ void DrawHLineScrollLayer(int layerID) {
                 hParallax.linePos[i] %= fullLayerwidth;
             }
         }
-        lastXSize = layerwidth;
+        LastXSize = layerwidth;
     }
 
     byte *pixelBufferPtr = Engine.FrameBuffer;
@@ -556,7 +556,7 @@ void DrawHLineScrollLayer(int layerID) {
                     deform = *deformationData;
 
                 // Fix for SS5 mobile bug
-                if (StrComp(stageList[activeStageList][stageListPosition].name, "5") && activeStageList == STAGELIST_SPECIAL)
+                if (StrComp(stageList[activeStageList][StageListPosition].name, "5") && activeStageList == STAGELIST_SPECIAL)
                     deform >>= 4;
 
                 chunkX += deform;
@@ -1024,7 +1024,7 @@ void DrawVLineScrollLayer(int layerID) {
 
     int xscrollOffset = 0;
     if (activeTileLayers[layerID]) { // BG Layer
-        int xScroll        = xScrollOffset * layer->parallaxFactor >> 6;
+        int xScroll        = XScrollOffset * layer->parallaxFactor >> 6;
         int fullLayerwidth = layerwidth << 7;
         layer->scrollPos += layer->scrollSpeed;
         if (layer->scrollPos > fullLayerwidth << 16)
@@ -1034,19 +1034,19 @@ void DrawVLineScrollLayer(int layerID) {
         lineScroll      = layer->lineScroll;
         deformationData = &bgDeformationData2[(byte)(xscrollOffset + bgDeformationOffset)];
     } else { // FG Layer
-        lastYSize            = layer->ysize;
-        xscrollOffset        = xScrollOffset;
+        LastYSize            = layer->ysize;
+        xscrollOffset        = XScrollOffset;
         lineScroll           = layer->lineScroll;
-        vParallax.linePos[0] = yScrollOffset;
+        vParallax.linePos[0] = YScrollOffset;
         vParallax.deform[0]  = true;
-        deformationData      = &bgDeformationData0[(byte)(xScrollOffset + fgDeformationOffset)];
+        deformationData      = &bgDeformationData0[(byte)(XScrollOffset + fgDeformationOffset)];
     }
 
     if (layer->type == LAYER_VSCROLL) {
-        if (lastYSize != layerheight) {
+        if (LastYSize != layerheight) {
             int fullLayerheight = layerheight << 7;
             for (int i = 0; i < vParallax.entryCount; ++i) {
-                vParallax.linePos[i] = yScrollOffset * vParallax.parallaxFactor[i] >> 7;
+                vParallax.linePos[i] = YScrollOffset * vParallax.parallaxFactor[i] >> 7;
 
                 vParallax.scrollPos[i] += vParallax.scrollPos[i] << 16;
                 if (vParallax.scrollPos[i] > fullLayerheight << 16)
@@ -1057,7 +1057,7 @@ void DrawVLineScrollLayer(int layerID) {
             }
             layerheight = fullLayerheight >> 7;
         }
-        lastYSize = layerheight;
+        LastYSize = layerheight;
     }
 
     byte *pixelBufferPtr = Engine.FrameBuffer;

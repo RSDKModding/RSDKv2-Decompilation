@@ -1,6 +1,6 @@
 #include "RetroEngine.hpp"
 
-int objectLoop    = 0;
+int ObjectLoop    = 0;
 int curObjectType = 0;
 Entity ObjectEntityList[ENTITY_COUNT];
 
@@ -10,60 +10,60 @@ const int OBJECT_BORDER_Y1 = 0x100;
 const int OBJECT_BORDER_Y2 = SCREEN_YSIZE + 0x100;
 
 void ProcessStartupObjects() {
-    scriptFrameCount = 0;
+    ScriptFramesNo = 0;
     ClearAnimationData();
     PlayerNo                   = 0;
     ScriptEng.arrayPosition[2] = TEMPENTITY_START;
     Entity *entity             = &ObjectEntityList[TEMPENTITY_START];
     for (int i = 0; i < OBJECT_COUNT; ++i) {
         ObjectScript *scriptInfo  = &objectScriptList[i];
-        objectLoop                = TEMPENTITY_START;
+        ObjectLoop                = TEMPENTITY_START;
         curObjectType             = i;
-        int frameStart            = scriptFrameCount;
-        scriptInfo->frameStartPtr = &scriptFrames[scriptFrameCount];
+        int frameStart            = ScriptFramesNo;
+        scriptInfo->frameStartPtr = &scriptFrames[ScriptFramesNo];
         scriptInfo->spriteSheetID = 0;
         entity->type              = i;
-        if (scriptData[scriptInfo->subStartup.scriptCodePtr] > 0)
+        if (ScriptData[scriptInfo->subStartup.scriptCodePtr] > 0)
             ProcessScript(scriptInfo->subStartup.scriptCodePtr, scriptInfo->subStartup.jumpTablePtr, SUB_SETUP);
-        scriptInfo->frameCount = scriptFrameCount - frameStart;
+        scriptInfo->frameCount = ScriptFramesNo - frameStart;
     }
     entity->type     = 0;
     curObjectType    = 0;
-    scriptFrameCount = 0;
+    ScriptFramesNo = 0;
 }
 
 void ProcessObjects() {
-    for (int i = 0; i < DRAWLAYER_COUNT; ++i) drawListEntries[i].listSize = 0;
+    for (int i = 0; i < DRAWLAYER_COUNT; ++i) ObjectDrawOrderList[i].listSize = 0;
 
-    for (objectLoop = 0; objectLoop < ENTITY_COUNT; ++objectLoop) {
+    for (ObjectLoop = 0; ObjectLoop < ENTITY_COUNT; ++ObjectLoop) {
         bool active = false;
         int x = 0, y = 0;
-        Entity *entity = &ObjectEntityList[objectLoop];
+        Entity *entity = &ObjectEntityList[ObjectLoop];
 
         if (entity->priority <= 0) {
             x      = entity->XPos >> 16;
             y      = entity->YPos >> 16;
-            active = x > xScrollOffset - OBJECT_BORDER_X1 && x < OBJECT_BORDER_X2 + xScrollOffset && y > yScrollOffset - OBJECT_BORDER_Y1
-                     && y < yScrollOffset + OBJECT_BORDER_Y2;
+            active = x > XScrollOffset - OBJECT_BORDER_X1 && x < OBJECT_BORDER_X2 + XScrollOffset && y > YScrollOffset - OBJECT_BORDER_Y1
+                     && y < YScrollOffset + OBJECT_BORDER_Y2;
         } else {
             active = true;
         }
 
         if (active && entity->type > OBJ_TYPE_BLANKOBJECT) {
             if (entity->type == OBJ_TYPE_PLAYER) {
-                if (objectLoop >= 2) {
+                if (ObjectLoop >= 2) {
                     entity->type = OBJ_TYPE_BLANKOBJECT;
                 } else {
-                    Player *player       = &PlayerList[objectLoop];
-                    PlayerScript *script = &PlayerScriptList[objectLoop];
+                    Player *player       = &PlayerList[ObjectLoop];
+                    PlayerScript *script = &PlayerScriptList[ObjectLoop];
                     switch (entity->propertyValue) {
                         case 0:
-                            PlayerNo = objectLoop;
+                            PlayerNo = ObjectLoop;
                             ProcessPlayerControl(player);
                             player->animationSpeed = 0;
-                            if (scriptData[script->scriptCodePtr_PlayerMain] > 0)
+                            if (ScriptData[script->scriptCodePtr_PlayerMain] > 0)
                                 ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_PLAYERMAIN);
-                            if (scriptData[script->scriptCodePtr_PlayerState[player->state]] > 0)
+                            if (ScriptData[script->scriptCodePtr_PlayerState[player->state]] > 0)
                                 ProcessScript(script->scriptCodePtr_PlayerState[player->state], script->jumpTablePtr_PlayerState[player->state],
                                               SUB_PLAYERSTATE);
                             ProcessPlayerAnimation(player);
@@ -73,7 +73,7 @@ void ProcessObjects() {
                         case 1:
                             ProcessPlayerControl(player);
                             ProcessPlayerAnimation(player);
-                            if (scriptData[script->scriptCodePtr_PlayerMain] > 0)
+                            if (ScriptData[script->scriptCodePtr_PlayerMain] > 0)
                                 ProcessScript(script->scriptCodePtr_PlayerMain, script->jumpTablePtr_PlayerMain, SUB_PLAYERMAIN);
                             if (player->tileCollisions)
                                 ProcessPlayerTileCollisions(player);
@@ -81,26 +81,26 @@ void ProcessObjects() {
                         case 2:
                             ProcessPlayerControl(player);
                             ProcessDebugMode(player);
-                            if (!objectLoop) {
-                                cameraEnabled = true;
+                            if (!ObjectLoop) {
+                                CameraEnabled = true;
                                 if (GKeyPress.B) {
                                     player->tileCollisions                     = true;
                                     player->objectInteraction                  = true;
                                     player->controlMode                        = 0;
-                                    ObjectEntityList[objectLoop].propertyValue = 0;
+                                    ObjectEntityList[ObjectLoop].propertyValue = 0;
                                 }
                             }
                             break;
                     }
                     if (entity->drawOrder < DRAWLAYER_COUNT)
-                        drawListEntries[entity->drawOrder].entityRefs[drawListEntries[entity->drawOrder].listSize++] = objectLoop;
+                        ObjectDrawOrderList[entity->drawOrder].entityRefs[ObjectDrawOrderList[entity->drawOrder].listSize++] = ObjectLoop;
                 }
             } else {
                 ObjectScript *scriptInfo = &objectScriptList[entity->type];
                 PlayerNo                 = 0;
-                if (scriptData[scriptInfo->subMain.scriptCodePtr] > 0)
+                if (ScriptData[scriptInfo->subMain.scriptCodePtr] > 0)
                     ProcessScript(scriptInfo->subMain.scriptCodePtr, scriptInfo->subMain.jumpTablePtr, SUB_MAIN);
-                if (scriptData[scriptInfo->subPlayerInteraction.scriptCodePtr] > 0) {
+                if (ScriptData[scriptInfo->subPlayerInteraction.scriptCodePtr] > 0) {
                     while (PlayerNo < activePlayerCount) {
                         if (PlayerList[PlayerNo].objectInteraction)
                             ProcessScript(scriptInfo->subPlayerInteraction.scriptCodePtr, scriptInfo->subPlayerInteraction.jumpTablePtr,
@@ -110,7 +110,7 @@ void ProcessObjects() {
                 }
 
                 if (entity->drawOrder < DRAWLAYER_COUNT)
-                    drawListEntries[entity->drawOrder].entityRefs[drawListEntries[entity->drawOrder].listSize++] = objectLoop;
+                    ObjectDrawOrderList[entity->drawOrder].entityRefs[ObjectDrawOrderList[entity->drawOrder].listSize++] = ObjectLoop;
             }
         }
     }

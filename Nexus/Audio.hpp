@@ -60,7 +60,7 @@ enum MusicStatuses {
 };
 
 extern int globalSFXCount;
-extern int stageSFXCount;
+extern int NoStageSFX;
 
 extern int masterVolume;
 extern int trackID;
@@ -201,7 +201,7 @@ inline void ReleaseGlobalSfx()
 }
 inline void ReleaseStageSfx()
 {
-    for (int i = stageSFXCount + globalSFXCount; i >= globalSFXCount; --i) {
+    for (int i = NoStageSFX + globalSFXCount; i >= globalSFXCount; --i) {
         if (sfxList[i].loaded) {
             StrCopy(sfxList[i].name, "");
             free(sfxList[i].buffer);
@@ -209,7 +209,7 @@ inline void ReleaseStageSfx()
             sfxList[i].loaded = false;
         }
     }
-    stageSFXCount = 0;
+    NoStageSFX = 0;
 }
 
 inline void ReleaseSoundDevice()

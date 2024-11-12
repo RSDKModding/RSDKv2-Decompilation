@@ -55,7 +55,7 @@ void InitUserdata()
         ini.SetInteger("Window", "WindowScale", Engine.windowScale = 2);
         ini.SetInteger("Window", "ScreenWidth", SCREEN_XSIZE = DEFAULT_SCREEN_XSIZE);
         ini.SetInteger("Window", "RefreshRate", Engine.refreshRate = 60);
-        ini.SetInteger("Window", "ColourMode", Engine.colourMode = 0);
+        ini.SetInteger("Window", "ColourMode", Engine.ColourMode = 0);
 
         ini.SetFloat("Audio", "BGMVolume", bgmVolume / (float)MAX_VOLUME);
         ini.SetFloat("Audio", "SFXVolume", sfxVolume / (float)MAX_VOLUME);
@@ -141,10 +141,10 @@ void InitUserdata()
             SCREEN_XSIZE = DEFAULT_SCREEN_XSIZE;
         if (!ini.GetInteger("Window", "RefreshRate", &Engine.refreshRate))
             Engine.refreshRate = 60;
-        int cm = Engine.colourMode;
+        int cm = Engine.ColourMode;
         if (!ini.GetInteger("Window", "ColourMode", &cm))
             cm = 1;
-        Engine.colourMode = cm;
+        Engine.ColourMode = cm;
 
         float bv = 0, sv = 0;
         if (!ini.GetFloat("Audio", "BGMVolume", &bv))
@@ -296,7 +296,7 @@ void writeSettings() {
     ini.SetComment("Window", "RRComment", "Determines the target FPS");
     ini.SetInteger("Window", "RefreshRate", Engine.refreshRate);
     ini.SetComment("Window", "CMComment", "Determines the output colour mode (0 = 8-bit, 1 = 16-bit, 2 = 32-bit)");
-    ini.SetInteger("Window", "ColourMode", Engine.colourMode);
+    ini.SetInteger("Window", "ColourMode", Engine.ColourMode);
 
     ini.SetFloat("Audio", "BGMVolume", bgmVolume / (float)MAX_VOLUME);
     ini.SetFloat("Audio", "SFXVolume", sfxVolume / (float)MAX_VOLUME);

@@ -1322,7 +1322,7 @@ void ProcessPlayerTileCollisions(Player *player) {
 
 void ObjectFloorCollision(int xOffset, int yOffset, int cPath) {
     ScriptEng.checkResult = false;
-    Entity *entity        = &ObjectEntityList[objectLoop];
+    Entity *entity        = &ObjectEntityList[ObjectLoop];
     int c                 = 0;
     int XPos              = (entity->XPos >> 16) + xOffset;
     int YPos              = (entity->YPos >> 16) + yOffset;
@@ -1382,7 +1382,7 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath) {
 void ObjectFloorGrip(int xOffset, int yOffset, int cPath) {
     int c;
     ScriptEng.checkResult = false;
-    Entity *entity        = &ObjectEntityList[objectLoop];
+    Entity *entity        = &ObjectEntityList[ObjectLoop];
     int XPos              = (entity->XPos >> 16) + xOffset;
     int YPos              = (entity->YPos >> 16) + yOffset;
     int chunkX            = YPos;

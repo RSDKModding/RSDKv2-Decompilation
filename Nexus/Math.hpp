@@ -15,14 +15,14 @@ extern int cosVal256[0x100];
 // Setup Angles
 void CalculateTrigAngles();
 
-inline int sin512(int angle) {
+inline int Sin512(int angle) {
     if (angle < 0)
         angle = 0x200 - angle;
     angle &= 0x1FF;
     return sinVal512[angle];
 }
 
-inline int cos512(int angle)
+inline int Cos512(int angle)
 {
     if (angle < 0)
         angle = 0x200 - angle;
@@ -30,7 +30,7 @@ inline int cos512(int angle)
     return cosVal512[angle];
 }
 
-inline int sin256(int angle)
+inline int Sin256(int angle)
 {
     if (angle < 0)
         angle = 0x100 - angle;
@@ -38,7 +38,7 @@ inline int sin256(int angle)
     return sinVal256[angle];
 }
 
-inline int cos256(int angle)
+inline int Cos256(int angle)
 {
     if (angle < 0)
         angle = 0x100 - angle;

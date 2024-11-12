@@ -31,7 +31,7 @@ enum ObjectPriority {
     PRIORITY_ALWAYS,
 };
 
-extern int objectLoop;
+extern int ObjectLoop;
 extern int curObjectType;
 extern Entity ObjectEntityList[ENTITY_COUNT];
 

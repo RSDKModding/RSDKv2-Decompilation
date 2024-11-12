@@ -1,7 +1,7 @@
 #include "RetroEngine.hpp"
 
 SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
-int scriptFrameCount = 0;
+int ScriptFramesNo = 0;
 
 SpriteFrame animFrames[SPRITEFRAME_COUNT];
 Hitbox PlayerCBoxes[HITBOX_COUNT];
@@ -110,5 +110,5 @@ void ClearAnimationData()
     //for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
     //for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(PlayerCBoxes[h]);
 
-    scriptFrameCount   = 0;
+    ScriptFramesNo   = 0;
 }

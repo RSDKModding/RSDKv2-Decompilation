@@ -82,7 +82,7 @@ bool processEvents() {
                     case SDLK_F1:
                         if (Engine.devMenu) {
                             activeStageList   = 0;
-                            stageListPosition = 0;
+                            StageListPosition = 0;
                             StageMode         = STAGEMODE_LOAD;
                             Engine.GameMode   = ENGINE_MAINGAME;
                         } else {
@@ -92,13 +92,13 @@ bool processEvents() {
 
                     case SDLK_F2:
                         if (Engine.devMenu) {
-                            stageListPosition--;
-                            while (stageListPosition < 0) {
+                            StageListPosition--;
+                            while (StageListPosition < 0) {
                                 activeStageList--;
 
                                 if (activeStageList < 0)
                                     activeStageList = 3;
-                                stageListPosition = stageListCount[activeStageList] - 1;
+                                StageListPosition = stageListCount[activeStageList] - 1;
                             }
                             StageMode       = STAGEMODE_LOAD;
                             Engine.GameMode = ENGINE_MAINGAME;
@@ -107,11 +107,11 @@ bool processEvents() {
 
                     case SDLK_F3:
                         if (Engine.devMenu) {
-                            stageListPosition++;
-                            while (stageListPosition >= stageListCount[activeStageList]) {
+                            StageListPosition++;
+                            while (StageListPosition >= stageListCount[activeStageList]) {
                                 activeStageList++;
 
-                                stageListPosition = 0;
+                                StageListPosition = 0;
 
                                 if (activeStageList >= 4)
                                     activeStageList = 0;

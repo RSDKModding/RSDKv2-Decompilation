@@ -166,7 +166,7 @@ public:
     bool running     = false;
 
     int GameMode    = ENGINE_MAINGAME;
-    byte colourMode = 1; // 16-bit
+    byte ColourMode = 1; // 16-bit
 
     int frameSkipSetting = 0;
     int frameSkipTimer   = 0;

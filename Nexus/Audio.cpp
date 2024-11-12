@@ -3,7 +3,7 @@
 #include <iostream>
 
 int globalSFXCount = 0;
-int stageSFXCount  = 0;
+int NoStageSFX  = 0;
 
 int masterVolume  = MAX_VOLUME;
 int trackID       = -1;
