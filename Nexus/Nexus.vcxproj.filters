@@ -78,6 +78,9 @@
     <ClInclude Include="Video.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ModAPI.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -141,6 +144,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ModAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

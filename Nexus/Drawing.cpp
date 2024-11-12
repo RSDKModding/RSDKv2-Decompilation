@@ -329,7 +329,15 @@ void ReleaseRenderDevice() {
 #endif
 }
 
-void ClearScreen(byte index) { memset(Engine.FrameBuffer, index, (SCREEN_XSIZE * SCREEN_YSIZE)); }
+void ClearScreen(byte index)
+{
+    byte *pixelBuffer = Engine.FrameBuffer;
+    int cnt           = SCREEN_XSIZE * SCREEN_YSIZE;
+    while (cnt--) {
+        *pixelBuffer = index;
+        ++pixelBuffer;
+    }
+}
 
 void SetScreenSize(int width, int lineSize) {
     SCREEN_XSIZE        = width;
