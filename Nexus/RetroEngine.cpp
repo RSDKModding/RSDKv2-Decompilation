@@ -54,21 +54,7 @@ bool processEvents() {
 #if RETRO_USE_MOD_LOADER
                             // hacky patch because people can escape
                             if (Engine.GameMode == ENGINE_SYSMENU && StageMode == DEVMENU_MODMENU) {
-                                // Reload entire engine
-                                Engine.LoadGameConfig("Data/Game/GameConfig.bin");
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
-                                if (Engine.window) {
-                                    char gameTitle[0x40];
-                                    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
-                                    SDL_SetWindowTitle(Engine.window, gameTitle);
-                                }
-#endif
-
-                                ReleaseStageSfx();
-                                ReleaseGlobalSfx();
-                                LoadGlobalSfx();
-
-                                saveMods();
+                                RefreshEngine();
                             }
 #endif
 
@@ -222,7 +208,7 @@ void RetroEngine::Init() {
     InitUserdata();
 #endif
 #if RETRO_USE_MOD_LOADER
-    initMods();
+    InitMods();
 #endif
     char dest[0x200];
 #if RETRO_PLATFORM == RETRO_UWP
@@ -309,7 +295,7 @@ void RetroEngine::Run() {
     ReleaseRenderDevice();
     writeSettings();
 #if RETRO_USE_MOD_LOADER
-    saveMods();
+    SaveMods();
 #endif
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2

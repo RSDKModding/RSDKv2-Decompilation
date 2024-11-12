@@ -38,13 +38,13 @@ int InitRenderDevice() {
     Engine.renderer = SDL_CreateRenderer(Engine.window, -1, SDL_RENDERER_ACCELERATED);
 
     if (!Engine.window) {
-        printLog("ERROR: failed to create window!");
+        PrintLog("ERROR: failed to create window!");
         Engine.GameMode = ENGINE_EXITGAME;
         return 0;
     }
 
     if (!Engine.renderer) {
-        printLog("ERROR: failed to create renderer!");
+        PrintLog("ERROR: failed to create renderer!");
         Engine.GameMode = ENGINE_EXITGAME;
         return 0;
     }
@@ -61,7 +61,7 @@ int InitRenderDevice() {
     Engine.screenBuffer = SDL_CreateTexture(Engine.renderer, colourMode, SDL_TEXTUREACCESS_STREAMING, SCREEN_XSIZE, SCREEN_YSIZE);
 
     if (!Engine.screenBuffer) {
-        printLog("ERROR: failed to create screen buffer!\nerror msg: %s", SDL_GetError());
+        PrintLog("ERROR: failed to create screen buffer!\nerror msg: %s", SDL_GetError());
         return 0;
     }
 
@@ -105,7 +105,7 @@ int InitRenderDevice() {
 
     Engine.windowSurface = SDL_SetVideoMode(SCREEN_XSIZE * Engine.windowScale, SCREEN_YSIZE * Engine.windowScale, 32, SDL_SWSURFACE);
     if (!Engine.windowSurface) {
-        printLog("ERROR: failed to create window!\nerror msg: %s", SDL_GetError());
+        PrintLog("ERROR: failed to create window!\nerror msg: %s", SDL_GetError());
         return 0;
     }
     // Set the window caption
@@ -115,14 +115,14 @@ int InitRenderDevice() {
         SDL_CreateRGBSurface(0, SCREEN_XSIZE * Engine.windowScale, SCREEN_YSIZE * Engine.windowScale, 16, 0xF800, 0x7E0, 0x1F, 0x00);
 
     if (!Engine.screenBuffer) {
-        printLog("ERROR: failed to create screen buffer!\nerror msg: %s", SDL_GetError());
+        PrintLog("ERROR: failed to create screen buffer!\nerror msg: %s", SDL_GetError());
         return 0;
     }
 
     /*Engine.screenBuffer2x = SDL_SetVideoMode(SCREEN_XSIZE * 2, SCREEN_YSIZE * 2, 16, SDL_SWSURFACE);
 
     if (!Engine.screenBuffer2x) {
-        printLog("ERROR: failed to create screen buffer HQ!\nerror msg: %s", SDL_GetError());
+        PrintLog("ERROR: failed to create screen buffer HQ!\nerror msg: %s", SDL_GetError());
         return 0;
     }*/
 

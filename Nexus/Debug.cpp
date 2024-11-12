@@ -322,40 +322,17 @@ void ProcessSystemMenu() {
 #if RETRO_USE_MOD_LOADER
         case DEVMENU_MODMENU: // Mod Menu
         {
+            int preOption = GameMenu[1].selection1;
             if (GKeyPress.down)
                 ++GameMenu[1].selection1;
             if (GKeyPress.up)
                 --GameMenu[1].selection1;
 
-            if (GKeyPress.left || GKeyPress.right) {
-                int offset = modOffset;
-                if (GKeyPress.left && modOffset - 18 >= 0) {
-                    modOffset -= 18;
-                } else if (GKeyPress.right && modOffset + 18 < modList.size()) {
-                    modOffset += 18;
-                }
-
-                if (offset != modOffset) {
-                    SetupTextMenu(&GameMenu[0], 0);
-                    AddTextMenuEntry(&GameMenu[0], "MOD LIST");
-                    SetupTextMenu(&GameMenu[1], 0);
-
-                    char buffer[0x100];
-                    for (int m = 0; m < modList.size(); ++m) {
-                        StrCopy(buffer, modList[m].name.c_str());
-                        StrAdd(buffer, ": ");
-                        StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
-                        for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
-                        AddTextMenuEntry(&GameMenu[1], buffer);
-                    }
-
-                    GameMenu[1].alignment      = MENU_ALIGN_RIGHT;
-                    GameMenu[1].selectionCount = 3;
-                    GameMenu[1].selection1     = 0;
-
-                    GameMenu[0].alignment      = MENU_ALIGN_CENTER;
-                    GameMenu[0].selectionCount = 1;
-                    StageMode                  = DEVMENU_MODMENU;
+            if (GameMenu[1].selection1 >= GameMenu[1].rowCount) {
+                if (GKeyDown.C) {
+                    --GameMenu[1].selection1;
+                } else {
+                    GameMenu[1].selection1 = 0;
                 }
             }
 
@@ -374,6 +351,26 @@ void ProcessSystemMenu() {
                 EditTextMenuEntry(&GameMenu[1], buffer, GameMenu[1].selection1);
             }
 
+            if (GKeyDown.C && GameMenu[1].selection1 != preOption) {
+                int option         = GameMenu[1].selection1;
+                ModInfo swap       = modList[preOption];
+                modList[preOption] = modList[option];
+                modList[option]    = swap;
+
+                SetupTextMenu(&GameMenu[0], 0);
+                AddTextMenuEntry(&GameMenu[0], "MOD LIST");
+                SetupTextMenu(&GameMenu[1], 0);
+
+                char buffer[0x100];
+                for (int m = 0; m < modList.size(); ++m) {
+                    StrCopy(buffer, modList[m].name.c_str());
+                    StrAdd(buffer, ": ");
+                    StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
+                    for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
+                    AddTextMenuEntry(&GameMenu[1], buffer);
+                }
+            }
+
             if (GKeyPress.B) {
                 StageMode = DEVMENU_MAIN;
                 SetupTextMenu(&GameMenu[0], 0);
@@ -389,26 +386,12 @@ void ProcessSystemMenu() {
                 AddTextMenuEntry(&GameMenu[0], "MODS");
                 AddTextMenuEntry(&GameMenu[0], " ");
                 AddTextMenuEntry(&GameMenu[0], "QUIT");
-                StageMode                  = DEVMENU_MAIN;
                 GameMenu[0].alignment      = MENU_ALIGN_CENTER;
                 GameMenu[0].selectionCount = 2;
                 GameMenu[0].selection1     = 0;
                 GameMenu[0].selection2     = 7;
 
-                // Reload entire engine
-                Engine.LoadGameConfig("Data/Game/GameConfig.bin");
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
-                if (Engine.window) {
-                    char gameTitle[0x40];
-                    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
-                    SDL_SetWindowTitle(Engine.window, gameTitle);
-                }
-#endif
-
-                ReleaseGlobalSfx();
-                LoadGlobalSfx();
-
-                saveMods();
+                RefreshEngine();
             }
 
             DrawTextMenu(&GameMenu[0], SCREEN_CENTERX - 4, 40);

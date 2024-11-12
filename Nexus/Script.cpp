@@ -894,7 +894,7 @@ void CheckCaseNumber(char *text) {
         if (caseID > JumpTableData[stackValue])
             JumpTableData[stackValue] = caseID;
     } else {
-        printLog("WARNING: unable to convert case string \"%s\" to int, on line %d", caseString, lineID);
+        PrintLog("WARNING: unable to convert case string \"%s\" to int, on line %d", caseString, lineID);
     }
 }
 bool ReadSwitchCase(char *text) {

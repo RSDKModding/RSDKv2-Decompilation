@@ -219,7 +219,7 @@ void LoadStageFiles(void) {
 
     if (!CheckCurrentStageFolder(StageListPosition)) {
 #if !RETRO_USE_ORIGINAL_CODE
-        printLog("Loading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
+        PrintLog("Loading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
 #endif
         ReleaseStageSfx();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
@@ -298,7 +298,7 @@ void LoadStageFiles(void) {
         LoadStageBackground();
 #if !RETRO_USE_ORIGINAL_CODE
     } else {
-        printLog("Reloading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
+        PrintLog("Reloading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
     }
 #endif
 

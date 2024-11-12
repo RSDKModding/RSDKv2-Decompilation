@@ -17,6 +17,7 @@ SOURCES = \
   Nexus/Input.cpp \
   Nexus/main.cpp \
   Nexus/Math.cpp \
+  Nexus/ModAPI.cpp \
   Nexus/Object.cpp \
   Nexus/Palette.cpp \
   Nexus/Player.cpp \

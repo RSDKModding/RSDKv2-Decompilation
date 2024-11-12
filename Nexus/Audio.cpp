@@ -64,7 +64,7 @@ int InitAudioPlayback()
         SDL_PauseAudioDevice(audioDevice, 0);
     }
     else {
-        printLog("Unable to open audio device: %s", SDL_GetError());
+        PrintLog("Unable to open audio device: %s", SDL_GetError());
         audioEnabled = false;
         return true; // no audio but game wont crash now
     }
@@ -75,7 +75,7 @@ int InitAudioPlayback()
         SDL_PauseAudio(0);
     }
     else {
-        printLog("Unable to open audio device: %s", SDL_GetError());
+        PrintLog("Unable to open audio device: %s", SDL_GetError());
         audioEnabled = false;
         return true; // no audio but game wont crash now
     }
@@ -247,7 +247,7 @@ void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
                     bytes_gotten += bytes_read;
                 }
                 else {
-                    printLog("Music read error: vorbis error: %d", bytes_read);
+                    PrintLog("Music read error: vorbis error: %d", bytes_read);
                 }
             }
 
@@ -446,7 +446,7 @@ void LoadMusic(void *userdata)
         musInfo.stream = SDL_NewAudioStream(AUDIO_S16, musInfo.vorbisFile.vi->channels, musInfo.vorbisFile.vi->rate, audioDeviceFormat.format,
                                             audioDeviceFormat.channels, audioDeviceFormat.freq);
         if (!musInfo.stream) {
-            printLog("Failed to create stream: %s", SDL_GetError());
+            PrintLog("Failed to create stream: %s", SDL_GetError());
         }
 #endif
 
@@ -517,7 +517,7 @@ void LoadSfx(char *filePath, byte sfxID)
         SDL_LockAudio();
         SDL_RWops *src = SDL_RWFromMem(sfx, info.fileSize);
         if (src == NULL) {
-            printLog("Unable to open sfx: %s", info.fileName);
+            PrintLog("Unable to open sfx: %s", info.fileName);
         }
         else {
             SDL_AudioSpec wav_spec;
@@ -528,7 +528,7 @@ void LoadSfx(char *filePath, byte sfxID)
             SDL_RWclose(src);
             delete[] sfx;
             if (wav == NULL) {
-                printLog("Unable to read sfx: %s", info.fileName);
+                PrintLog("Unable to read sfx: %s", info.fileName);
             }
             else {
                 SDL_AudioCVT convert;

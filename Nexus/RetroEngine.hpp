@@ -151,6 +151,7 @@ extern bool engineDebugMode;
 #include "Video.hpp"
 #include "Userdata.hpp"
 #include "Debug.hpp"
+#include "ModAPI.hpp"
 
 class RetroEngine {
 public:

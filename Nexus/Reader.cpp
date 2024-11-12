@@ -117,7 +117,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         if (!ParseVirtualFileSystem(fileInfo)) {
             fClose(cFileHandle);
             cFileHandle = NULL;
-            printLog("Couldn't load file '%s'", filePathBuf);
+            PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
         fileInfo->readPos           = readPos;
@@ -131,7 +131,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
         StrCopy(fileName, filePathBuf);
         cFileHandle = fOpen(fileInfo->fileName, "rb");
         if (!cFileHandle) {
-            printLog("Couldn't load file '%s'", filePathBuf);
+            PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
 
@@ -149,7 +149,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     bufferPosition = 0;
     readSize       = 0;
 
-    printLog("Loaded File '%s'", filePathBuf);
+    PrintLog("Loaded File '%s'", filePathBuf);
 
     return true;
 }
@@ -477,7 +477,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         if (!ParseVirtualFileSystem2(fileInfo)) {
             fClose(fileInfo->cFileHandle);
             fileInfo->cFileHandle = NULL;
-            printLog("Couldn't load file '%s'", filePathBuf);
+            PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
         fileInfo->fileBuffer = (byte *)malloc(fileInfo->vFileSize);
@@ -490,7 +490,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         StrCopy(fileInfo->fileName, filePathBuf);
         fileInfo->cFileHandle = fOpen(fileInfo->fileName, "rb");
         if (!fileInfo->cFileHandle) {
-            printLog("Couldn't load file '%s'", filePathBuf);
+            PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
 
@@ -511,7 +511,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     }
     fileInfo->bufferPosition = 0;
 
-    printLog("Loaded File '%s'", filePathBuf);
+    PrintLog("Loaded File '%s'", filePathBuf);
 
     return true;
 }
