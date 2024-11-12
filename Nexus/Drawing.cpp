@@ -358,15 +358,7 @@ void DrawObjectList(int Layer) {
         }
     }
 }
-void DrawStageGFX() {
-    waterDrawPos = waterLevel - YScrollOffset;
-
-    if (waterDrawPos < 0)
-        waterDrawPos = 0;
-
-    if (waterDrawPos > SCREEN_YSIZE)
-        waterDrawPos = SCREEN_YSIZE;
-
+void DrawStageGfx() {
     DrawObjectList(0);
     if (activeTileLayers[0] < LAYER_COUNT) {
         switch (stageLayouts[activeTileLayers[0]].type) {
@@ -1937,8 +1929,8 @@ void DrawRotatedSprite(int direction, int XPos, int YPos, int pivotX, int pivotY
         angle += 0x200;
     if (angle)
         angle = 0x200 - angle;
-    int sine   = sinVal512[angle];
-    int cosine = cosVal512[angle];
+    int sine   = SinValue512[angle];
+    int cosine = CosValue512[angle];
     int XPositions[4];
     int YPositions[4];
 

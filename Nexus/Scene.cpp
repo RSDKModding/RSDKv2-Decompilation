@@ -19,8 +19,8 @@ int XScrollOffset = 0;
 int YScrollOffset = 0;
 int YScrollA      = 0;
 int YScrollB      = SCREEN_YSIZE;
-int xScrollA      = 0;
-int xScrollB      = SCREEN_XSIZE;
+int XScrollA      = 0;
+int XScrollB      = SCREEN_XSIZE;
 int YScrollMove   = 0;
 int EarthquakeX   = 0;
 int EarthquakeY   = 0;
@@ -32,7 +32,7 @@ int YBoundary1    = 0;
 int NewYBoundary1 = 0;
 int XBoundary2    = 0;
 int YBoundary2    = 0;
-int waterLevel    = 0x7FFFFFF;
+int WaterLevel    = 0x7FFFFFF;
 int waterDrawPos  = SCREEN_YSIZE;
 int NewXBoundary2 = 0;
 int NewYBoundary2 = 0;
@@ -153,7 +153,7 @@ void ProcessStage(void) {
                 }
             }
 
-            DrawStageGFX();
+            DrawStageGfx();
             FlipScreen();
             break;
         case STAGEMODE_PAUSED:
@@ -197,7 +197,7 @@ void ProcessStage(void) {
                         SetPlayerLockedScreenPosition(&PlayerList[0]);
                     }
                 }
-                DrawStageGFX();
+                DrawStageGfx();
             }
 
             if (GKeyPress.start) {
@@ -310,10 +310,11 @@ void LoadStageFiles(void) {
     }
     LoadActLayout();
     ProcessStartupObjects();
-    xScrollA = (PlayerList[0].XPos >> 16) - SCREEN_CENTERX;
-    xScrollB = (PlayerList[0].XPos >> 16) - SCREEN_CENTERX + SCREEN_XSIZE;
+
+    XScrollA = (PlayerList[0].XPos >> 16) - SCREEN_CENTERX;
+    XScrollB = (PlayerList[0].XPos >> 16) - (SCREEN_CENTERX + SCREEN_XSIZE);
     YScrollA = (PlayerList[0].YPos >> 16) - SCREEN_SCROLL_UP;
-    YScrollB = (PlayerList[0].YPos >> 16) - SCREEN_SCROLL_UP + SCREEN_YSIZE;
+    YScrollB = (PlayerList[0].YPos >> 16) - (SCREEN_SCROLL_UP + SCREEN_YSIZE);
 }
 int LoadActFile(const char *ext, int stageID, FileInfo *info) {
     char dest[0x40];
@@ -362,7 +363,7 @@ void LoadActLayout() {
         NewYBoundary1 = 0;
         XBoundary2    = stageLayouts[0].xsize << 7;
         YBoundary2    = stageLayouts[0].ysize << 7;
-        waterLevel    = YBoundary2 + 128;
+        WaterLevel    = YBoundary2 + 128;
         NewXBoundary2 = stageLayouts[0].xsize << 7;
         NewYBoundary2 = stageLayouts[0].ysize << 7;
 
@@ -879,9 +880,9 @@ void SetPlayerScreenPosition(Player *player) {
         else
             XBoundary2 = NewXBoundary2;
     }
-    int xscrollA     = xScrollA;
-    int xscrollB     = xScrollB;
-    int scrollAmount = playerXPos - (xScrollA + SCREEN_CENTERX);
+    int xscrollA     = XScrollA;
+    int xscrollB     = XScrollB;
+    int scrollAmount = playerXPos - (XScrollA + SCREEN_CENTERX);
     if (abs(scrollAmount) >= 25) {
         if (scrollAmount <= 0)
             xscrollA -= 16;
@@ -906,8 +907,8 @@ void SetPlayerScreenPosition(Player *player) {
         xscrollB = XBoundary2;
         xscrollA = XBoundary2 - SCREEN_XSIZE;
     }
-    xScrollA = xscrollA;
-    xScrollB = xscrollB;
+    XScrollA = xscrollA;
+    XScrollB = xscrollB;
     if (playerXPos <= xscrollA + SCREEN_CENTERX) {
         player->screenXPos = EarthquakeX + playerXPos - xscrollA;
         XScrollOffset      = xscrollA - EarthquakeX;
@@ -921,7 +922,7 @@ void SetPlayerScreenPosition(Player *player) {
     }
     int yscrollA     = YScrollA;
     int yscrollB     = YScrollB;
-    int hitboxDiff   = PlayerCBoxes[0].left[0] - GetPlayerCBox(script)->left[0];
+    int hitboxDiff   = PlayerCBoxes[0].bottom[0] - GetPlayerCBoxInstance(player, script)->bottom[0];
     int adjustYPos   = playerYPos - hitboxDiff;
     int adjustAmount = player->lookPos + adjustYPos - (YScrollA + SCREEN_SCROLL_UP);
     if (player->trackScroll) {
@@ -1042,6 +1043,7 @@ void SetPlayerScreenPositionCDStyle(Player *player) {
         else
             XBoundary2 = NewXBoundary2;
     }
+
     if (!player->gravity) {
         if (player->direction) {
             if (player->animation == ANI_PEELOUT || player->animation == ANI_SPINDASH || player->speed < -0x5F5C2) {
@@ -1072,16 +1074,17 @@ void SetPlayerScreenPositionCDStyle(Player *player) {
             XScrollOffset      = XBoundary2 - SCREEN_XSIZE - EarthquakeX;
         }
     }
+
     int yscrollA     = YScrollA;
     int yscrollB     = YScrollB;
-    int hitboxDiff   = PlayerCBoxes[0].left[0] - GetPlayerCBox(script)->left[0];
+    int hitboxDiff   = PlayerCBoxes[0].bottom[0] - GetPlayerCBoxInstance(player, script)->bottom[0];
     int adjustY      = playerYPos - hitboxDiff;
     int adjustOffset = player->lookPos + adjustY - (YScrollA + SCREEN_SCROLL_UP);
     if (player->trackScroll) {
         YScrollMove = 32;
     } else {
         if (YScrollMove == 32) {
-            YScrollMove = 2 * ((hitboxDiff + SCREEN_SCROLL_UP - player->screenYPos - player->lookPos) >> 1);
+            YScrollMove = ((hitboxDiff + SCREEN_SCROLL_UP - player->screenYPos - player->lookPos) >> 1) << 1;
             if (YScrollMove > 32)
                 YScrollMove = 32;
             if (YScrollMove < -32)
@@ -1119,6 +1122,7 @@ void SetPlayerScreenPositionCDStyle(Player *player) {
         yscrollB = YBoundary2;
         yscrollA = YBoundary2 - SCREEN_YSIZE;
     }
+
     YScrollA = yscrollA;
     YScrollB = yscrollB;
 
@@ -1141,6 +1145,7 @@ void SetPlayerScreenPositionCDStyle(Player *player) {
             YScrollOffset      = yscrollB - SCREEN_YSIZE - EarthquakeY;
         }
     }
+
     player->screenYPos += hitboxDiff;
 }
 void SetPlayerLockedScreenPosition(Player *player) {
@@ -1163,10 +1168,10 @@ void SetPlayerLockedScreenPosition(Player *player) {
             break;
         }
         case CAMERASTYLE_EXTENDED: {
-            int xscrollA = xScrollA;
-            int xscrollB = xScrollB;
-            if (playerXPos <= xScrollA + SCREEN_CENTERX) {
-                player->screenXPos = EarthquakeX + playerXPos - xScrollA;
+            int xscrollA = XScrollA;
+            int xscrollB = XScrollB;
+            if (playerXPos <= XScrollA + SCREEN_CENTERX) {
+                player->screenXPos = EarthquakeX + playerXPos - XScrollA;
                 XScrollOffset      = xscrollA - EarthquakeX;
             } else {
                 XScrollOffset      = playerXPos + EarthquakeX - SCREEN_CENTERX;
@@ -1182,7 +1187,7 @@ void SetPlayerLockedScreenPosition(Player *player) {
     }
     int yscrollA   = YScrollA;
     int yscrollB   = YScrollB;
-    int hitboxDiff = PlayerCBoxes[0].left[0] - GetPlayerCBox(script)->left[0];
+    int hitboxDiff = PlayerCBoxes[0].bottom[0] - GetPlayerCBoxInstance(player, script)->bottom[0];
     int adjustY    = playerYPos - hitboxDiff;
 
     if (EarthquakeY) {

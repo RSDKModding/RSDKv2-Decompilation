@@ -57,7 +57,7 @@ void SetTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte table
 
 // Layer Drawing
 void DrawObjectList(int layer);
-void DrawStageGFX();
+void DrawStageGfx();
 
 // TileLayer Drawing
 void DrawHLineScrollLayer(int layerID);

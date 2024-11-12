@@ -86,7 +86,7 @@ bool processEvents() {
                             StageMode         = STAGEMODE_LOAD;
                             Engine.GameMode   = ENGINE_MAINGAME;
                         } else {
-                            Engine.running = false;
+                            Engine.GameRunning = false;
                         }
                         break;
 
@@ -218,7 +218,9 @@ bool processEvents() {
 
 void RetroEngine::Init() {
     CalculateTrigAngles();
+#if !RETRO_USE_ORIGINAL_CODE
     InitUserdata();
+#endif
 #if RETRO_USE_MOD_LOADER
     initMods();
 #endif
@@ -243,14 +245,14 @@ void RetroEngine::Init() {
     CheckBinFile(dest);
 
     GameMode = ENGINE_EXITGAME;
-    running  = false;
+    GameRunning  = false;
     if (LoadGameConfig("Data/Game/GameConfig.bin")) {
         if (InitRenderDevice()) {
             if (InitAudioPlayback()) {
                 InitSystemMenu();
                 ClearScriptData();
                 initialised = true;
-                running     = true;
+                GameRunning     = true;
             }
         }
     }
@@ -265,7 +267,7 @@ void RetroEngine::Run() {
     unsigned long long targetFreq = SDL_GetPerformanceFrequency() / Engine.refreshRate;
     unsigned long long curTicks   = 0;
 
-    while (running) {
+    while (GameRunning) {
 #if !RETRO_USE_ORIGINAL_CODE
         if (!vsync) {
             if (SDL_GetPerformanceCounter() < curTicks + targetFreq)
@@ -273,7 +275,7 @@ void RetroEngine::Run() {
             curTicks = SDL_GetPerformanceCounter();
         }
 #endif
-        running = processEvents();
+        GameRunning = processEvents();
 
         for (int s = 0; s < gameSpeed; ++s) {
             ReadInputDevice();
@@ -293,7 +295,7 @@ void RetroEngine::Run() {
                         ResetCurrentStageFolder();
                         break;
                     case ENGINE_EXITGAME: 
-                        running = false; 
+                        GameRunning = false; 
                         break;
                     default: break;
                 }

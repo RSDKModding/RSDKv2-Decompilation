@@ -1339,10 +1339,10 @@ void ClearScriptData() {
 }
 
 void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
-    bool running      = true;
+    bool GameRunning      = true;
     int scriptDataPtr = scriptCodePtr;
     jumpTableStackPos = 0;
-    while (running) {
+    while (GameRunning) {
         int opcode           = ScriptData[scriptDataPtr++];
         int opcodeSize       = functions[opcode].opcodeSize;
         int scriptCodeOffset = scriptDataPtr;
@@ -1798,7 +1798,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
         // Functions
         switch (opcode) {
             default: break;
-            case FUNC_END: running = false; break;
+            case FUNC_END: GameRunning = false; break;
             case FUNC_EQUAL: ScriptEng.operands[0] = ScriptEng.operands[1]; break;
             case FUNC_ADD: ScriptEng.operands[0] += ScriptEng.operands[1]; break;
             case FUNC_SUB: ScriptEng.operands[0] -= ScriptEng.operands[1]; break;

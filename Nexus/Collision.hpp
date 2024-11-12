@@ -48,6 +48,11 @@ inline Hitbox *GetPlayerCBox(PlayerScript *script)
     return &PlayerCBoxes[script->animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
 }
 
+inline Hitbox *GetPlayerCBoxInstance(Player *player, PlayerScript *script)
+{
+    return &PlayerCBoxes[script->animations[player->animation].frames[player->frame].hitboxID];
+}
+
 void FindFloorPosition(Player *player, CollisionSensor *sensor, int startYPos);
 void FindLWallPosition(Player *player, CollisionSensor *sensor, int startXPos);
 void FindRoofPosition(Player *player, CollisionSensor *sensor, int startYPos);

@@ -86,7 +86,7 @@ void ProcessObjects() {
                                 if (GKeyPress.B) {
                                     player->tileCollisions                     = true;
                                     player->objectInteraction                  = true;
-                                    player->controlMode                        = 0;
+                                    player->controlMode                        = CONTROLMODE_NORMAL;
                                     ObjectEntityList[ObjectLoop].propertyValue = 0;
                                 }
                             }

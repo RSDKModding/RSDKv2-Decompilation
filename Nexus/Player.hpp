@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define PLAYER_COUNT (0x2) 
+#define PLAYER_COUNT (0x2)
 
 enum PlayerAni {
     ANI_STOPPED,
@@ -27,12 +27,17 @@ enum PlayerAni {
     ANI_FLAILINGRIGHT,
     ANI_SLIDING,
     ANI_FINISHPOSE = 23,
-    ANI_CORKSCREW = 34,
-    ANI_HANGING = 43,
+    ANI_CORKSCREW  = 34,
+    ANI_HANGING    = 43,
 };
 
-struct PlayerMovementStats
-{
+enum PlayerControlModes {
+    CONTROLMODE_NONE     = -1,
+    CONTROLMODE_NORMAL   = 0,
+    CONTROLMODE_SIDEKICK = 1,
+};
+
+struct PlayerMovementStats {
     int topSpeed;
     int acceleration;
     int deceleration;
@@ -104,18 +109,17 @@ struct PlayerScript {
     byte startJumpSpeed;
 };
 
-
 extern Player PlayerList[PLAYER_COUNT];
 extern PlayerScript PlayerScriptList[PLAYER_COUNT];
 extern int PlayerNo;
 extern int activePlayerCount;
 
-extern ushort upBuffer;
-extern ushort downBuffer;
-extern ushort leftBuffer;
-extern ushort rightBuffer;
-extern ushort jumpPressBuffer;
-extern ushort jumpHoldBuffer;
+extern ushort DelayUp;
+extern ushort DelayDown;
+extern ushort DelayLeft;
+extern ushort DelayRight;
+extern ushort DelayJumpPress;
+extern ushort DelayJumpHold;
 
 void LoadPlayerFromList(byte characterID, byte playerID);
 

@@ -163,7 +163,7 @@ public:
     char dataFile[0x80];
 
     bool initialised = false;
-    bool running     = false;
+    bool GameRunning     = false;
 
     int GameMode    = ENGINE_MAINGAME;
     byte ColourMode = 1; // 16-bit
