@@ -49,7 +49,7 @@ void UpdateVideoFrame()
                     FileRead(&fileBuffer, 1);
                 } while (c != 0x100);
             }
-            ReadGifPictureData(surface->width, surface->height, interlaced, graphicData, surface->dataPosition);
+            ReadGifPictureData(surface->width, surface->height, interlaced, GraphicData, surface->dataPosition);
 
             SetFilePosition(videoFilePos);
             ++currentVideoFrame;

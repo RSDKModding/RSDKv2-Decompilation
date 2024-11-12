@@ -44,7 +44,7 @@ extern int functionStack[FUNCSTACK_COUNT];
 extern int jumpTableStackPos;
 extern int functionStackPos;
 
-extern ScriptEngine scriptEng;
+extern ScriptEngine ScriptEng;
 extern char scriptText[0x100];
 
 extern int scriptDataPos;

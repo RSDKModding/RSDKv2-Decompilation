@@ -682,8 +682,8 @@ void RWallCollision(Player *player, CollisionSensor *sensor)
 
 void ProcessTracedCollision(Player *player)
 {
-    PlayerScript *script = &playerScriptList[activePlayer];
-    Hitbox *playerHitbox = getPlayerHitbox(script);
+    PlayerScript *script = &PlayerScriptList[activePlayer];
+    Hitbox *playerHitbox = GetPlayerCBox(script);
     collisionLeft        = playerHitbox->left[0];
     collisionTop         = playerHitbox->top[0];
     collisionRight       = playerHitbox->right[0];
@@ -1285,8 +1285,8 @@ void ProcessPathGrip(Player *player)
 
 void SetPathGripSensors(Player *player)
 {
-    PlayerScript *script = &playerScriptList[activePlayer];
-    Hitbox *playerHitbox = getPlayerHitbox(script);
+    PlayerScript *script = &PlayerScriptList[activePlayer];
+    Hitbox *playerHitbox = GetPlayerCBox(script);
     switch (player->collisionMode) {
         case CMODE_FLOOR: {
             collisionLeft   = playerHitbox->left[0];
@@ -1373,7 +1373,6 @@ void ProcessPlayerTileCollisions(Player *player)
     player->flailing[0]   = 0;
     player->flailing[1]   = 0;
     player->flailing[2]   = 0;
-    scriptEng.checkResult = false;
     if (player->gravity == 1)
         ProcessTracedCollision(player);
     else
@@ -1382,8 +1381,8 @@ void ProcessPlayerTileCollisions(Player *player)
 
 void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
 {
-    scriptEng.checkResult = false;
-    Entity *entity        = &objectEntityList[objectLoop];
+    ScriptEng.checkResult = false;
+    Entity *entity        = &ObjectEntityList[objectLoop];
     int c                 = 0;
     int XPos              = (entity->XPos >> 16) + xOffset;
     int YPos              = (entity->YPos >> 16) + yOffset;
@@ -1402,7 +1401,7 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
                         break;
                     }
                     YPos                  = collisionMasks[cPath].floorMasks[c] + (chunkY << 7) + (tileY << 4);
-                    scriptEng.checkResult = true;
+                    ScriptEng.checkResult = true;
                     break;
                 }
                 case 1: {
@@ -1411,7 +1410,7 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
                         break;
                     }
                     YPos                  = collisionMasks[cPath].floorMasks[c] + (chunkY << 7) + (tileY << 4);
-                    scriptEng.checkResult = true;
+                    ScriptEng.checkResult = true;
                     break;
                 }
                 case 2: {
@@ -1420,7 +1419,7 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
                         break;
                     }
                     YPos                  = 15 - collisionMasks[cPath].roofMasks[c] + (chunkY << 7) + (tileY << 4);
-                    scriptEng.checkResult = true;
+                    ScriptEng.checkResult = true;
                     break;
                 }
                 case 3: {
@@ -1429,12 +1428,12 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
                         break;
                     }
                     YPos                  = 15 - collisionMasks[cPath].roofMasks[c] + (chunkY << 7) + (tileY << 4);
-                    scriptEng.checkResult = true;
+                    ScriptEng.checkResult = true;
                     break;
                 }
             }
         }
-        if (scriptEng.checkResult) {
+        if (ScriptEng.checkResult) {
             entity->YPos = (YPos - yOffset) << 16;
         }
     }
@@ -1443,14 +1442,14 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath)
 void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
 {
     int c;
-    scriptEng.checkResult = false;
-    Entity *entity        = &objectEntityList[objectLoop];
+    ScriptEng.checkResult = false;
+    Entity *entity        = &ObjectEntityList[objectLoop];
     int XPos              = (entity->XPos >> 16) + xOffset;
     int YPos              = (entity->YPos >> 16) + yOffset;
     int chunkX            = YPos;
     YPos                  = YPos - 16;
     for (int i = 3; i > 0; i--) {
-        if (XPos > 0 && XPos < stageLayouts[0].xsize << 7 && YPos > 0 && YPos < stageLayouts[0].ysize << 7 && !scriptEng.checkResult) {
+        if (XPos > 0 && XPos < stageLayouts[0].xsize << 7 && YPos > 0 && YPos < stageLayouts[0].ysize << 7 && !ScriptEng.checkResult) {
             int chunkX    = XPos >> 7;
             int tileX     = (XPos & 0x7F) >> 4;
             int chunkY    = YPos >> 7;
@@ -1465,7 +1464,7 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
                             break;
                         }
                         entity->YPos          = collisionMasks[cPath].floorMasks[c] + (chunkY << 7) + (tileY << 4);
-                        scriptEng.checkResult = true;
+                        ScriptEng.checkResult = true;
                         break;
                     }
                     case 1: {
@@ -1474,7 +1473,7 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
                             break;
                         }
                         entity->YPos          = collisionMasks[cPath].floorMasks[c] + (chunkY << 7) + (tileY << 4);
-                        scriptEng.checkResult = true;
+                        ScriptEng.checkResult = true;
                         break;
                     }
                     case 2: {
@@ -1483,7 +1482,7 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
                             break;
                         }
                         entity->YPos          = 15 - collisionMasks[cPath].roofMasks[c] + (chunkY << 7) + (tileY << 4);
-                        scriptEng.checkResult = true;
+                        ScriptEng.checkResult = true;
                         break;
                     }
                     case 3: {
@@ -1492,7 +1491,7 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
                             break;
                         }
                         entity->YPos          = 15 - collisionMasks[cPath].roofMasks[c] + (chunkY << 7) + (tileY << 4);
-                        scriptEng.checkResult = true;
+                        ScriptEng.checkResult = true;
                         break;
                     }
                 }
@@ -1500,21 +1499,21 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath)
         }
         YPos += 16;
     }
-    if (scriptEng.checkResult) {
+    if (ScriptEng.checkResult) {
         if (abs(entity->YPos - chunkX) < 16) {
             entity->YPos = (entity->YPos - yOffset) << 16;
             return;
         }
         entity->YPos          = (chunkX - yOffset) << 16;
-        scriptEng.checkResult = false;
+        ScriptEng.checkResult = false;
     }
 }
 
 void TouchCollision(int left, int top, int right, int bottom)
 {
-    Player *player       = &playerList[activePlayer];
-    PlayerScript *script = &playerScriptList[activePlayer];
-    Hitbox *playerHitbox = getPlayerHitbox(script);
+    Player *player       = &PlayerList[activePlayer];
+    PlayerScript *script = &PlayerScriptList[activePlayer];
+    Hitbox *playerHitbox = GetPlayerCBox(script);
 
     collisionLeft   = player->XPos >> 16;
     collisionTop    = player->YPos >> 16;
@@ -1524,19 +1523,19 @@ void TouchCollision(int left, int top, int right, int bottom)
     collisionTop += playerHitbox->top[0];
     collisionRight += playerHitbox->right[0];
     collisionBottom += playerHitbox->bottom[0];
-    scriptEng.checkResult = collisionRight > left && collisionLeft < right && collisionBottom > top && collisionTop < bottom;
+    ScriptEng.checkResult = collisionRight > left && collisionLeft < right && collisionBottom > top && collisionTop < bottom;
 }
 void BoxCollision(int left, int top, int right, int bottom)
 {
-    Player *player       = &playerList[activePlayer];
-    PlayerScript *script = &playerScriptList[activePlayer];
-    Hitbox *playerHitbox = getPlayerHitbox(script);
+    Player *player       = &PlayerList[activePlayer];
+    PlayerScript *script = &PlayerScriptList[activePlayer];
+    Hitbox *playerHitbox = GetPlayerCBox(script);
 
     collisionLeft         = playerHitbox->left[0];
     collisionTop          = playerHitbox->top[0];
     collisionRight        = playerHitbox->right[0];
     collisionBottom       = playerHitbox->bottom[0];
-    scriptEng.checkResult = false;
+    ScriptEng.checkResult = false;
 
     int spd = 0;
     switch (player->collisionMode) {
@@ -1579,7 +1578,7 @@ void BoxCollision(int left, int top, int right, int bottom)
             player->YVelocity     = 0;
             player->angle         = 0;
             player->rotation      = 0;
-            scriptEng.checkResult = true;
+            ScriptEng.checkResult = true;
         }
         else {
             sensors[0].collided = false;
@@ -1599,7 +1598,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                 }
                 if (player->YVelocity < 1)
                     player->YVelocity = 0;
-                scriptEng.checkResult = 4;
+                ScriptEng.checkResult = 4;
             }
             else {
                 sensors[0].collided = false;
@@ -1621,7 +1620,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                         player->XVelocity = 0;
                         player->speed     = 0;
                     }
-                    scriptEng.checkResult = 2;
+                    ScriptEng.checkResult = 2;
                 }
                 else {
                     sensors[0].collided = false;
@@ -1645,7 +1644,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                             player->XVelocity = 0;
                             player->speed     = 0;
                         }
-                        scriptEng.checkResult = 3;
+                        ScriptEng.checkResult = 3;
                     }
                 }
             }
@@ -1671,7 +1670,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                 player->XVelocity = 0;
                 player->speed     = 0;
             }
-            scriptEng.checkResult = 2;
+            ScriptEng.checkResult = 2;
         }
         else {
             sensors[0].collided = false;
@@ -1694,7 +1693,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                     player->XVelocity = 0;
                     player->speed     = 0;
                 }
-                scriptEng.checkResult = 3;
+                ScriptEng.checkResult = 3;
             }
             else {
                 sensors[0].collided = false;
@@ -1724,7 +1723,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                     player->YVelocity     = 0;
                     player->angle         = 0;
                     player->rotation      = 0;
-                    scriptEng.checkResult = true;
+                    ScriptEng.checkResult = true;
                 }
                 else {
                     sensors[0].collided = false;
@@ -1746,7 +1745,7 @@ void BoxCollision(int left, int top, int right, int bottom)
                         }
                         if (player->YVelocity < 1)
                             player->YVelocity = 0;
-                        scriptEng.checkResult = 4;
+                        ScriptEng.checkResult = 4;
                     }
                 }
             }
@@ -1755,9 +1754,9 @@ void BoxCollision(int left, int top, int right, int bottom)
 }
 void PlatformCollision(int left, int top, int right, int bottom)
 {
-    Player *player       = &playerList[activePlayer];
-    PlayerScript *script = &playerScriptList[activePlayer];
-    Hitbox *playerHitbox = getPlayerHitbox(script);
+    Player *player       = &PlayerList[activePlayer];
+    PlayerScript *script = &PlayerScriptList[activePlayer];
+    Hitbox *playerHitbox = GetPlayerCBox(script);
 
     collisionLeft         = playerHitbox->left[0];
     collisionTop          = playerHitbox->top[0];
@@ -1772,7 +1771,7 @@ void PlatformCollision(int left, int top, int right, int bottom)
     sensors[0].YPos       = player->YPos + (collisionBottom << 16);
     sensors[1].YPos       = sensors[0].YPos;
     sensors[2].YPos       = sensors[0].YPos;
-    scriptEng.checkResult = false;
+    ScriptEng.checkResult = false;
     for (int i = 0; i < 3; ++i) {
         if (sensors[i].XPos > left && sensors[i].XPos < right && sensors[i].YPos > top - 2 && sensors[i].YPos < bottom && player->YVelocity >= 0) {
             sensors[i].collided = 1;
@@ -1791,5 +1790,5 @@ void PlatformCollision(int left, int top, int right, int bottom)
     player->YVelocity     = 0;
     player->angle         = 0;
     player->rotation      = 0;
-    scriptEng.checkResult = true;
+    ScriptEng.checkResult = true;
 }

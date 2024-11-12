@@ -43,9 +43,9 @@ extern int collisionBottom;
 
 extern CollisionSensor sensors[6];
 
-inline Hitbox *getPlayerHitbox(PlayerScript *script)
+inline Hitbox *GetPlayerCBox(PlayerScript *script)
 {
-    return &hitboxList[script->animations[playerList[activePlayer].animation].frames[playerList[activePlayer].frame].hitboxID];
+    return &PlayerCBoxes[script->animations[PlayerList[activePlayer].animation].frames[PlayerList[activePlayer].frame].hitboxID];
 }
 
 void FindFloorPosition(Player *player, CollisionSensor *sensor, int startYPos);

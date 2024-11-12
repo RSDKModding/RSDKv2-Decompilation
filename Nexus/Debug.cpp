@@ -20,7 +20,7 @@ void InitSystemMenu()
     if (Engine.usingBinFile) {
 #endif
         ClearGraphicsData();
-        for (int i = 0; i < PLAYER_COUNT; ++i) playerScriptList[i].scriptPath[0] = 0;
+        for (int i = 0; i < PLAYER_COUNT; ++i) PlayerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
         LoadPlayerFromList(0, 0);
         Engine.gameMode = ENGINE_MAINGAME;

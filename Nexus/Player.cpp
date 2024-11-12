@@ -1,7 +1,7 @@
 #include "RetroEngine.hpp"
 
-Player playerList[PLAYER_COUNT];
-PlayerScript playerScriptList[PLAYER_COUNT];
+Player PlayerList[PLAYER_COUNT];
+PlayerScript PlayerScriptList[PLAYER_COUNT];
 int activePlayer  = 0;
 int activePlayerCount = 1;
 
@@ -74,8 +74,8 @@ void LoadPlayerFromList(byte characterID, byte playerID)
             strBuf[strLen] = '\0';
 
             FileRead(&strLen, 1);
-            FileRead(&playerScriptList[p].scriptPath, strLen); // player script file
-            playerScriptList[p].scriptPath[strLen] = '\0';
+            FileRead(&PlayerScriptList[p].scriptPath, strLen); // player script file
+            PlayerScriptList[p].scriptPath[strLen] = '\0';
 
             if (characterID == p) {
                 GetFileInfo(&info);
@@ -95,9 +95,9 @@ void ProcessPlayerAnimationChange(Player *player)
 {
     if (player->animation != player->prevAnimation) {
         if (player->animation == ANI_JUMPING)
-            player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+            player->YPos += (PlayerCBoxes[0].bottom[0] - PlayerCBoxes[1].bottom[0]) << 16;
         if (player->prevAnimation == ANI_JUMPING)
-            player->YPos -= (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+            player->YPos -= (PlayerCBoxes[0].bottom[0] - PlayerCBoxes[1].bottom[0]) << 16;
         player->prevAnimation  = player->animation;
         player->frame          = 0;
         player->animationTimer = 0;
@@ -119,7 +119,7 @@ void DrawPlayer(Player *player, SpriteFrame *frame)
             break;
         default: break;
     }
-    DrawSpriteRotated(player->direction, player->screenXPos, player->screenYPos, -frame->pivotX, -frame->pivotY, frame->sprX, frame->sprY,
+    DrawRotatedSprite(player->direction, player->screenXPos, player->screenYPos, -frame->pivotX, -frame->pivotY, frame->sprX, frame->sprY,
                       frame->width, frame->height, rotation, frame->sheetID);
 }
 
@@ -445,7 +445,7 @@ void ProcessDebugMode(Player *player)
 
 void ProcessPlayerAnimation(Player *player)
 {
-    PlayerScript *script = &playerScriptList[player->type];
+    PlayerScript *script = &PlayerScriptList[player->type];
     if (!player->gravity) {
         int speed = (player->jumpingSpeed * abs(player->speed) / 6 >> 16) + 48;
         if (speed > 0xF0)
@@ -474,9 +474,9 @@ void ProcessPlayerAnimation(Player *player)
         player->animationTimer += script->animations[player->animation].speed;
     if (player->animation != player->prevAnimation) {
         if (player->animation == ANI_JUMPING)
-            player->YPos += (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+            player->YPos += (PlayerCBoxes[0].bottom[0] - PlayerCBoxes[1].bottom[0]) << 16;
         if (player->prevAnimation == ANI_JUMPING)
-            player->YPos -= (hitboxList[0].bottom[0] - hitboxList[1].bottom[0]) << 16;
+            player->YPos -= (PlayerCBoxes[0].bottom[0] - PlayerCBoxes[1].bottom[0]) << 16;
         player->prevAnimation  = player->animation;
         player->frame          = 0;
         player->animationTimer = 0;

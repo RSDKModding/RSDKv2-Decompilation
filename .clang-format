@@ -23,7 +23,6 @@ AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: true
 UseTab: Never
-BreakBeforeBraces: Custom
 BraceWrapping:
     AfterClass:      true
     AfterControlStatement: false

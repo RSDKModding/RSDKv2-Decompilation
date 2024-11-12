@@ -105,8 +105,8 @@ struct PlayerScript {
 };
 
 
-extern Player playerList[PLAYER_COUNT];
-extern PlayerScript playerScriptList[PLAYER_COUNT];
+extern Player PlayerList[PLAYER_COUNT];
+extern PlayerScript PlayerScriptList[PLAYER_COUNT];
 extern int activePlayer;
 extern int activePlayerCount;
 

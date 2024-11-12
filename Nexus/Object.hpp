@@ -33,7 +33,7 @@ enum ObjectPriority {
 
 extern int objectLoop;
 extern int curObjectType;
-extern Entity objectEntityList[ENTITY_COUNT];
+extern Entity ObjectEntityList[ENTITY_COUNT];
 
 extern int OBJECT_BORDER_X1;
 extern int OBJECT_BORDER_X2;

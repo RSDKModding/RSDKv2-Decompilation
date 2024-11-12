@@ -212,7 +212,7 @@ inline void ReleaseStageSfx()
     stageSFXCount = 0;
 }
 
-inline void ReleaseAudioDevice()
+inline void ReleaseSoundDevice()
 {
     StopMusic();
     StopAllSfx();

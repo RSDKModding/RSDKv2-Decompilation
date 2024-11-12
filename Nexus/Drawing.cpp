@@ -3,18 +3,18 @@
 int SCREEN_XSIZE   = 320;
 int SCREEN_CENTERX = SCREEN_XSIZE / 2;
 
-byte blendLookupTable[0x100 * 0x100];
+byte BlendLookupTable[0x100 * 0x100];
 
-byte tintTable0[0x100];
-byte tintTable1[0x100];
-byte tintTable2[0x100];
-byte tintTable3[0x100];
+byte TintLookupTable1[0x100];
+byte TintLookupTable2[0x100];
+byte TintLookupTable3[0x100];
+byte TintLookupTable4[0x100];
 
 DrawListEntry drawListEntries[DRAWLAYER_COUNT];
 
 int gfxDataPosition;
 GFXSurface gfxSurface[SURFACE_MAX];
-byte graphicData[GFXDATA_MAX];
+byte GraphicData[GFXDATA_MAX];
 
 int InitRenderDevice()
 {
@@ -22,8 +22,8 @@ int InitRenderDevice()
 
     sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.usingBinFile ? "" : " (Using Data Folder)");
 
-    Engine.pixelBuffer = new byte[SCREEN_XSIZE * SCREEN_YSIZE];
-    memset(Engine.pixelBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(byte));
+    Engine.FrameBuffer = new byte[SCREEN_XSIZE * SCREEN_YSIZE];
+    memset(Engine.FrameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(byte));
 
 #if RETRO_USING_SDL2
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -174,14 +174,14 @@ void FlipScreen()
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                          = palette8F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8F[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                          = palette8WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8WF[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
@@ -189,14 +189,14 @@ void FlipScreen()
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                          = palette8[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        Colour clr                          = palette8W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        Colour clr                          = palette8W[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         frameBuffer[(y * SCREEN_XSIZE) + x] = PACK_RGB888(clr.r, clr.g, clr.b);
                     }
                 }
@@ -218,26 +218,26 @@ void FlipScreen()
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16F[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16WF[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
             }
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        frameBuffer[(y * SCREEN_XSIZE) + x] = palette16W[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                     }
                 }
             }
@@ -258,7 +258,7 @@ void FlipScreen()
             if (fadeMode) {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                            = palette32F[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        uint clr                            = palette32F[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         byte r                              = (clr >> 16) & 0xFF;
                         byte g                              = (clr >> 8) & 0xFF;
                         byte b                              = (clr >> 0) & 0xFF;
@@ -268,7 +268,7 @@ void FlipScreen()
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                            = palette32WF[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        uint clr                            = palette32WF[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         byte r                              = (clr >> 16) & 0xFF;
                         byte g                              = (clr >> 8) & 0xFF;
                         byte b                              = (clr >> 0) & 0xFF;
@@ -279,7 +279,7 @@ void FlipScreen()
             else {
                 for (int y = 0; y < waterDrawPos; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                            = palette32[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        uint clr                            = palette32[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         byte r                              = (clr >> 16) & 0xFF;
                         byte g                              = (clr >> 8) & 0xFF;
                         byte b                              = (clr >> 0) & 0xFF;
@@ -289,7 +289,7 @@ void FlipScreen()
 
                 for (int y = waterDrawPos; y < SCREEN_YSIZE; ++y) {
                     for (int x = 0; x < SCREEN_XSIZE; ++x) {
-                        uint clr                            = palette32W[Engine.pixelBuffer[(y * SCREEN_XSIZE) + x]];
+                        uint clr                            = palette32W[Engine.FrameBuffer[(y * SCREEN_XSIZE) + x]];
                         byte r                              = (clr >> 16) & 0xFF;
                         byte g                              = (clr >> 8) & 0xFF;
                         byte b                              = (clr >> 0) & 0xFF;
@@ -319,8 +319,8 @@ void FlipScreen()
 
 void ReleaseRenderDevice()
 {
-    if (Engine.pixelBuffer)
-        delete[] Engine.pixelBuffer;
+    if (Engine.FrameBuffer)
+        delete[] Engine.FrameBuffer;
 #if RETRO_USING_SDL2
     SDL_DestroyTexture(Engine.screenBuffer);
     Engine.screenBuffer = NULL;
@@ -338,7 +338,7 @@ void ReleaseRenderDevice()
 
 void ClearScreen(byte index)
 {
-    byte *pixelBuffer = Engine.pixelBuffer;
+    byte *pixelBuffer = Engine.FrameBuffer;
     int cnt           = SCREEN_XSIZE * SCREEN_YSIZE;
     while (cnt--) {
         *pixelBuffer = index;
@@ -360,13 +360,13 @@ void DrawObjectList(int Layer)
     int size = drawListEntries[Layer].listSize;
     for (int i = 0; i < size; ++i) {
         objectLoop = drawListEntries[Layer].entityRefs[i];
-        int type   = objectEntityList[objectLoop].type;
+        int type   = ObjectEntityList[objectLoop].type;
 
         if (type == OBJ_TYPE_PLAYER) {
-            Player *player = &playerList[objectLoop];
+            Player *player = &PlayerList[objectLoop];
             ProcessPlayerAnimationChange(player);
             if (player->visible) {
-                DrawPlayer(player, &playerScriptList[player->type].animations[player->animation].frames[player->frame]);
+                DrawPlayer(player, &PlayerScriptList[player->type].animations[player->animation].frames[player->frame]);
             }
         }
         else if (type) {
@@ -455,7 +455,7 @@ void SetBlendTable(ushort alpha, byte type, byte a3, byte a4)
                             index = i;
                         }
                     }
-                    blendLookupTable[(0x100 * y) + x] = index;
+                    BlendLookupTable[(0x100 * y) + x] = index;
                 }
             }
             break;
@@ -464,7 +464,7 @@ void SetBlendTable(ushort alpha, byte type, byte a3, byte a4)
                 for (int x = 0; x < 0x100; ++x) {
                     int v1                          = (byte)((palette8[y].b + palette8[y].g + palette8[y].r) / 3);
                     int v2                          = (byte)((palette8[x].b + palette8[x].g + palette8[x].r) / 3);
-                    blendLookupTable[0x100 * y + x] = a4 + a3 * ((ushort)((0xFF - alpha) * v1 + alpha * v2) >> 8) / 0x100;
+                    BlendLookupTable[0x100 * y + x] = a4 + a3 * ((ushort)((0xFF - alpha) * v1 + alpha * v2) >> 8) / 0x100;
                 }
             }
             break;
@@ -475,10 +475,10 @@ void SetTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte table
 {
     byte *tintTable = NULL;
     switch (tableID) {
-        case 0: tintTable = tintTable0; break;
-        case 1: tintTable = tintTable1; break;
-        case 2: tintTable = tintTable2; break;
-        case 3: tintTable = tintTable3; break;
+        case 0: tintTable = TintLookupTable1; break;
+        case 1: tintTable = TintLookupTable2; break;
+        case 2: tintTable = TintLookupTable3; break;
+        case 3: tintTable = TintLookupTable4; break;
         default: break;
     }
 
@@ -559,7 +559,7 @@ void DrawHLineScrollLayer(int layerID)
         lastXSize = layerwidth;
     }
 
-    byte *pixelBufferPtr = Engine.pixelBuffer;
+    byte *pixelBufferPtr = Engine.FrameBuffer;
     int tileYPos         = yscrollOffset % (layerheight << 7);
     if (tileYPos < 0)
         tileYPos += layerheight << 7;
@@ -1091,7 +1091,7 @@ void DrawVLineScrollLayer(int layerID)
         lastYSize = layerheight;
     }
 
-    byte *pixelBufferPtr = Engine.pixelBuffer;
+    byte *pixelBufferPtr = Engine.FrameBuffer;
     int tileXPos         = xscrollOffset % (layerheight << 7);
     if (tileXPos < 0)
         tileXPos += layerheight << 7;
@@ -1619,7 +1619,7 @@ void DrawVLineScrollLayer(int layerID)
 }
 void Draw3DCloudLayer(int layerID) { TileLayer *layer = &stageLayouts[activeTileLayers[layerID]]; }
 
-void DrawTintRectangle(int XPos, int YPos, int width, int height, byte tintID)
+void DrawTintRect(int XPos, int YPos, int width, int height, byte tintID)
 {
     if (width + XPos > SCREEN_XSIZE)
         width = SCREEN_XSIZE - XPos;
@@ -1639,15 +1639,15 @@ void DrawTintRectangle(int XPos, int YPos, int width, int height, byte tintID)
 
     byte *tintTable = NULL;
     switch (tintID) {
-        case 0: tintTable = tintTable0; break;
-        case 1: tintTable = tintTable1; break;
-        case 2: tintTable = tintTable2; break;
-        case 3: tintTable = tintTable3; break;
+        case 0: tintTable = TintLookupTable1; break;
+        case 1: tintTable = TintLookupTable2; break;
+        case 2: tintTable = TintLookupTable3; break;
+        case 3: tintTable = TintLookupTable4; break;
         default: break;
     }
 
     int yOffset = SCREEN_XSIZE - width;
-    for (byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];; pixelBufferPtr += yOffset) {
+    for (byte *pixelBufferPtr = &Engine.FrameBuffer[XPos + SCREEN_XSIZE * YPos];; pixelBufferPtr += yOffset) {
         height--;
         if (height < 0)
             break;
@@ -1706,10 +1706,10 @@ void DrawScaledTintMask(int direction, int XPos, int YPos, int pivotX, int pivot
 
     byte *tintTable = NULL;
     switch (tintID) {
-        case 0: tintTable = tintTable0; break;
-        case 1: tintTable = tintTable1; break;
-        case 2: tintTable = tintTable2; break;
-        case 3: tintTable = tintTable3; break;
+        case 0: tintTable = TintLookupTable1; break;
+        case 1: tintTable = TintLookupTable2; break;
+        case 2: tintTable = TintLookupTable3; break;
+        case 3: tintTable = TintLookupTable4; break;
         default: break;
     }
 
@@ -1717,8 +1717,8 @@ void DrawScaledTintMask(int direction, int XPos, int YPos, int pivotX, int pivot
     int pitch           = SCREEN_XSIZE - width;
     int gfxwidth        = surface->width;
     // byte *lineBuffer       = &gfxLineBuffer[trueYPos];
-    byte *gfxData        = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[trueXPos + SCREEN_XSIZE * trueYPos];
+    byte *gfxData        = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[trueXPos + SCREEN_XSIZE * trueYPos];
     if (direction == FLIP_X) {
         byte *gfxDataPtr = &gfxData[widthM1];
         int gfxPitch     = 0;
@@ -1787,8 +1787,8 @@ void DrawSprite(int XPos, int YPos, int width, int height, int sprX, int sprY, i
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - width;
     int gfxPitch         = surface->width - width;
-    byte *gfxDataPtr     = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];
+    byte *gfxDataPtr     = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[XPos + SCREEN_XSIZE * YPos];
     while (height--) {
         int w = width;
         while (w--) {
@@ -1824,8 +1824,8 @@ void DrawSpriteNoKey(int XPos, int YPos, int width, int height, int sprX, int sp
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - width;
     int gfxPitch         = surface->width - width;
-    byte *gfxDataPtr     = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];
+    byte *gfxDataPtr     = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[XPos + SCREEN_XSIZE * YPos];
     while (height--) {
         int w = width;
         while (w--) {
@@ -1860,8 +1860,8 @@ void DrawSpriteClipped(int XPos, int YPos, int width, int height, int sprX, int 
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - width;
     int gfxPitch         = surface->width - width;
-    byte *gfxDataPtr     = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];
+    byte *gfxDataPtr     = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[XPos + SCREEN_XSIZE * YPos];
     while (height--) {
         int w = width;
         while (w--) {
@@ -1875,7 +1875,7 @@ void DrawSpriteClipped(int XPos, int YPos, int width, int height, int sprX, int 
     }
 }
 
-void DrawSpriteScaled(int direction, int XPos, int YPos, int pivotX, int pivotY, int scaleX, int scaleY, int width, int height, int sprX, int sprY,
+void DrawScaledSprite(int direction, int XPos, int YPos, int pivotX, int pivotY, int scaleX, int scaleY, int width, int height, int sprX, int sprY,
                       int sheetID)
 {
     int roundedYPos = 0;
@@ -1924,8 +1924,8 @@ void DrawSpriteScaled(int direction, int XPos, int YPos, int pivotX, int pivotY,
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - width;
     int gfxwidth         = surface->width;
-    byte *gfxData        = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[trueXPos + SCREEN_XSIZE * trueYPos];
+    byte *gfxData        = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[trueXPos + SCREEN_XSIZE * trueYPos];
     if (direction == FLIP_X) {
         byte *gfxDataPtr = &gfxData[widthM1];
         int gfxPitch     = 0;
@@ -1972,7 +1972,7 @@ void DrawSpriteScaled(int direction, int XPos, int YPos, int pivotX, int pivotY,
     }
 }
 
-void DrawSpriteRotated(int direction, int XPos, int YPos, int pivotX, int pivotY, int sprX, int sprY, int width, int height, int rotation,
+void DrawRotatedSprite(int direction, int XPos, int YPos, int pivotX, int pivotY, int sprX, int sprY, int width, int height, int rotation,
                        int sheetID)
 {
     int sprXPos    = (pivotX + sprX) << 9;
@@ -2053,14 +2053,14 @@ void DrawSpriteRotated(int direction, int XPos, int YPos, int pivotX, int pivotY
 
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - maxX;
-    byte *pixelBufferPtr = &Engine.pixelBuffer[left + SCREEN_XSIZE * top];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[left + SCREEN_XSIZE * top];
     int startX           = left - XPos;
     int startY           = top - YPos;
     int shiftPivot       = (sprX << 9) - 1;
     fullwidth <<= 9;
     int shiftheight = (sprY << 9) - 1;
     fullheight <<= 9;
-    byte *gfxData = &graphicData[surface->dataPosition];
+    byte *gfxData = &GraphicData[surface->dataPosition];
     if (cosine < 0 || sine < 0)
         sprYPos += sine + cosine;
 
@@ -2132,13 +2132,13 @@ void DrawBlendedSprite(int XPos, int YPos, int width, int height, int sprX, int 
     GFXSurface *surface  = &gfxSurface[sheetID];
     int pitch            = SCREEN_XSIZE - width;
     int gfxPitch         = surface->width - width;
-    byte *gfxData        = &graphicData[sprX + surface->width * sprY + surface->dataPosition];
-    byte *pixelBufferPtr = &Engine.pixelBuffer[XPos + SCREEN_XSIZE * YPos];
+    byte *gfxData        = &GraphicData[sprX + surface->width * sprY + surface->dataPosition];
+    byte *pixelBufferPtr = &Engine.FrameBuffer[XPos + SCREEN_XSIZE * YPos];
     while (height--) {
         int w = width;
         while (w--) {
             if (*gfxData > 0)
-                *pixelBufferPtr = blendLookupTable[(0x100 * *pixelBufferPtr) + *gfxData];
+                *pixelBufferPtr = BlendLookupTable[(0x100 * *pixelBufferPtr) + *gfxData];
             ++gfxData;
             ++pixelBufferPtr;
         }
@@ -2147,6 +2147,7 @@ void DrawBlendedSprite(int XPos, int YPos, int width, int height, int sprX, int 
     }
 }
 
+
 void DrawTextMenuEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight)
 {
     TextMenu *tMenu = (TextMenu *)menu;
@@ -2154,7 +2155,17 @@ void DrawTextMenuEntry(void *menu, int rowID, int XPos, int YPos, int textHighli
     for (int i = 0; i < tMenu->entrySize[rowID]; ++i) {
         if (tMenu->textData[id] > 0)
             DrawSprite(XPos + 8 * i, YPos, 8, 8, textHighlight, 8 * tMenu->textData[id] - 8, textMenuSurfaceNo);
-        id++;
+        ++id;
+    }
+}
+void DrawBlendedTextMenuEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight)
+{
+    TextMenu *tMenu = (TextMenu *)menu;
+    int id          = tMenu->entryStart[rowID];
+    for (int i = 0; i < tMenu->entrySize[rowID]; ++i) {
+        if (tMenu->textData[id] > 0)
+            DrawBlendedSprite(XPos + 8 * i, YPos, 8, 8, textHighlight, 8 * tMenu->textData[id] - 8, textMenuSurfaceNo);
+        ++id;
     }
 }
 void DrawStageTextEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight)

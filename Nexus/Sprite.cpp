@@ -247,7 +247,7 @@ void RemoveGraphicsFile(const char *filePath, int sheetID)
         StrCopy(gfxSurface[sheetID].fileName, "");
         int dataPosStart = gfxSurface[sheetID].dataPosition;
         int dataPosEnd   = gfxSurface[sheetID].dataPosition + gfxSurface[sheetID].height * gfxSurface[sheetID].width;
-        for (int i = 0x200000 - dataPosEnd; i > 0; --i) graphicData[dataPosStart++] = graphicData[dataPosEnd++];
+        for (int i = 0x200000 - dataPosEnd; i > 0; --i) GraphicData[dataPosStart++] = GraphicData[dataPosEnd++];
         gfxDataPosition -= gfxSurface[sheetID].height * gfxSurface[sheetID].width;
         for (int i = 0; i < SURFACE_MAX; ++i) {
             if (gfxSurface[i].dataPosition > gfxSurface[sheetID].dataPosition)
@@ -286,7 +286,7 @@ int LoadBMPFile(const char *filePath, byte sheetID)
 
         SetFilePosition(info.fileSize - surface->height * surface->width);
         surface->dataPosition = gfxDataPosition;
-        byte *gfxData         = &graphicData[surface->dataPosition + surface->width * (surface->height - 1)];
+        byte *gfxData         = &GraphicData[surface->dataPosition + surface->width * (surface->height - 1)];
         for (int y = 0; y < surface->height; ++y) {
             for (int x = 0; x < surface->width; ++x) {
                 FileRead(&fileBuffer, 1);
@@ -364,7 +364,7 @@ int LoadGIFFile(const char *filePath, byte sheetID)
 
         gfxDataPosition += surface->width * surface->height;
         if (gfxDataPosition < GFXDATA_MAX) {
-            ReadGifPictureData(surface->width, surface->height, interlaced, graphicData, surface->dataPosition);
+            ReadGifPictureData(surface->width, surface->height, interlaced, GraphicData, surface->dataPosition);
         }
         else {
             gfxDataPosition = 0;
@@ -397,7 +397,7 @@ int LoadGFXFile(const char *filePath, byte sheetID)
         for (int i = 0; i < 0xFF; ++i) FileRead(&clr, 3); // Palette
 
         surface->dataPosition = gfxDataPosition;
-        byte *gfxData         = &graphicData[surface->dataPosition];
+        byte *gfxData         = &GraphicData[surface->dataPosition];
         byte buf[3];
         while (true) {
             FileRead(&buf[0], 1);

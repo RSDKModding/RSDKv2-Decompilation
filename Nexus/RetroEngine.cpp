@@ -289,6 +289,7 @@ void RetroEngine::Run()
                 switch (gameMode) {
                     case ENGINE_SYSMENU:
                         ProcessSystemMenu();
+                        FlipScreen();
                         break;
                     case ENGINE_MAINGAME:
                         ProcessStage(); 
@@ -304,11 +305,10 @@ void RetroEngine::Run()
             }
         }
 
-        FlipScreen();
         frameStep  = false;
     }
 
-    ReleaseAudioDevice();
+    ReleaseSoundDevice();
     ReleaseRenderDevice();
     writeSettings();
 #if RETRO_USE_MOD_LOADER

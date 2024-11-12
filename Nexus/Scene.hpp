@@ -215,7 +215,7 @@ int LoadStageFile(const char *filePath, int stageID, FileInfo *info);
 
 void LoadActLayout();
 void LoadStageBackground();
-void LoadStageChunks();
+void Load128x128Mappings();
 void LoadStageCollisions();
 void LoadStageGIFFile(int stageID);
 void LoadStageGFXFile(int stageID);
