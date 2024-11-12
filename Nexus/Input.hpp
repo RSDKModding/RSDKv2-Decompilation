@@ -43,8 +43,8 @@ struct InputButton {
     inline bool down() { return (press || hold); }
 };
 
-extern InputData keyPress;
-extern InputData keyDown;
+extern InputData GKeyPress;
+extern InputData GKeyDown;
 
 extern bool anyPress;
 

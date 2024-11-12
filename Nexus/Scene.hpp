@@ -120,7 +120,7 @@ extern int stageListCount[STAGELIST_MAX];
 extern char stageListNames[STAGELIST_MAX][0x20];
 extern SceneInfo stageList[STAGELIST_MAX][0x100];
 
-extern int stageMode;
+extern int StageMode;
 
 extern int cameraStyle;
 extern int cameraEnabled;

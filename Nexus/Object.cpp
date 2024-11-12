@@ -12,7 +12,7 @@ const int OBJECT_BORDER_Y2 = SCREEN_YSIZE + 0x100;
 void ProcessStartupObjects() {
     scriptFrameCount = 0;
     ClearAnimationData();
-    activePlayer               = 0;
+    PlayerNo                   = 0;
     ScriptEng.arrayPosition[2] = TEMPENTITY_START;
     Entity *entity             = &ObjectEntityList[TEMPENTITY_START];
     for (int i = 0; i < OBJECT_COUNT; ++i) {
@@ -58,7 +58,7 @@ void ProcessObjects() {
                     PlayerScript *script = &PlayerScriptList[objectLoop];
                     switch (entity->propertyValue) {
                         case 0:
-                            activePlayer = objectLoop;
+                            PlayerNo = objectLoop;
                             ProcessPlayerControl(player);
                             player->animationSpeed = 0;
                             if (scriptData[script->scriptCodePtr_PlayerMain] > 0)
@@ -83,7 +83,7 @@ void ProcessObjects() {
                             ProcessDebugMode(player);
                             if (!objectLoop) {
                                 cameraEnabled = true;
-                                if (keyPress.B) {
+                                if (GKeyPress.B) {
                                     player->tileCollisions                     = true;
                                     player->objectInteraction                  = true;
                                     player->controlMode                        = 0;
@@ -97,15 +97,15 @@ void ProcessObjects() {
                 }
             } else {
                 ObjectScript *scriptInfo = &objectScriptList[entity->type];
-                activePlayer             = 0;
+                PlayerNo                 = 0;
                 if (scriptData[scriptInfo->subMain.scriptCodePtr] > 0)
                     ProcessScript(scriptInfo->subMain.scriptCodePtr, scriptInfo->subMain.jumpTablePtr, SUB_MAIN);
                 if (scriptData[scriptInfo->subPlayerInteraction.scriptCodePtr] > 0) {
-                    while (activePlayer < activePlayerCount) {
-                        if (PlayerList[activePlayer].objectInteraction)
+                    while (PlayerNo < activePlayerCount) {
+                        if (PlayerList[PlayerNo].objectInteraction)
                             ProcessScript(scriptInfo->subPlayerInteraction.scriptCodePtr, scriptInfo->subPlayerInteraction.jumpTablePtr,
                                           SUB_PLAYERINTERACTION);
-                        ++activePlayer;
+                        ++PlayerNo;
                     }
                 }
 

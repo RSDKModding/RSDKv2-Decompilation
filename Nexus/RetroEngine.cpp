@@ -9,8 +9,7 @@ bool engineDebugMode = false;
 
 RetroEngine Engine = RetroEngine();
 
-inline int getLowerRate(int intendRate, int targetRate)
-{
+inline int getLowerRate(int intendRate, int targetRate) {
     int result   = 0;
     int valStore = 0;
 
@@ -25,8 +24,7 @@ inline int getLowerRate(int intendRate, int targetRate)
     return result;
 }
 
-bool processEvents()
-{
+bool processEvents() {
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     while (SDL_PollEvent(&Engine.sdlEvents)) {
         // Main Events
@@ -40,12 +38,12 @@ bool processEvents()
                         Engine.isFullScreen = true;
                         break;
                     }
-                    case SDL_WINDOWEVENT_CLOSE: Engine.gameMode = ENGINE_EXITGAME; return false;
+                    case SDL_WINDOWEVENT_CLOSE: Engine.GameMode = ENGINE_EXITGAME; return false;
                 }
                 break;
             case SDL_CONTROLLERDEVICEADDED: controllerInit(Engine.sdlEvents.cdevice.which); break;
             case SDL_CONTROLLERDEVICEREMOVED: controllerClose(Engine.sdlEvents.cdevice.which); break;
-            case SDL_APP_TERMINATING: Engine.gameMode = ENGINE_EXITGAME; break;
+            case SDL_APP_TERMINATING: Engine.GameMode = ENGINE_EXITGAME; break;
 #endif
             case SDL_KEYDOWN:
                 switch (Engine.sdlEvents.key.keysym.sym) {
@@ -55,13 +53,13 @@ bool processEvents()
                         if (Engine.devMenu) {
 #if RETRO_USE_MOD_LOADER
                             // hacky patch because people can escape
-                            if (Engine.gameMode == ENGINE_SYSMENU && stageMode == DEVMENU_MODMENU) {
+                            if (Engine.GameMode == ENGINE_SYSMENU && StageMode == DEVMENU_MODMENU) {
                                 // Reload entire engine
                                 Engine.LoadGameConfig("Data/Game/GameConfig.bin");
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
                                 if (Engine.window) {
                                     char gameTitle[0x40];
-                                    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.usingBinFile ? "" : " (Using Data Folder)");
+                                    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
                                     SDL_SetWindowTitle(Engine.window, gameTitle);
                                 }
 #endif
@@ -74,10 +72,9 @@ bool processEvents()
                             }
 #endif
 
-                            Engine.gameMode = ENGINE_INITSYSMENU;
-                        }
-                        else {
-                            Engine.gameMode = ENGINE_EXITGAME;
+                            Engine.GameMode = ENGINE_INITSYSMENU;
+                        } else {
+                            Engine.GameMode = ENGINE_EXITGAME;
                             return false;
                         }
                         break;
@@ -86,10 +83,9 @@ bool processEvents()
                         if (Engine.devMenu) {
                             activeStageList   = 0;
                             stageListPosition = 0;
-                            stageMode         = STAGEMODE_LOAD;
-                            Engine.gameMode   = ENGINE_MAINGAME;
-                        }
-                        else {
+                            StageMode         = STAGEMODE_LOAD;
+                            Engine.GameMode   = ENGINE_MAINGAME;
+                        } else {
                             Engine.running = false;
                         }
                         break;
@@ -104,8 +100,8 @@ bool processEvents()
                                     activeStageList = 3;
                                 stageListPosition = stageListCount[activeStageList] - 1;
                             }
-                            stageMode       = STAGEMODE_LOAD;
-                            Engine.gameMode = ENGINE_MAINGAME;
+                            StageMode       = STAGEMODE_LOAD;
+                            Engine.GameMode = ENGINE_MAINGAME;
                         }
                         break;
 
@@ -120,8 +116,8 @@ bool processEvents()
                                 if (activeStageList >= 4)
                                     activeStageList = 0;
                             }
-                            stageMode       = STAGEMODE_LOAD;
-                            Engine.gameMode = ENGINE_MAINGAME;
+                            StageMode       = STAGEMODE_LOAD;
+                            Engine.GameMode = ENGINE_MAINGAME;
                         }
                         break;
 
@@ -138,8 +134,7 @@ bool processEvents()
                             SDL_RestoreWindow(Engine.window);
                             SDL_SetWindowFullscreen(Engine.window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 #endif
-                        }
-                        else {
+                        } else {
 #if RETRO_USING_SDL1
                             Engine.windowSurface =
                                 SDL_SetVideoMode(SCREEN_XSIZE * Engine.windowScale, SCREEN_YSIZE * Engine.windowScale, 16, SDL_SWSURFACE);
@@ -158,7 +153,7 @@ bool processEvents()
                     case SDLK_F5:
                         if (Engine.devMenu) {
                             currentStageFolder[0] = 0; // reload all assets & scripts
-                            stageMode             = STAGEMODE_LOAD;
+                            StageMode             = STAGEMODE_LOAD;
                         }
                         break;
 
@@ -214,15 +209,14 @@ bool processEvents()
                 keyState[Engine.sdlEvents.key.keysym.sym] = 0;
 #endif
                 break;
-            case SDL_QUIT: Engine.gameMode = ENGINE_EXITGAME; return false;
+            case SDL_QUIT: Engine.GameMode = ENGINE_EXITGAME; return false;
         }
     }
 #endif
     return true;
 }
 
-void RetroEngine::Init()
-{
+void RetroEngine::Init() {
     CalculateTrigAngles();
     InitUserdata();
 #if RETRO_USE_MOD_LOADER
@@ -248,7 +242,7 @@ void RetroEngine::Init()
 #endif
     CheckBinFile(dest);
 
-    gameMode = ENGINE_EXITGAME;
+    GameMode = ENGINE_EXITGAME;
     running  = false;
     if (LoadGameConfig("Data/Game/GameConfig.bin")) {
         if (InitRenderDevice()) {
@@ -267,11 +261,10 @@ void RetroEngine::Init()
     skipFrameIndex   = refreshRate / lower;
 }
 
-void RetroEngine::Run()
-{
+void RetroEngine::Run() {
     unsigned long long targetFreq = SDL_GetPerformanceFrequency() / Engine.refreshRate;
     unsigned long long curTicks   = 0;
-    
+
     while (running) {
 #if !RETRO_USE_ORIGINAL_CODE
         if (!vsync) {
@@ -286,12 +279,12 @@ void RetroEngine::Run()
             ReadInputDevice();
 
             if (!masterPaused || frameStep) {
-                switch (gameMode) {
+                switch (GameMode) {
                     case ENGINE_SYSMENU:
                         ProcessSystemMenu();
                         FlipScreen();
                         break;
-                    case ENGINE_MAINGAME:
+                    case ENGINE_MAINGAME: 
                         ProcessStage(); 
                         break;
                     case ENGINE_INITSYSMENU:
@@ -299,13 +292,15 @@ void RetroEngine::Run()
                         InitSystemMenu();
                         ResetCurrentStageFolder();
                         break;
-                    case ENGINE_EXITGAME: running = false; break;
+                    case ENGINE_EXITGAME: 
+                        running = false; 
+                        break;
                     default: break;
                 }
             }
         }
 
-        frameStep  = false;
+        frameStep = false;
     }
 
     ReleaseSoundDevice();
@@ -320,8 +315,7 @@ void RetroEngine::Run()
 #endif
 }
 
-bool RetroEngine::LoadGameConfig(const char *filePath)
-{
+bool RetroEngine::LoadGameConfig(const char *filePath) {
     FileInfo info;
     byte fileBuffer  = 0;
     byte fileBuffer2 = 0;
@@ -424,7 +418,6 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
                 // Read Stage Mode
                 FileRead(&fileBuffer, 1);
                 stageList[cat][s].highlighted = fileBuffer;
-
             }
         }
 

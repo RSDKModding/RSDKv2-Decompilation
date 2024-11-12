@@ -10,7 +10,7 @@ char stageListNames[STAGELIST_MAX][0x20] = {
 };
 SceneInfo stageList[STAGELIST_MAX][0x100];
 
-int stageMode = STAGEMODE_LOAD;
+int StageMode = STAGEMODE_LOAD;
 
 int cameraStyle   = CAMERASTYLE_FOLLOW;
 int cameraEnabled = false;
@@ -83,7 +83,7 @@ CollisionMasks collisionMasks[2];
 byte tilesetGFXData[TILESET_SIZE];
 
 void ProcessStage(void) {
-    switch (stageMode) {
+    switch (StageMode) {
         case STAGEMODE_LOAD:
             cameraEnabled     = true;
             xScrollOffset     = 0;
@@ -107,18 +107,18 @@ void ProcessStage(void) {
                 PlayerList[i].tileCollisions    = true;
                 PlayerList[i].objectInteraction = true;
             }
-            stageMode = STAGEMODE_NORMAL;
+            StageMode = STAGEMODE_NORMAL;
             break;
         case STAGEMODE_NORMAL:
-            if (fadeMode > 0)
-                fadeMode--;
+            if (PaletteMode > 0)
+                PaletteMode--;
 
             lastXSize = -1;
             lastYSize = -1;
-            CheckKeyDown(&keyDown, 0xFF);
-            CheckKeyPress(&keyPress, 0xFF);
-            if (pauseEnabled && keyPress.start) {
-                stageMode = STAGEMODE_PAUSED;
+            CheckKeyDown(&GKeyDown, 0xFF);
+            CheckKeyPress(&GKeyPress, 0xFF);
+            if (pauseEnabled && GKeyPress.start) {
+                StageMode = STAGEMODE_PAUSED;
                 PauseSound();
             }
 
@@ -153,16 +153,16 @@ void ProcessStage(void) {
             FlipScreen();
             break;
         case STAGEMODE_PAUSED:
-            if (fadeMode > 0)
-                fadeMode--;
+            if (PaletteMode > 0)
+                PaletteMode--;
 
             lastXSize = -1;
             lastYSize = -1;
-            CheckKeyDown(&keyDown, 0xFF);
-            CheckKeyPress(&keyPress, 0xFF);
+            CheckKeyDown(&GKeyDown, 0xFF);
+            CheckKeyPress(&GKeyPress, 0xFF);
 
-            if (keyPress.C) {
-                keyPress.C = false;
+            if (GKeyPress.C) {
+                GKeyPress.C = false;
                 if (timeEnabled) {
                     if (++frameCounter == Engine.refreshRate) {
                         frameCounter = 0;
@@ -192,8 +192,8 @@ void ProcessStage(void) {
                 DrawStageGFX();
             }
 
-            if (pauseEnabled && keyPress.start) {
-                stageMode = STAGEMODE_NORMAL;
+            if (pauseEnabled && GKeyPress.start) {
+                StageMode = STAGEMODE_NORMAL;
                 ResumeSound();
             }
             break;

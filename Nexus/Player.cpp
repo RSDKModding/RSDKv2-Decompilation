@@ -2,7 +2,7 @@
 
 Player PlayerList[PLAYER_COUNT];
 PlayerScript PlayerScriptList[PLAYER_COUNT];
-int activePlayer  = 0;
+int PlayerNo          = 0;
 int activePlayerCount = 1;
 
 ushort upBuffer        = 0;
@@ -12,8 +12,7 @@ ushort rightBuffer     = 0;
 ushort jumpPressBuffer = 0;
 ushort jumpHoldBuffer  = 0;
 
-void LoadPlayerFromList(byte characterID, byte playerID)
-{
+void LoadPlayerFromList(byte characterID, byte playerID) {
     FileInfo info;
     char strBuf[0x100];
     byte fileBuffer = 0;
@@ -70,7 +69,7 @@ void LoadPlayerFromList(byte characterID, byte playerID)
         FileRead(&count, 1);
         for (int p = 0; p < count; ++p) {
             FileRead(&strLen, 1);
-            FileRead(&strBuf, strLen); //player anim file
+            FileRead(&strBuf, strLen); // player anim file
             strBuf[strLen] = '\0';
 
             FileRead(&strLen, 1);
@@ -91,8 +90,7 @@ void LoadPlayerFromList(byte characterID, byte playerID)
     }
 }
 
-void ProcessPlayerAnimationChange(Player *player)
-{
+void ProcessPlayerAnimationChange(Player *player) {
     if (player->animation != player->prevAnimation) {
         if (player->animation == ANI_JUMPING)
             player->YPos += (PlayerCBoxes[0].bottom[0] - PlayerCBoxes[1].bottom[0]) << 16;
@@ -104,8 +102,7 @@ void ProcessPlayerAnimationChange(Player *player)
     }
 }
 
-void DrawPlayer(Player *player, SpriteFrame *frame)
-{
+void DrawPlayer(Player *player, SpriteFrame *frame) {
     int rotation = 0;
     switch (player->animation) {
         case ANI_RUNNING:
@@ -123,8 +120,7 @@ void DrawPlayer(Player *player, SpriteFrame *frame)
                       frame->width, frame->height, rotation, frame->sheetID);
 }
 
-void ProcessPlayerControl(Player *Player)
-{
+void ProcessPlayerControl(Player *Player) {
     if (Player->controlMode == -1) {
         upBuffer <<= 1;
         upBuffer |= (byte)Player->up;
@@ -138,28 +134,25 @@ void ProcessPlayerControl(Player *Player)
         jumpPressBuffer |= (byte)Player->jumpPress;
         jumpHoldBuffer <<= 1;
         jumpHoldBuffer |= (byte)Player->jumpHold;
-    }
-    else if (Player->controlMode == 1) {
+    } else if (Player->controlMode == 1) {
         Player->up        = upBuffer >> 15;
         Player->down      = downBuffer >> 15;
         Player->left      = leftBuffer >> 15;
         Player->right     = rightBuffer >> 15;
         Player->jumpPress = jumpPressBuffer >> 15;
         Player->jumpHold  = jumpHoldBuffer >> 15;
-    }
-    else {
-        Player->up   = keyDown.up;
-        Player->down = keyDown.down;
-        if (!keyDown.left || !keyDown.right) {
-            Player->left  = keyDown.left;
-            Player->right = keyDown.right;
-        }
-        else {
+    } else {
+        Player->up   = GKeyDown.up;
+        Player->down = GKeyDown.down;
+        if (!GKeyDown.left || !GKeyDown.right) {
+            Player->left  = GKeyDown.left;
+            Player->right = GKeyDown.right;
+        } else {
             Player->left  = false;
             Player->right = false;
         }
-        Player->jumpHold  = keyDown.C | keyDown.B | keyDown.A;
-        Player->jumpPress = keyPress.C | keyPress.B | keyPress.A;
+        Player->jumpHold  = GKeyDown.C | GKeyDown.B | GKeyDown.A;
+        Player->jumpPress = GKeyPress.C | GKeyPress.B | GKeyPress.A;
         upBuffer <<= 1;
         upBuffer |= (byte)Player->up;
         downBuffer <<= 1;
@@ -175,8 +168,7 @@ void ProcessPlayerControl(Player *Player)
     }
 }
 
-void SetMovementStats(PlayerMovementStats *stats)
-{
+void SetMovementStats(PlayerMovementStats *stats) {
     stats->topSpeed            = 0x60000;
     stats->acceleration        = 0xC00;
     stats->deceleration        = 0xC00;
@@ -187,21 +179,18 @@ void SetMovementStats(PlayerMovementStats *stats)
     stats->rollingDeceleration = 0x2000;
 }
 
-void ProcessDefaultAirMovement(Player* player)
-{
+void ProcessDefaultAirMovement(Player *player) {
     if (player->speed <= -player->stats.topSpeed) {
         if (player->left)
             player->direction = FLIP_X;
-    }
-    else if (player->left) {
+    } else if (player->left) {
         player->speed -= player->stats.airAcceleration;
         player->direction = FLIP_X;
     }
     if (player->speed >= player->stats.topSpeed) {
         if (player->right)
             player->direction = FLIP_NONE;
-    }
-    else if (player->right) {
+    } else if (player->right) {
         player->speed += player->stats.airAcceleration;
         player->direction = FLIP_NONE;
     }
@@ -210,22 +199,19 @@ void ProcessDefaultAirMovement(Player* player)
         player->speed -= player->speed >> 5;
 }
 
-void ProcessDefaultGravityFalse(Player *player)
-{
+void ProcessDefaultGravityFalse(Player *player) {
     player->trackScroll = false;
-    player->XVelocity = (player->speed * cosVal256[player->angle]) >> 8;
-    player->YVelocity = (player->speed * sinVal256[player->angle]) >> 8;
+    player->XVelocity   = (player->speed * cosVal256[player->angle]) >> 8;
+    player->YVelocity   = (player->speed * sinVal256[player->angle]) >> 8;
 }
 
-void ProcessDefaultGravityTrue(Player* player)
-{
+void ProcessDefaultGravityTrue(Player *player) {
     player->trackScroll = true;
     player->YVelocity += player->stats.gravityStrength;
     if (player->YVelocity >= -0x33CB0) {
         player->timer = 0;
-    }
-    else if (!player->jumpHold && player->timer > 0) {
-        player->timer = 0;
+    } else if (!player->jumpHold && player->timer > 0) {
+        player->timer     = 0;
         player->YVelocity = -0x3C800;
         player->speed -= player->speed >> 5;
     }
@@ -237,29 +223,25 @@ void ProcessDefaultGravityTrue(Player* player)
                 player->rotation = 0;
             }
         }
-    }
-    else {
+    } else {
         player->rotation -= 2;
         if (player->rotation < 1)
             player->rotation = 0;
     }
 }
 
-void ProcessDefaultGroundMovement(Player *player)
-{
+void ProcessDefaultGroundMovement(Player *player) {
     if ((signed int)player->frictionLoss <= 0) {
         if (player->left && player->speed > -player->stats.topSpeed) {
             if (player->speed <= 0) {
                 player->speed -= player->stats.acceleration;
                 player->skidding = 0;
-            }
-            else {
+            } else {
                 if (player->speed > 0x40000)
                     player->skidding = 16;
                 if (player->speed >= 0x8000) {
                     player->speed -= 0x8000;
-                }
-                else {
+                } else {
                     player->speed    = -0x8000;
                     player->skidding = 0;
                 }
@@ -269,14 +251,12 @@ void ProcessDefaultGroundMovement(Player *player)
             if (player->speed >= 0) {
                 player->speed += player->stats.acceleration;
                 player->skidding = 0;
-            }
-            else {
+            } else {
                 if (player->speed < -0x40000)
                     player->skidding = 16;
                 if (player->speed <= -0x8000) {
                     player->speed += 0x8000;
-                }
-                else {
+                } else {
                     player->speed    = 0x8000;
                     player->skidding = 0;
                 }
@@ -290,14 +270,11 @@ void ProcessDefaultGroundMovement(Player *player)
 
         if (player->left || player->right) {
             switch (player->collisionMode) {
-                case CMODE_FLOOR:
-                    player->speed += sinVal256[player->angle] << 13 >> 8;
-                    break;
+                case CMODE_FLOOR: player->speed += sinVal256[player->angle] << 13 >> 8; break;
                 case CMODE_LWALL:
                     if (player->angle >= 176) {
                         player->speed += (sinVal256[player->angle] << 13 >> 8);
-                    }
-                    else {
+                    } else {
                         if (player->speed < -0x60000 || player->speed > 0x60000)
                             player->speed += sinVal256[player->angle] << 13 >> 8;
                         else
@@ -313,8 +290,7 @@ void ProcessDefaultGroundMovement(Player *player)
                 case CMODE_RWALL:
                     if (player->angle <= 80) {
                         player->speed += sinVal256[player->angle] << 13 >> 8;
-                    }
-                    else {
+                    } else {
                         if (player->speed < -0x60000 || player->speed > 0x60000)
                             player->speed += sinVal256[player->angle] << 13 >> 8;
                         else
@@ -340,8 +316,7 @@ void ProcessDefaultGroundMovement(Player *player)
                     }
                 }
             }
-        }
-        else {
+        } else {
             if (player->speed < 0) {
                 player->speed += player->stats.deceleration;
                 if (player->speed > 0)
@@ -359,15 +334,13 @@ void ProcessDefaultGroundMovement(Player *player)
                     player->frictionLoss = 30;
             }
         }
-    }
-    else {
+    } else {
         --player->frictionLoss;
         player->speed = (sinVal256[player->angle] << 13 >> 8) + player->speed;
     }
 }
 
-void ProcessDefaultJumpAction(Player *player)
-{
+void ProcessDefaultJumpAction(Player *player) {
     player->frictionLoss  = 0;
     player->gravity       = true;
     player->XVelocity     = (player->speed * cosVal256[player->angle] + player->stats.jumpStrength * sinVal256[player->angle]) >> 8;
@@ -380,8 +353,7 @@ void ProcessDefaultJumpAction(Player *player)
     player->timer         = 1;
 }
 
-void ProcessDefaultRollingMovement(Player *player)
-{
+void ProcessDefaultRollingMovement(Player *player) {
     if (player->right && player->speed < 0)
         player->speed += player->stats.rollingDeceleration;
     if (player->left && player->speed > 0)
@@ -403,15 +375,12 @@ void ProcessDefaultRollingMovement(Player *player)
     if (player->speed <= 0) {
         if (sinVal256[player->angle] >= 0) {
             player->speed += (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8);
-        }
-        else {
+        } else {
             player->speed += 0x5000 * sinVal256[player->angle] >> 8;
         }
-    }
-    else if (sinVal256[player->angle] <= 0) {
+    } else if (sinVal256[player->angle] <= 0) {
         player->speed += (player->stats.rollingDeceleration * sinVal256[player->angle] >> 8);
-    }
-    else {
+    } else {
         player->speed += 0x5000 * sinVal256[player->angle] >> 8;
     }
 
@@ -419,32 +388,29 @@ void ProcessDefaultRollingMovement(Player *player)
         player->speed = 0x180000;
 }
 
-void ProcessDebugMode(Player *player)
-{
+void ProcessDebugMode(Player *player) {
     if (player->down || player->up || player->right || player->left) {
         if (player->speed < 0x100000) {
             player->speed += 0xC00;
             if (player->speed > 0x100000)
                 player->speed = 0x100000;
         }
-    }
-    else {
+    } else {
         player->speed = 0;
     }
 
-    if (keyDown.left)
+    if (GKeyDown.left)
         player->XPos -= player->speed;
-    if (keyDown.right)
+    if (GKeyDown.right)
         player->XPos += player->speed;
 
-    if (keyDown.up)
+    if (GKeyDown.up)
         player->YPos -= player->speed;
-    if (keyDown.down)
+    if (GKeyDown.down)
         player->YPos += player->speed;
 }
 
-void ProcessPlayerAnimation(Player *player)
-{
+void ProcessPlayerAnimation(Player *player) {
     PlayerScript *script = &PlayerScriptList[player->type];
     if (!player->gravity) {
         int speed = (player->jumpingSpeed * abs(player->speed) / 6 >> 16) + 48;

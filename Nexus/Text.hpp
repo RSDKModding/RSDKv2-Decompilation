@@ -23,8 +23,8 @@ struct TextMenu {
     sbyte selection2;
 };
 
-extern TextMenu gameMenu[TEXTMENU_COUNT];
-extern int textMenuSurfaceNo;
+extern TextMenu GameMenu[TEXTMENU_COUNT];
+extern int TextMenuSurfaceNo;
 
 void LoadConfigListText(TextMenu *menu, int listNo);
 

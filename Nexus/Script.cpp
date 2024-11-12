@@ -1539,24 +1539,24 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_CHECKRESULT: ScriptEng.operands[i] = ScriptEng.checkResult; break;
                     case VAR_ARRAYPOS0: ScriptEng.operands[i] = ScriptEng.arrayPosition[0]; break;
                     case VAR_ARRAYPOS1: ScriptEng.operands[i] = ScriptEng.arrayPosition[1]; break;
-                    case VAR_KEYDOWNUP: ScriptEng.operands[i] = keyDown.up; break;
-                    case VAR_KEYDOWNDOWN: ScriptEng.operands[i] = keyDown.down; break;
-                    case VAR_KEYDOWNLEFT: ScriptEng.operands[i] = keyDown.left; break;
-                    case VAR_KEYDOWNRIGHT: ScriptEng.operands[i] = keyDown.right; break;
-                    case VAR_KEYDOWNBUTTONA: ScriptEng.operands[i] = keyDown.A; break;
-                    case VAR_KEYDOWNBUTTONB: ScriptEng.operands[i] = keyDown.B; break;
-                    case VAR_KEYDOWNBUTTONC: ScriptEng.operands[i] = keyDown.C; break;
-                    case VAR_KEYDOWNSTART: ScriptEng.operands[i] = keyDown.start; break;
-                    case VAR_KEYPRESSUP: ScriptEng.operands[i] = keyPress.up; break;
-                    case VAR_KEYPRESSDOWN: ScriptEng.operands[i] = keyPress.down; break;
-                    case VAR_KEYPRESSLEFT: ScriptEng.operands[i] = keyPress.left; break;
-                    case VAR_KEYPRESSRIGHT: ScriptEng.operands[i] = keyPress.right; break;
-                    case VAR_KEYPRESSBUTTONA: ScriptEng.operands[i] = keyPress.A; break;
-                    case VAR_KEYPRESSBUTTONB: ScriptEng.operands[i] = keyPress.B; break;
-                    case VAR_KEYPRESSBUTTONC: ScriptEng.operands[i] = keyPress.C; break;
-                    case VAR_KEYPRESSSTART: ScriptEng.operands[i] = keyPress.start; break;
-                    case VAR_MENU1SELECTION: ScriptEng.operands[i] = gameMenu[0].selection1; break;
-                    case VAR_MENU2SELECTION: ScriptEng.operands[i] = gameMenu[1].selection1; break;
+                    case VAR_KEYDOWNUP: ScriptEng.operands[i] = GKeyDown.up; break;
+                    case VAR_KEYDOWNDOWN: ScriptEng.operands[i] = GKeyDown.down; break;
+                    case VAR_KEYDOWNLEFT: ScriptEng.operands[i] = GKeyDown.left; break;
+                    case VAR_KEYDOWNRIGHT: ScriptEng.operands[i] = GKeyDown.right; break;
+                    case VAR_KEYDOWNBUTTONA: ScriptEng.operands[i] = GKeyDown.A; break;
+                    case VAR_KEYDOWNBUTTONB: ScriptEng.operands[i] = GKeyDown.B; break;
+                    case VAR_KEYDOWNBUTTONC: ScriptEng.operands[i] = GKeyDown.C; break;
+                    case VAR_KEYDOWNSTART: ScriptEng.operands[i] = GKeyDown.start; break;
+                    case VAR_KEYPRESSUP: ScriptEng.operands[i] = GKeyPress.up; break;
+                    case VAR_KEYPRESSDOWN: ScriptEng.operands[i] = GKeyPress.down; break;
+                    case VAR_KEYPRESSLEFT: ScriptEng.operands[i] = GKeyPress.left; break;
+                    case VAR_KEYPRESSRIGHT: ScriptEng.operands[i] = GKeyPress.right; break;
+                    case VAR_KEYPRESSBUTTONA: ScriptEng.operands[i] = GKeyPress.A; break;
+                    case VAR_KEYPRESSBUTTONB: ScriptEng.operands[i] = GKeyPress.B; break;
+                    case VAR_KEYPRESSBUTTONC: ScriptEng.operands[i] = GKeyPress.C; break;
+                    case VAR_KEYPRESSSTART: ScriptEng.operands[i] = GKeyPress.start; break;
+                    case VAR_MENU1SELECTION: ScriptEng.operands[i] = GameMenu[0].selection1; break;
+                    case VAR_MENU2SELECTION: ScriptEng.operands[i] = GameMenu[1].selection1; break;
                     case VAR_STAGEACTIVELIST: ScriptEng.operands[i] = activeStageList; break;
                     case VAR_STAGELISTPOS: ScriptEng.operands[i] = stageListPosition; break;
                     case VAR_GLOBAL: ScriptEng.operands[i] = globalVariables[arrayVal]; break;
@@ -1569,235 +1569,235 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_STAGEACTNO: ScriptEng.operands[i] = actID; break;
                     case VAR_OBJECTENTITYNO: ScriptEng.operands[i] = arrayVal; break;
                     case VAR_PLAYERTYPE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].type;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].type;
                         break;
                     }
                     case VAR_PLAYERSTATE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].state;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].state;
                         break;
                     }
                     case VAR_PLAYERCONTROLMODE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].controlMode;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].controlMode;
                         break;
                     }
                     case VAR_PLAYERCOLLISIONMODE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].collisionMode;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].collisionMode;
                         break;
                     }
                     case VAR_PLAYERCOLLISIONPLANE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].collisionPlane;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].collisionPlane;
                         break;
                     }
                     case VAR_PLAYERXPOS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].XPos;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].XPos;
                         break;
                     }
                     case VAR_PLAYERYPOS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].YPos;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].YPos;
                         break;
                     }
                     case VAR_PLAYERSCREENXPOS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].screenXPos;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].screenXPos;
                         break;
                     }
                     case VAR_PLAYERSCREENYPOS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].screenYPos;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].screenYPos;
                         break;
                     }
                     case VAR_PLAYERSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].speed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].speed;
                         break;
                     }
                     case VAR_PLAYERXVELOCITY: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].XVelocity;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].XVelocity;
                         break;
                     }
                     case VAR_PLAYERYVELOCITY: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].YVelocity;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].YVelocity;
                         break;
                     }
                     case VAR_PLAYERGRAVITY: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].gravity;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].gravity;
                         break;
                     }
                     case VAR_PLAYERANGLE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].angle;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].angle;
                         break;
                     }
                     case VAR_PLAYERSKIDDING: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].skidding;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].skidding;
                         break;
                     }
                     case VAR_PLAYERPUSHING: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].pushing;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].pushing;
                         break;
                     }
                     case VAR_PLAYERFRICTIONLOSS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].frictionLoss;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].frictionLoss;
                         break;
                     }
                     case VAR_PLAYERWALKINGSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].walkingSpeed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].walkingSpeed;
                         break;
                     }
                     case VAR_PLAYERRUNNINGSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].runningSpeed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].runningSpeed;
                         break;
                     }
                     case VAR_PLAYERJUMPINGSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].jumpingSpeed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].jumpingSpeed;
                         break;
                     }
                     case VAR_PLAYERTRACKSCROLL: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].trackScroll;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].trackScroll;
                         break;
                     }
                     case VAR_PLAYERUP: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].up;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].up;
                         break;
                     }
                     case VAR_PLAYERDOWN: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].down;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].down;
                         break;
                     }
                     case VAR_PLAYERLEFT: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].left;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].left;
                         break;
                     }
                     case VAR_PLAYERRIGHT: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].right;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].right;
                         break;
                     }
                     case VAR_PLAYERJUMPPRESS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].jumpPress;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].jumpPress;
                         break;
                     }
                     case VAR_PLAYERJUMPHOLD: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].jumpHold;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].jumpHold;
                         break;
                     }
                     case VAR_PLAYERFOLLOWPLAYER1: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].followPlayer1;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].followPlayer1;
                         break;
                     }
                     case VAR_PLAYERLOOKPOS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].lookPos;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].lookPos;
                         break;
                     }
                     case VAR_PLAYERWATER: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].water;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].water;
                         break;
                     }
                     case VAR_PLAYERTOPSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.topSpeed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.topSpeed;
                         break;
                     }
                     case VAR_PLAYERACCELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.acceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.acceleration;
                         break;
                     }
                     case VAR_PLAYERDECELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.deceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.deceleration;
                         break;
                     }
                     case VAR_PLAYERAIRACCELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.airAcceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.airAcceleration;
                         break;
                     }
                     case VAR_PLAYERAIRDECELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.airDeceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.airDeceleration;
                         break;
                     }
                     case VAR_PLAYERGRAVITYSTRENGTH: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.gravityStrength;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.gravityStrength;
                         break;
                     }
                     case VAR_PLAYERJUMPSTRENGTH: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.jumpStrength;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.jumpStrength;
                         break;
                     }
                     case VAR_PLAYERROLLINGACCELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.rollingAcceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.rollingAcceleration;
                         break;
                     }
                     case VAR_PLAYERROLLINGDECELERATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].stats.rollingDeceleration;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].stats.rollingDeceleration;
                         break;
                     }
                     case VAR_PLAYERENTITYNO: {
-                        ScriptEng.operands[i] = activePlayer;
+                        ScriptEng.operands[i] = PlayerNo;
                         break;
                     }
                     case VAR_PLAYERCOLLISIONLEFT: {
-                        Hitbox *hitbox = &PlayerCBoxes[PlayerScriptList[activePlayer]
-                                                         .animations[PlayerList[activePlayer].animation]
-                                                         .frames[PlayerList[activePlayer].frame]
+                        Hitbox *hitbox = &PlayerCBoxes[PlayerScriptList[PlayerNo]
+                                                         .animations[PlayerList[PlayerNo].animation]
+                                                         .frames[PlayerList[PlayerNo].frame]
                                                          .hitboxID];
                         ScriptEng.operands[i]   = hitbox->left[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONTOP: {
-                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[activePlayer]
-                                                         .animations[PlayerList[activePlayer].animation]
-                                                         .frames[PlayerList[activePlayer].frame]
+                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[PlayerNo]
+                                                         .animations[PlayerList[PlayerNo].animation]
+                                                         .frames[PlayerList[PlayerNo].frame]
                                                          .hitboxID];
                         ScriptEng.operands[i] = hitbox->top[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONRIGHT: {
-                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[activePlayer]
-                                                         .animations[PlayerList[activePlayer].animation]
-                                                         .frames[PlayerList[activePlayer].frame]
+                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[PlayerNo]
+                                                         .animations[PlayerList[PlayerNo].animation]
+                                                         .frames[PlayerList[PlayerNo].frame]
                                                          .hitboxID];
                         ScriptEng.operands[i] = hitbox->right[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONBOTTOM: {
-                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[activePlayer]
-                                                         .animations[PlayerList[activePlayer].animation]
-                                                         .frames[PlayerList[activePlayer].frame]
+                        Hitbox *hitbox        = &PlayerCBoxes[PlayerScriptList[PlayerNo]
+                                                         .animations[PlayerList[PlayerNo].animation]
+                                                         .frames[PlayerList[PlayerNo].frame]
                                                          .hitboxID];
                         ScriptEng.operands[i] = hitbox->bottom[0];
                         break;
                     }
                     case VAR_PLAYERFLAILING: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].flailing[arrayVal];
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].flailing[arrayVal];
                         break;
                     }
                     case VAR_PLAYERTIMER: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].timer;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].timer;
                         break;
                     }
                     case VAR_PLAYERTILECOLLISIONS: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].tileCollisions;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].tileCollisions;
                         break;
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].objectInteraction;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].objectInteraction;
                         break;
                     }
                     case VAR_PLAYERVISIBLE: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].visible;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].visible;
                         break;
                     }
                     case VAR_PLAYERROTATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].rotation;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].rotation;
                         break;
                     }
                     case VAR_PLAYERDIRECTION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].direction;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].direction;
                         break;
                     }
                     case VAR_PLAYERFRAME: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].frame;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].frame;
                         break;
                     }
                     case VAR_PLAYERANIMATION: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].animation;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].animation;
                         break;
                     }
                     case VAR_PLAYERANIMATIONSPEED: {
-                        ScriptEng.operands[i] = PlayerList[activePlayer].animationSpeed;
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].animationSpeed;
                         break;
                     }
                     case VAR_STAGEPAUSEENABLED: ScriptEng.operands[i] = pauseEnabled; break;
@@ -1860,7 +1860,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
 
         ObjectScript *scriptInfo = &objectScriptList[ObjectEntityList[objectLoop].type];
         Entity *entity           = &ObjectEntityList[objectLoop];
-        Player *player           = &PlayerList[activePlayer];
+        Player *player           = &PlayerList[PlayerNo];
         SpriteFrame *spriteFrame = nullptr;
 
         // Functions
@@ -2228,8 +2228,8 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             }
             case FUNC_DRAWMENU:
                 opcodeSize        = 0;
-                textMenuSurfaceNo = scriptInfo->spriteSheetID;
-                DrawTextMenu(&gameMenu[ScriptEng.operands[0]], ScriptEng.operands[1], ScriptEng.operands[2]);
+                TextMenuSurfaceNo = scriptInfo->spriteSheetID;
+                DrawTextMenu(&GameMenu[ScriptEng.operands[0]], ScriptEng.operands[1], ScriptEng.operands[2]);
                 break;
             case FUNC_SPRITEFRAME:
                 opcodeSize = 0;
@@ -2373,7 +2373,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             }
             case FUNC_SETUPMENU: {
                 opcodeSize     = 0;
-                TextMenu *menu = &gameMenu[ScriptEng.operands[0]];
+                TextMenu *menu = &GameMenu[ScriptEng.operands[0]];
                 SetupTextMenu(menu, ScriptEng.operands[1]);
                 menu->selectionCount = ScriptEng.operands[2];
                 menu->alignment      = ScriptEng.operands[3];
@@ -2381,21 +2381,21 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             }
             case FUNC_ADDMENUENTRY: {
                 opcodeSize                           = 0;
-                TextMenu *menu                       = &gameMenu[ScriptEng.operands[0]];
+                TextMenu *menu                       = &GameMenu[ScriptEng.operands[0]];
                 menu->entryHighlight[menu->rowCount] = ScriptEng.operands[2];
                 AddTextMenuEntry(menu, scriptText);
                 break;
             }
             case FUNC_EDITMENUENTRY: {
                 opcodeSize     = 0;
-                TextMenu *menu = &gameMenu[ScriptEng.operands[0]];
+                TextMenu *menu = &GameMenu[ScriptEng.operands[0]];
                 EditTextMenuEntry(menu, scriptText, ScriptEng.operands[2]);
                 menu->entryHighlight[ScriptEng.operands[2]] = ScriptEng.operands[3];
                 break;
             }
             case FUNC_LOADSTAGE:
                 opcodeSize = 0;
-                stageMode  = STAGEMODE_LOAD;
+                StageMode  = STAGEMODE_LOAD;
                 break;
             case FUNC_DRAWTINTRECT:
                 opcodeSize = 0;
@@ -2433,7 +2433,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case C_TOUCH:
                         ScriptEng.operands[5] = entity->XPos >> 16;
                         ScriptEng.operands[6] = entity->YPos >> 16;
-                        TouchCollision(ScriptEng.operands[5] + ScriptEng.operands[1], ScriptEng.operands[6] + ScriptEng.operands[2],
+                        BasicCollision(ScriptEng.operands[5] + ScriptEng.operands[1], ScriptEng.operands[6] + ScriptEng.operands[2],
                                        ScriptEng.operands[5] + ScriptEng.operands[3], ScriptEng.operands[6] + ScriptEng.operands[4]);
                         break;
                     case C_BOX:
@@ -2475,27 +2475,27 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
             }
             case FUNC_DEFAULTGROUNDMOVEMENT:
                 opcodeSize = 0; 
-                ProcessDefaultGroundMovement(&PlayerList[activePlayer]); 
+                ProcessDefaultGroundMovement(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_DEFAULTAIRMOVEMENT:
                 opcodeSize = 0; 
-                ProcessDefaultAirMovement(&PlayerList[activePlayer]); 
+                ProcessDefaultAirMovement(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_DEFAULTROLLINGMOVEMENT:
                 opcodeSize = 0; 
-                ProcessDefaultRollingMovement(&PlayerList[activePlayer]); 
+                ProcessDefaultRollingMovement(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_DEFAULTGRAVITYTRUE: 
                 opcodeSize = 0;
-                ProcessDefaultGravityTrue(&PlayerList[activePlayer]); 
+                ProcessDefaultGravityTrue(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_DEFAULTGRAVITYFALSE:
                 opcodeSize = 0; 
-                ProcessDefaultGravityFalse(&PlayerList[activePlayer]); 
+                ProcessDefaultGravityFalse(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_DEFAULTJUMPACTION: 
                 opcodeSize = 0;
-                ProcessDefaultJumpAction(&PlayerList[activePlayer]); 
+                ProcessDefaultJumpAction(&PlayerList[PlayerNo]); 
                 break;
             case FUNC_SETMUSICTRACK:
                 opcodeSize = 0;
@@ -2683,24 +2683,24 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_CHECKRESULT: ScriptEng.checkResult = ScriptEng.operands[i]; break;
                     case VAR_ARRAYPOS0: ScriptEng.arrayPosition[0] = ScriptEng.operands[i]; break;
                     case VAR_ARRAYPOS1: ScriptEng.arrayPosition[1] = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNUP: keyDown.up = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNDOWN: keyDown.down = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNLEFT: keyDown.left = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNRIGHT: keyDown.right = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONA: keyDown.A = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONB: keyDown.B = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNBUTTONC: keyDown.C = ScriptEng.operands[i]; break;
-                    case VAR_KEYDOWNSTART: keyDown.start = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSUP: keyPress.up = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSDOWN: keyPress.down = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSLEFT: keyPress.left = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSRIGHT: keyPress.right = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONA: keyPress.A = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONB: keyPress.B = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSBUTTONC: keyPress.C = ScriptEng.operands[i]; break;
-                    case VAR_KEYPRESSSTART: keyPress.start = ScriptEng.operands[i]; break;
-                    case VAR_MENU1SELECTION: gameMenu[0].selection1 = ScriptEng.operands[i]; break;
-                    case VAR_MENU2SELECTION: gameMenu[1].selection1 = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNUP: GKeyDown.up = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNDOWN: GKeyDown.down = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNLEFT: GKeyDown.left = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNRIGHT: GKeyDown.right = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONA: GKeyDown.A = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONB: GKeyDown.B = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNBUTTONC: GKeyDown.C = ScriptEng.operands[i]; break;
+                    case VAR_KEYDOWNSTART: GKeyDown.start = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSUP: GKeyPress.up = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSDOWN: GKeyPress.down = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSLEFT: GKeyPress.left = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSRIGHT: GKeyPress.right = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONA: GKeyPress.A = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONB: GKeyPress.B = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSBUTTONC: GKeyPress.C = ScriptEng.operands[i]; break;
+                    case VAR_KEYPRESSSTART: GKeyPress.start = ScriptEng.operands[i]; break;
+                    case VAR_MENU1SELECTION: GameMenu[0].selection1 = ScriptEng.operands[i]; break;
+                    case VAR_MENU2SELECTION: GameMenu[1].selection1 = ScriptEng.operands[i]; break;
                     case VAR_STAGEACTIVELIST: activeStageList = ScriptEng.operands[i]; break;
                     case VAR_STAGELISTPOS: stageListPosition = ScriptEng.operands[i]; break;
                     case VAR_XSCROLLOFFSET: xScrollOffset = ScriptEng.operands[i]; break;
@@ -2713,175 +2713,175 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_STAGEACTNO: actID = ScriptEng.operands[i]; break;
                     case VAR_OBJECTENTITYNO: break;
                     case VAR_PLAYERTYPE: {
-                        PlayerList[activePlayer].type = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].type = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERSTATE: {
-                        PlayerList[activePlayer].state = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].state = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCONTROLMODE: {
-                        PlayerList[activePlayer].controlMode = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].controlMode = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONMODE: {
-                        PlayerList[activePlayer].collisionMode = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].collisionMode = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONPLANE: {
-                        PlayerList[activePlayer].collisionPlane = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].collisionPlane = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERXPOS: {
-                        PlayerList[activePlayer].XPos = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].XPos = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERYPOS: {
-                        PlayerList[activePlayer].YPos = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].YPos = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERSCREENXPOS: {
-                        PlayerList[activePlayer].screenXPos = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].screenXPos = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERSCREENYPOS: {
-                        PlayerList[activePlayer].screenYPos = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].screenYPos = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERSPEED: {
-                        PlayerList[activePlayer].speed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].speed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERXVELOCITY: {
-                        PlayerList[activePlayer].XVelocity = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].XVelocity = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERYVELOCITY: {
-                        PlayerList[activePlayer].YVelocity = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].YVelocity = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERGRAVITY: {
-                        PlayerList[activePlayer].gravity = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].gravity = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERANGLE: {
-                        PlayerList[activePlayer].angle = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].angle = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROTATION: {
-                        PlayerList[activePlayer].rotation = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].rotation = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERDIRECTION: {
-                        PlayerList[activePlayer].direction = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].direction = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERANIMATION: {
-                        PlayerList[activePlayer].animation = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].animation = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERFRAME: {
-                        PlayerList[activePlayer].frame = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].frame = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERSKIDDING: {
-                        PlayerList[activePlayer].skidding = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].skidding = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERPUSHING: {
-                        PlayerList[activePlayer].pushing = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].pushing = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERFRICTIONLOSS: {
-                        PlayerList[activePlayer].frictionLoss = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].frictionLoss = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERWALKINGSPEED: {
-                        PlayerList[activePlayer].walkingSpeed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].walkingSpeed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERRUNNINGSPEED: {
-                        PlayerList[activePlayer].runningSpeed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].runningSpeed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERJUMPINGSPEED: {
-                        PlayerList[activePlayer].jumpingSpeed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].jumpingSpeed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERTRACKSCROLL: {
-                        PlayerList[activePlayer].trackScroll = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].trackScroll = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERUP: {
-                        PlayerList[activePlayer].up = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].up = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERDOWN: {
-                        PlayerList[activePlayer].down = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].down = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERLEFT: {
-                        PlayerList[activePlayer].left = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].left = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERRIGHT: {
-                        PlayerList[activePlayer].right = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].right = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERJUMPPRESS: {
-                        PlayerList[activePlayer].jumpPress = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].jumpPress = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERJUMPHOLD: {
-                        PlayerList[activePlayer].jumpHold = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].jumpHold = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERFOLLOWPLAYER1: {
-                        PlayerList[activePlayer].followPlayer1 = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].followPlayer1 = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERLOOKPOS: {
-                        PlayerList[activePlayer].lookPos = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].lookPos = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERWATER: {
-                        PlayerList[activePlayer].water = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].water = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERTOPSPEED: {
-                        PlayerList[activePlayer].stats.topSpeed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.topSpeed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERACCELERATION: {
-                        PlayerList[activePlayer].stats.acceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.acceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERDECELERATION: {
-                        PlayerList[activePlayer].stats.deceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.deceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERAIRACCELERATION: {
-                        PlayerList[activePlayer].stats.airAcceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.airAcceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERAIRDECELERATION: {
-                        PlayerList[activePlayer].stats.airDeceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.airDeceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERGRAVITYSTRENGTH: {
-                        PlayerList[activePlayer].stats.gravityStrength = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.gravityStrength = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERJUMPSTRENGTH: {
-                        PlayerList[activePlayer].stats.jumpStrength = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.jumpStrength = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROLLINGACCELERATION: {
-                        PlayerList[activePlayer].stats.rollingAcceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.rollingAcceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERROLLINGDECELERATION: {
-                        PlayerList[activePlayer].stats.rollingDeceleration = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].stats.rollingDeceleration = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERENTITYNO: break;
@@ -2890,7 +2890,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_PLAYERCOLLISIONRIGHT: break;
                     case VAR_PLAYERCOLLISIONBOTTOM: break;
                     case VAR_PLAYERFLAILING: {
-                        PlayerList[activePlayer].flailing[arrayVal] = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].flailing[arrayVal] = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_STAGEPAUSEENABLED: {
@@ -2901,19 +2901,19 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                         break;
                     }
                     case VAR_PLAYERTIMER: {
-                        PlayerList[activePlayer].timer = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].timer = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERANIMATIONSPEED: {
-                        PlayerList[activePlayer].animationSpeed = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].animationSpeed = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYERTILECOLLISIONS: {
-                        PlayerList[activePlayer].tileCollisions = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].tileCollisions = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
-                        PlayerList[activePlayer].objectInteraction = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].objectInteraction = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_SCREENCAMERAENABLED: cameraEnabled = ScriptEng.operands[i]; break;
@@ -2921,7 +2921,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub)
                     case VAR_MUSICVOLUME: SetMusicVolume(ScriptEng.operands[i]); break;
                     case VAR_MUSICCURRENTTRACK: trackID = ScriptEng.operands[i]; break;
                     case VAR_PLAYERVISIBLE: {
-                        PlayerList[activePlayer].visible = ScriptEng.operands[i];
+                        PlayerList[PlayerNo].visible = ScriptEng.operands[i];
                         break;
                     }
                     case VAR_STAGENEWXBOUNDARY1: newXBoundary1 = ScriptEng.operands[i]; break;

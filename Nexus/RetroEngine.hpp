@@ -156,7 +156,7 @@ class RetroEngine {
 public:
     RetroEngine() {}
 
-    bool usingBinFile       = false;
+    bool UseBinFile         = false;
     bool usingDataFileStore = false;
     bool forceFolder        = false;
 
@@ -165,7 +165,7 @@ public:
     bool initialised = false;
     bool running     = false;
 
-    int gameMode    = 1;
+    int GameMode    = ENGINE_MAINGAME;
     byte colourMode = 1; // 16-bit
 
     int frameSkipSetting = 0;

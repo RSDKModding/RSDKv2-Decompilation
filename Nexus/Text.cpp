@@ -1,7 +1,7 @@
 #include "RetroEngine.hpp"
 
-TextMenu gameMenu[TEXTMENU_COUNT];
-int textMenuSurfaceNo = 0;
+TextMenu GameMenu[TEXTMENU_COUNT];
+int TextMenuSurfaceNo = 0;
 
 void SetupTextMenu(TextMenu *menu, int rowCount)
 {

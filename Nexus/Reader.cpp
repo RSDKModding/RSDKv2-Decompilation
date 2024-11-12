@@ -19,19 +19,19 @@ bool CheckBinFile(const char *filePath)
 {
     FileInfo info;
 
-    Engine.usingBinFile       = false;
+    Engine.UseBinFile       = false;
     Engine.usingDataFileStore = false;
 
     cFileHandle = fOpen(filePath, "rb");
     if (cFileHandle) {
-        Engine.usingBinFile = true;
+        Engine.UseBinFile = true;
         StrCopy(binFileName, filePath);
         fClose(cFileHandle);
         cFileHandle = NULL;
         return true;
     }
     else {
-        Engine.usingBinFile = false;
+        Engine.UseBinFile = false;
         cFileHandle         = NULL;
         return false;
     }
@@ -59,10 +59,10 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     StrCopy(filePathBuf, filePath);
 
     if (Engine.forceFolder)
-        Engine.usingBinFile = Engine.usingDataFileStore;
+        Engine.UseBinFile = Engine.usingDataFileStore;
     Engine.forceFolder = false;
 
-    Engine.usingDataFileStore = Engine.usingBinFile;
+    Engine.usingDataFileStore = Engine.UseBinFile;
 
 #if RETRO_USE_MOD_LOADER
     fileInfo->isMod = false;
@@ -83,7 +83,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
                 Engine.forceFolder  = true;
-                Engine.usingBinFile = false;
+                Engine.UseBinFile = false;
                 fileInfo->isMod     = true;
                 isModdedFile        = true;
                 addPath             = false;
@@ -104,7 +104,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     StrCopy(fileInfo->fileName, "");
     StrCopy(fileName, "");
 
-    if (Engine.usingBinFile && !Engine.forceFolder) {
+    if (Engine.UseBinFile && !Engine.forceFolder) {
         cFileHandle = fOpen(binFileName, "rb");
         fSeek(cFileHandle, 0, SEEK_END);
         fileSize       = (int)fTell(cFileHandle);
@@ -184,7 +184,7 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     fullFilename[fNamePos] = 0;
 
     fSeek(cFileHandle, 0, SEEK_SET);
-    Engine.usingBinFile = false;
+    Engine.UseBinFile = false;
     bufferPosition      = 0;
     readSize            = 0;
     readPos             = 0;
@@ -257,7 +257,7 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     }
 
     if (fileOffset == -1) {
-        Engine.usingBinFile = true;
+        Engine.UseBinFile = true;
         return false;
     }
     else {
@@ -306,7 +306,7 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
 
             // No File has been found (next file would be in a new dir)
             if (virtualFileOffset >= nextFileOffset + headerSize) {
-                Engine.usingBinFile = true;
+                Engine.UseBinFile = true;
                 return false;
             }
             fSeek(cFileHandle, virtualFileOffset, SEEK_SET);
@@ -314,10 +314,10 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             readSize       = 0;
             readPos        = virtualFileOffset;
         }
-        Engine.usingBinFile = true;
+        Engine.UseBinFile = true;
         return true;
     }
-    // Engine.usingBinFile = true;
+    // Engine.UseBinFile = true;
     return false;
 }
 
@@ -326,7 +326,7 @@ void FileRead(void *dest, int size)
     byte *data = (byte *)dest;
 
     if (readPos <= fileSize) {
-        if (Engine.usingBinFile && !Engine.forceFolder) {
+        if (Engine.UseBinFile && !Engine.forceFolder) {
             while (size > 0) {
                 if (bufferPosition == readSize)
                     FillFileBuffer();
@@ -351,14 +351,14 @@ void SetFileInfo(FileInfo *fileInfo)
 {
     Engine.forceFolder = false;
     if (!fileInfo->isMod) {
-        Engine.usingBinFile = Engine.usingDataFileStore;
+        Engine.UseBinFile = Engine.usingDataFileStore;
     }
     else {
         Engine.forceFolder = true;
     }
 
     isModdedFile = fileInfo->isMod;
-    if (Engine.usingBinFile && !Engine.forceFolder) {
+    if (Engine.UseBinFile && !Engine.forceFolder) {
         cFileHandle       = fOpen(binFileName, "rb");
         virtualFileOffset = fileInfo->virtualFileOffset;
         vFileSize         = fileInfo->fileSize;
@@ -383,7 +383,7 @@ void SetFileInfo(FileInfo *fileInfo)
 
 size_t GetFilePosition()
 {
-    if (Engine.usingBinFile)
+    if (Engine.UseBinFile)
         return bufferPosition + readPos - readSize - virtualFileOffset;
     else
         return bufferPosition + readPos - readSize;
@@ -391,7 +391,7 @@ size_t GetFilePosition()
 
 void SetFilePosition(int newPos)
 {
-    if (Engine.usingBinFile) {
+    if (Engine.UseBinFile) {
         readPos = virtualFileOffset + newPos;
     }
     else {
@@ -403,7 +403,7 @@ void SetFilePosition(int newPos)
 
 bool ReachedEndOfFile()
 {
-    if (Engine.usingBinFile)
+    if (Engine.UseBinFile)
         return bufferPosition + readPos - readSize - virtualFileOffset >= vFileSize;
     else
         return bufferPosition + readPos - readSize >= fileSize;
@@ -420,10 +420,10 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     StrCopy(filePathBuf, filePath);
 
     if (Engine.forceFolder)
-        Engine.usingBinFile = Engine.usingDataFileStore;
+        Engine.UseBinFile = Engine.usingDataFileStore;
     Engine.forceFolder = false;
 
-    Engine.usingDataFileStore = Engine.usingBinFile;
+    Engine.usingDataFileStore = Engine.UseBinFile;
 
 #if RETRO_USE_MOD_LOADER
     fileInfo->isMod = false;
@@ -444,7 +444,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
                 Engine.forceFolder   = true;
-                Engine.usingBinFile = false;
+                Engine.UseBinFile = false;
                 fileInfo->isMod      = true;
                 isModdedFile         = true;
                 addPath              = false;
@@ -464,7 +464,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
 
     StrCopy(fileInfo->fileName, "");
 
-    if (Engine.usingBinFile && !Engine.forceFolder) {
+    if (Engine.UseBinFile && !Engine.forceFolder) {
         fileInfo->cFileHandle = fOpen(binFileName, "rb");
         fSeek(fileInfo->cFileHandle, 0, SEEK_END);
         fileInfo->fileSize       = (int)fTell(fileInfo->cFileHandle);
@@ -546,7 +546,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     fullFilename[fNamePos] = 0;
 
     fSeek(fileInfo->cFileHandle, 0, SEEK_SET);
-    Engine.usingBinFile      = false;
+    Engine.UseBinFile      = false;
     fileInfo->bufferPosition = 0;
     // readSize             = 0;
     fileInfo->readPos = 0;
@@ -617,7 +617,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     }
 
     if (fileOffset == -1) {
-        Engine.usingBinFile = true;
+        Engine.UseBinFile = true;
         return false;
     }
     else {
@@ -665,7 +665,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
 
             // No File has been found (next file would be in a new dir)
             if (fileInfo->virtualFileOffset >= nextFileOffset + headerSize) {
-                Engine.usingBinFile = true;
+                Engine.UseBinFile = true;
                 return false;
             }
             fSeek(fileInfo->cFileHandle, fileInfo->virtualFileOffset, SEEK_SET);
@@ -673,10 +673,10 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
             // readSize       = 0;
             fileInfo->readPos = fileInfo->virtualFileOffset;
         }
-        Engine.usingBinFile = true;
+        Engine.UseBinFile = true;
         return true;
     }
-    // Engine.usingBinFile = true;
+    // Engine.UseBinFile = true;
     return false;
 }
 
@@ -696,7 +696,7 @@ size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer)
     }
     else {
         if (rPos <= info->fileSize) {
-            if (Engine.usingBinFile && !Engine.forceFolder) {
+            if (Engine.UseBinFile && !Engine.forceFolder) {
                 int rSize = 0;
                 if (rPos + size <= info->fileSize)
                     rSize = size;

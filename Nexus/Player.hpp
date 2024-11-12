@@ -107,7 +107,7 @@ struct PlayerScript {
 
 extern Player PlayerList[PLAYER_COUNT];
 extern PlayerScript PlayerScriptList[PLAYER_COUNT];
-extern int activePlayer;
+extern int PlayerNo;
 extern int activePlayerCount;
 
 extern ushort upBuffer;
