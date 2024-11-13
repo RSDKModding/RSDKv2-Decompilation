@@ -329,7 +329,7 @@ void ProcessSystemMenu() {
                 --GameMenu[1].selection1;
 
             if (GameMenu[1].selection1 >= GameMenu[1].rowCount)
-                GameMenu[1].selection1 = GKeyDown.C ? (GameMenu[1].selection1 - 1) : 0;
+                GameMenu[1].selection1 = 0;
             if (GameMenu[1].selection1 < 0)
                 GameMenu[1].selection1 = GameMenu[1].rowCount - 1;
 
