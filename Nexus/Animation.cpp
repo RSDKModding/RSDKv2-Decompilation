@@ -1,6 +1,6 @@
 #include "RetroEngine.hpp"
 
-SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
+SpriteFrame ScriptFrames[SPRITEFRAME_COUNT];
 int ScriptFramesNo = 0;
 
 SpriteFrame animFrames[SPRITEFRAME_COUNT];
@@ -106,6 +106,6 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
 }
 void ClearAnimationData()
 {
-    for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(scriptFrames[f]);
+    for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(ScriptFrames[f]);
     ScriptFramesNo   = 0;
 }

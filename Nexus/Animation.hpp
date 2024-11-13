@@ -33,7 +33,7 @@ struct Hitbox {
     sbyte bottom[HITBOX_DIR_COUNT];
 };
 
-extern SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
+extern SpriteFrame ScriptFrames[SPRITEFRAME_COUNT];
 extern int ScriptFramesNo;
 
 extern SpriteFrame animFrames[SPRITEFRAME_COUNT];

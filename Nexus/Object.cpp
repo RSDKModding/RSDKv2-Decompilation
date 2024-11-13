@@ -16,11 +16,11 @@ void ProcessStartupObjects() {
     ScriptEng.arrayPosition[2] = TEMPENTITY_START;
     Entity *entity             = &ObjectEntityList[TEMPENTITY_START];
     for (int i = 0; i < OBJECT_COUNT; ++i) {
-        ObjectScript *scriptInfo  = &objectScriptList[i];
+        ObjectScript *scriptInfo  = &ObjectScriptList[i];
         ObjectLoop                = TEMPENTITY_START;
         curObjectType             = i;
         int frameStart            = ScriptFramesNo;
-        scriptInfo->frameStartPtr = &scriptFrames[ScriptFramesNo];
+        scriptInfo->frameStartPtr = &ScriptFrames[ScriptFramesNo];
         scriptInfo->spriteSheetID = 0;
         entity->type              = i;
         if (ScriptData[scriptInfo->subStartup.scriptCodePtr] > 0)
@@ -96,7 +96,7 @@ void ProcessObjects() {
                         ObjectDrawOrderList[entity->drawOrder].entityRefs[ObjectDrawOrderList[entity->drawOrder].listSize++] = ObjectLoop;
                 }
             } else {
-                ObjectScript *scriptInfo = &objectScriptList[entity->type];
+                ObjectScript *scriptInfo = &ObjectScriptList[entity->type];
                 PlayerNo                 = 0;
                 if (ScriptData[scriptInfo->subMain.scriptCodePtr] > 0)
                     ProcessScript(scriptInfo->subMain.scriptCodePtr, scriptInfo->subMain.jumpTablePtr, SUB_MAIN);

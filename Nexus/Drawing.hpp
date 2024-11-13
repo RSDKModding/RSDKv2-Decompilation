@@ -35,8 +35,8 @@ extern byte TintLookupTable4[0x100];
 
 extern DrawListEntry ObjectDrawOrderList[DRAWLAYER_COUNT];
 
-extern int gfxDataPosition;
-extern GFXSurface gfxSurface[SURFACE_MAX];
+extern int GfxDataPosition;
+extern GFXSurface GfxSurface[SURFACE_MAX];
 extern byte GraphicData[GFXDATA_MAX];
 
 int InitRenderDevice();
@@ -46,17 +46,17 @@ void ReleaseRenderDevice();
 void ClearScreen(byte index);
 
 inline void ClearGraphicsData() {
-    for (int i = 0; i < SURFACE_MAX; ++i) StrCopy(gfxSurface[i].fileName, "");
-    gfxDataPosition = 0;
+    for (int i = 0; i < SURFACE_MAX; ++i) StrCopy(GfxSurface[i].fileName, "");
+    GfxDataPosition = 0;
 #if !RETRO_USE_ORIGINAL_CODE
-    MEM_ZERO(gfxSurface);
+    MEM_ZERO(GfxSurface);
 #endif
 }
 
 void SetScreenSize(int width, int lineSize);
 
-void SetBlendTable(ushort alpha, byte type, byte a3, byte a4);
-void SetTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte tableID);
+void GenerateBlendTable(ushort alpha, byte type, byte a3, byte a4);
+void GenerateTintTable(short alpha, short a2, byte type, byte a4, byte a5, byte tableID);
 
 // Layer Drawing
 void DrawObjectList(int layer);

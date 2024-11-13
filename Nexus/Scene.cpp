@@ -62,7 +62,7 @@ byte titleCardWord2 = 0;
 
 byte activeTileLayers[4];
 byte tLayerMidPoint;
-TileLayer stageLayouts[LAYER_COUNT];
+TileLayer StageLayouts[LAYER_COUNT];
 
 int bgDeformationData0[DEFORM_COUNT];
 int bgDeformationData1[DEFORM_COUNT];
@@ -74,11 +74,11 @@ int fgDeformationOffsetW = 0;
 int bgDeformationOffset  = 0;
 int bgDeformationOffsetW = 0;
 
-LineScroll hParallax;
-LineScroll vParallax;
+LineScroll HParallax;
+LineScroll VParallax;
 
 Tiles128x128 tiles128x128;
-CollisionMasks collisionMasks[2];
+CollisionMasks TileCollisions[2];
 
 byte tilesetGFXData[TILESET_SIZE];
 
@@ -355,24 +355,24 @@ void LoadActLayout() {
         FileRead(activeTileLayers, 4);
         FileRead(&tLayerMidPoint, 1);
 
-        FileRead(&stageLayouts[0].xsize, 1);
-        FileRead(&stageLayouts[0].ysize, 1);
+        FileRead(&StageLayouts[0].xsize, 1);
+        FileRead(&StageLayouts[0].ysize, 1);
         XBoundary1    = 0;
         NewXBoundary1 = 0;
         YBoundary1    = 0;
         NewYBoundary1 = 0;
-        XBoundary2    = stageLayouts[0].xsize << 7;
-        YBoundary2    = stageLayouts[0].ysize << 7;
+        XBoundary2    = StageLayouts[0].xsize << 7;
+        YBoundary2    = StageLayouts[0].ysize << 7;
         WaterLevel    = YBoundary2 + 128;
-        NewXBoundary2 = stageLayouts[0].xsize << 7;
-        NewYBoundary2 = stageLayouts[0].ysize << 7;
+        NewXBoundary2 = StageLayouts[0].xsize << 7;
+        NewYBoundary2 = StageLayouts[0].ysize << 7;
 
-        for (int i = 0; i < 0x10000; ++i) stageLayouts[0].tiles[i] = 0;
+        for (int i = 0; i < 0x10000; ++i) StageLayouts[0].tiles[i] = 0;
 
         byte fileBuffer = 0;
-        for (int y = 0; y < stageLayouts[0].ysize; ++y) {
-            ushort *tiles = &stageLayouts[0].tiles[(y * 0x100)];
-            for (int x = 0; x < stageLayouts[0].xsize; ++x) {
+        for (int y = 0; y < StageLayouts[0].ysize; ++y) {
+            ushort *tiles = &StageLayouts[0].tiles[(y * 0x100)];
+            for (int x = 0; x < StageLayouts[0].xsize; ++x) {
                 FileRead(&fileBuffer, 1);
                 tiles[x] = fileBuffer << 8;
                 FileRead(&fileBuffer, 1);
@@ -432,17 +432,17 @@ void LoadActLayout() {
 
             ++object;
         }
-        stageLayouts[0].type = LAYER_HSCROLL;
+        StageLayouts[0].type = LAYER_HSCROLL;
         CloseFile();
     }
 }
 void LoadStageBackground() {
     for (int i = 0; i < LAYER_COUNT; ++i) {
-        stageLayouts[i].type = LAYER_NOSCROLL;
+        StageLayouts[i].type = LAYER_NOSCROLL;
     }
     for (int i = 0; i < PARALLAX_COUNT; ++i) {
-        hParallax.scrollPos[i] = 0;
-        vParallax.scrollPos[i] = 0;
+        HParallax.scrollPos[i] = 0;
+        VParallax.scrollPos[i] = 0;
     }
 
     FileInfo info;
@@ -450,48 +450,48 @@ void LoadStageBackground() {
         byte fileBuffer = 0;
         byte layerCount = 0;
         FileRead(&layerCount, 1);
-        FileRead(&hParallax.entryCount, 1);
-        for (int i = 0; i < hParallax.entryCount; ++i) {
+        FileRead(&HParallax.entryCount, 1);
+        for (int i = 0; i < HParallax.entryCount; ++i) {
             FileRead(&fileBuffer, 1);
-            hParallax.parallaxFactor[i] = fileBuffer;
+            HParallax.parallaxFactor[i] = fileBuffer;
 
             FileRead(&fileBuffer, 1);
-            hParallax.scrollSpeed[i] = fileBuffer << 10;
+            HParallax.scrollSpeed[i] = fileBuffer << 10;
 
-            hParallax.scrollPos[i] = 0;
+            HParallax.scrollPos[i] = 0;
 
-            FileRead(&hParallax.deform[i], 1);
+            FileRead(&HParallax.deform[i], 1);
         }
 
-        FileRead(&vParallax.entryCount, 1);
-        for (int i = 0; i < vParallax.entryCount; ++i) {
+        FileRead(&VParallax.entryCount, 1);
+        for (int i = 0; i < VParallax.entryCount; ++i) {
             FileRead(&fileBuffer, 1);
-            vParallax.parallaxFactor[i] = fileBuffer;
+            VParallax.parallaxFactor[i] = fileBuffer;
 
             FileRead(&fileBuffer, 1);
-            vParallax.scrollSpeed[i] = fileBuffer << 10;
+            VParallax.scrollSpeed[i] = fileBuffer << 10;
 
-            vParallax.scrollPos[i] = 0;
+            VParallax.scrollPos[i] = 0;
 
-            FileRead(&vParallax.deform[i], 1);
+            FileRead(&VParallax.deform[i], 1);
         }
 
         for (int i = 1; i < layerCount + 1; ++i) {
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].xsize = fileBuffer;
+            StageLayouts[i].xsize = fileBuffer;
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].ysize = fileBuffer;
+            StageLayouts[i].ysize = fileBuffer;
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].type = fileBuffer;
+            StageLayouts[i].type = fileBuffer;
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].parallaxFactor = fileBuffer;
+            StageLayouts[i].parallaxFactor = fileBuffer;
             FileRead(&fileBuffer, 1);
-            stageLayouts[i].scrollSpeed = fileBuffer << 10;
-            stageLayouts[i].scrollPos   = 0;
+            StageLayouts[i].scrollSpeed = fileBuffer << 10;
+            StageLayouts[i].scrollPos   = 0;
 
-            memset(stageLayouts[i].tiles, 0, TILELAYER_CHUNK_MAX * sizeof(ushort));
-            byte *lineScrollPtr = stageLayouts[i].lineScroll;
-            memset(stageLayouts[i].lineScroll, 0, 0x7FFF);
+            memset(StageLayouts[i].tiles, 0, TILELAYER_CHUNK_MAX * sizeof(ushort));
+            byte *lineScrollPtr = StageLayouts[i].lineScroll;
+            memset(StageLayouts[i].lineScroll, 0, 0x7FFF);
 
             // Read Line Scroll
             byte buf[3];
@@ -513,9 +513,9 @@ void LoadStageBackground() {
             }
 
             // Read Layout
-            for (int y = 0; y < stageLayouts[i].ysize; ++y) {
-                ushort *chunks = &stageLayouts[i].tiles[y * 0x100];
-                for (int x = 0; x < stageLayouts[i].xsize; ++x) {
+            for (int y = 0; y < StageLayouts[i].ysize; ++y) {
+                ushort *chunks = &StageLayouts[i].tiles[y * 0x100];
+                for (int x = 0; x < StageLayouts[i].xsize; ++x) {
                     FileRead(&fileBuffer, 1);
                     *chunks += fileBuffer;
                     ++chunks;
@@ -560,22 +560,22 @@ void LoadStageCollisions() {
             for (int p = 0; p < 2; ++p) {
                 FileRead(&fileBuffer, 1);
                 bool isCeiling             = fileBuffer >> 4;
-                collisionMasks[p].flags[t] = fileBuffer & 0xF;
+                TileCollisions[p].flags[t] = fileBuffer & 0xF;
                 FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] = fileBuffer;
+                TileCollisions[p].angles[t] = fileBuffer;
                 FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] += fileBuffer << 8;
+                TileCollisions[p].angles[t] += fileBuffer << 8;
                 FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] += fileBuffer << 16;
+                TileCollisions[p].angles[t] += fileBuffer << 16;
                 FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] += fileBuffer << 24;
+                TileCollisions[p].angles[t] += fileBuffer << 24;
 
                 if (isCeiling) // Ceiling Tile
                 {
                     for (int c = 0; c < TILE_SIZE; c += 2) {
                         FileRead(&fileBuffer, 1);
-                        collisionMasks[p].roofMasks[c + tileIndex]     = fileBuffer >> 4;
-                        collisionMasks[p].roofMasks[c + tileIndex + 1] = fileBuffer & 0xF;
+                        TileCollisions[p].roofMasks[c + tileIndex]     = fileBuffer >> 4;
+                        TileCollisions[p].roofMasks[c + tileIndex + 1] = fileBuffer & 0xF;
                     }
 
                     // Has Collision (Pt 1)
@@ -583,10 +583,10 @@ void LoadStageCollisions() {
                     int id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) {
                         if (fileBuffer & id) {
-                            collisionMasks[p].floorMasks[c + tileIndex + 8] = 0;
+                            TileCollisions[p].floorMasks[c + tileIndex + 8] = 0;
                         } else {
-                            collisionMasks[p].floorMasks[c + tileIndex + 8] = 0x40;
-                            collisionMasks[p].roofMasks[c + tileIndex + 8]  = -0x40;
+                            TileCollisions[p].floorMasks[c + tileIndex + 8] = 0x40;
+                            TileCollisions[p].roofMasks[c + tileIndex + 8]  = -0x40;
                         }
                         id <<= 1;
                     }
@@ -596,10 +596,10 @@ void LoadStageCollisions() {
                     id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) {
                         if (fileBuffer & id) {
-                            collisionMasks[p].floorMasks[c + tileIndex] = 0;
+                            TileCollisions[p].floorMasks[c + tileIndex] = 0;
                         } else {
-                            collisionMasks[p].floorMasks[c + tileIndex] = 0x40;
-                            collisionMasks[p].roofMasks[c + tileIndex]  = -0x40;
+                            TileCollisions[p].floorMasks[c + tileIndex] = 0x40;
+                            TileCollisions[p].roofMasks[c + tileIndex]  = -0x40;
                         }
                         id <<= 1;
                     }
@@ -609,12 +609,12 @@ void LoadStageCollisions() {
                         int h = 0;
                         while (h > -1) {
                             if (h >= TILE_SIZE) {
-                                collisionMasks[p].lWallMasks[c + tileIndex] = 0x40;
+                                TileCollisions[p].lWallMasks[c + tileIndex] = 0x40;
                                 h                                           = -1;
-                            } else if (c > collisionMasks[p].roofMasks[h + tileIndex]) {
+                            } else if (c > TileCollisions[p].roofMasks[h + tileIndex]) {
                                 ++h;
                             } else {
-                                collisionMasks[p].lWallMasks[c + tileIndex] = h;
+                                TileCollisions[p].lWallMasks[c + tileIndex] = h;
                                 h                                           = -1;
                             }
                         }
@@ -625,12 +625,12 @@ void LoadStageCollisions() {
                         int h = TILE_SIZE - 1;
                         while (h < TILE_SIZE) {
                             if (h <= -1) {
-                                collisionMasks[p].rWallMasks[c + tileIndex] = -0x40;
+                                TileCollisions[p].rWallMasks[c + tileIndex] = -0x40;
                                 h                                           = TILE_SIZE;
-                            } else if (c > collisionMasks[p].roofMasks[h + tileIndex]) {
+                            } else if (c > TileCollisions[p].roofMasks[h + tileIndex]) {
                                 --h;
                             } else {
-                                collisionMasks[p].rWallMasks[c + tileIndex] = h;
+                                TileCollisions[p].rWallMasks[c + tileIndex] = h;
                                 h                                           = TILE_SIZE;
                             }
                         }
@@ -639,18 +639,18 @@ void LoadStageCollisions() {
                 {
                     for (int c = 0; c < TILE_SIZE; c += 2) {
                         FileRead(&fileBuffer, 1);
-                        collisionMasks[p].floorMasks[c + tileIndex]     = fileBuffer >> 4;
-                        collisionMasks[p].floorMasks[c + tileIndex + 1] = fileBuffer & 0xF;
+                        TileCollisions[p].floorMasks[c + tileIndex]     = fileBuffer >> 4;
+                        TileCollisions[p].floorMasks[c + tileIndex + 1] = fileBuffer & 0xF;
                     }
                     FileRead(&fileBuffer, 1);
                     int id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) // HasCollision
                     {
                         if (fileBuffer & id) {
-                            collisionMasks[p].roofMasks[c + tileIndex + 8] = 0xF;
+                            TileCollisions[p].roofMasks[c + tileIndex + 8] = 0xF;
                         } else {
-                            collisionMasks[p].floorMasks[c + tileIndex + 8] = 0x40;
-                            collisionMasks[p].roofMasks[c + tileIndex + 8]  = -0x40;
+                            TileCollisions[p].floorMasks[c + tileIndex + 8] = 0x40;
+                            TileCollisions[p].roofMasks[c + tileIndex + 8]  = -0x40;
                         }
                         id <<= 1;
                     }
@@ -660,10 +660,10 @@ void LoadStageCollisions() {
                     for (int c = 0; c < TILE_SIZE / 2; ++c) // HasCollision (pt 2)
                     {
                         if (fileBuffer & id) {
-                            collisionMasks[p].roofMasks[c + tileIndex] = 0xF;
+                            TileCollisions[p].roofMasks[c + tileIndex] = 0xF;
                         } else {
-                            collisionMasks[p].floorMasks[c + tileIndex] = 0x40;
-                            collisionMasks[p].roofMasks[c + tileIndex]  = -0x40;
+                            TileCollisions[p].floorMasks[c + tileIndex] = 0x40;
+                            TileCollisions[p].roofMasks[c + tileIndex]  = -0x40;
                         }
                         id <<= 1;
                     }
@@ -673,12 +673,12 @@ void LoadStageCollisions() {
                         int h = 0;
                         while (h > -1) {
                             if (h >= TILE_SIZE) {
-                                collisionMasks[p].lWallMasks[c + tileIndex] = 0x40;
+                                TileCollisions[p].lWallMasks[c + tileIndex] = 0x40;
                                 h                                           = -1;
-                            } else if (c < collisionMasks[p].floorMasks[h + tileIndex]) {
+                            } else if (c < TileCollisions[p].floorMasks[h + tileIndex]) {
                                 ++h;
                             } else {
-                                collisionMasks[p].lWallMasks[c + tileIndex] = h;
+                                TileCollisions[p].lWallMasks[c + tileIndex] = h;
                                 h                                           = -1;
                             }
                         }
@@ -689,12 +689,12 @@ void LoadStageCollisions() {
                         int h = TILE_SIZE - 1;
                         while (h < TILE_SIZE) {
                             if (h <= -1) {
-                                collisionMasks[p].rWallMasks[c + tileIndex] = -0x40;
+                                TileCollisions[p].rWallMasks[c + tileIndex] = -0x40;
                                 h                                           = TILE_SIZE;
-                            } else if (c < collisionMasks[p].floorMasks[h + tileIndex]) {
+                            } else if (c < TileCollisions[p].floorMasks[h + tileIndex]) {
                                 --h;
                             } else {
-                                collisionMasks[p].rWallMasks[c + tileIndex] = h;
+                                TileCollisions[p].rWallMasks[c + tileIndex] = h;
                                 h                                           = TILE_SIZE;
                             }
                         }
@@ -819,12 +819,12 @@ void LoadStageGFXFile(int stageID) {
 
 void ResetBackgroundSettings() {
     for (int i = 0; i < LAYER_COUNT; ++i) {
-        stageLayouts[i].scrollPos = 0;
+        StageLayouts[i].scrollPos = 0;
     }
 
     for (int i = 0; i < PARALLAX_COUNT; ++i) {
-        hParallax.scrollPos[i] = 0;
-        vParallax.scrollPos[i] = 0;
+        HParallax.scrollPos[i] = 0;
+        VParallax.scrollPos[i] = 0;
     }
 }
 

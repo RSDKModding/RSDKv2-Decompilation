@@ -464,10 +464,10 @@ void LoadMusic(void *userdata)
     }
 }
 
-void SetMusicTrack(char *filePath, byte CurrentMusicTrack, bool loop)
+void SetMusicTrack(char *filePath, byte trackID, bool loop)
 {
     LockAudioDevice();
-    TrackInfo *track = &musicTracks[CurrentMusicTrack];
+    TrackInfo *track = &musicTracks[trackID];
     StrCopy(track->fileName, "Data/Music/");
     StrAdd(track->fileName, filePath);
     track->trackLoop = loop;

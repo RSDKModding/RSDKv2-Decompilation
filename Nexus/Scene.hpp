@@ -174,7 +174,7 @@ extern byte titleCardWord2;
 
 extern byte activeTileLayers[4];
 extern byte tLayerMidPoint;
-extern TileLayer stageLayouts[LAYER_COUNT];
+extern TileLayer StageLayouts[LAYER_COUNT];
 
 extern int bgDeformationData0[DEFORM_COUNT];
 extern int bgDeformationData1[DEFORM_COUNT];
@@ -186,11 +186,11 @@ extern int fgDeformationOffsetW;
 extern int bgDeformationOffset;
 extern int bgDeformationOffsetW;
 
-extern LineScroll hParallax;
-extern LineScroll vParallax;
+extern LineScroll HParallax;
+extern LineScroll VParallax;
 
 extern Tiles128x128 tiles128x128;
-extern CollisionMasks collisionMasks[2];
+extern CollisionMasks TileCollisions[2];
 
 extern byte tilesetGFXData[TILESET_SIZE];
 

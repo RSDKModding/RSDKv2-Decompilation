@@ -139,7 +139,7 @@ inline void freeMusInfo()
 #endif
 
 void LoadMusic(void *userdata);
-void SetMusicTrack(char *filePath, byte CurrentMusicTrack, bool loop);
+void SetMusicTrack(char *filePath, byte trackID, bool loop);
 bool PlayMusic(int track);
 inline void StopMusic()
 {
