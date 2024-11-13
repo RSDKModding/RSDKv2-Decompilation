@@ -2,11 +2,11 @@
 #include <cmath>
 #include <iostream>
 
-int globalSFXCount = 0;
+int NoGlobalSFX = 0;
 int NoStageSFX  = 0;
 
-int masterVolume  = MAX_VOLUME;
-int trackID       = -1;
+int MusicVolume  = MAX_VOLUME;
+int CurrentMusicTrack       = -1;
 int sfxVolume     = MAX_VOLUME;
 int bgmVolume     = MAX_VOLUME;
 bool audioEnabled = false;
@@ -47,7 +47,7 @@ SDL_AudioDeviceID audioDevice;
 
 #define MIX_BUFFER_SAMPLES (256)
 
-int InitAudioPlayback()
+int InitSoundDevice()
 {
     StopAllSfx(); //"init"
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
@@ -58,7 +58,7 @@ int InitAudioPlayback()
     want.channels = AUDIO_CHANNELS;
     want.callback = ProcessAudioPlayback;
 
-    #if RETRO_USING_SDL2
+#if RETRO_USING_SDL2
     if ((audioDevice = SDL_OpenAudioDevice(nullptr, 0, &want, &audioDeviceFormat, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE)) > 0) {
         audioEnabled = true;
         SDL_PauseAudioDevice(audioDevice, 0);
@@ -133,8 +133,8 @@ void LoadGlobalSfx()
 
         // Read SFX
         FileRead(&fileBuffer, 1);
-        globalSFXCount = fileBuffer;
-        for (byte s = 0; s < globalSFXCount; ++s) {
+        NoGlobalSFX = fileBuffer;
+        for (byte s = 0; s < NoGlobalSFX; ++s) {
             FileRead(&fileBuffer, 1);
             FileRead(strBuffer, fileBuffer);
             strBuffer[fileBuffer] = 0;
@@ -147,7 +147,6 @@ void LoadGlobalSfx()
         CloseFile();
     }
 
-    // sfxDataPosStage = sfxDataPos;
     nextChannelPos = 0;
     for (int i = 0; i < CHANNEL_COUNT; ++i) sfxChannels[i].sfxID = -1;
 }
@@ -216,7 +215,7 @@ void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
                 return;
             }
             if (bytes_done != 0)
-                ProcessAudioMixing(stream, musInfo.buffer, bytes_done / sizeof(Sint16), (bgmVolume * masterVolume) / MAX_VOLUME, 0);
+                ProcessAudioMixing(stream, musInfo.buffer, bytes_done / sizeof(Sint16), (bgmVolume * MusicVolume) / MAX_VOLUME, 0);
 #endif
 
 #if RETRO_USING_SDL1
@@ -266,7 +265,7 @@ void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
                 }
 
                 if (cvtResult == 0)
-                    ProcessAudioMixing(stream, (const Sint16 *)convert.buf, bytes_gotten / sizeof(Sint16), (bgmVolume * masterVolume) / MAX_VOLUME,
+                    ProcessAudioMixing(stream, (const Sint16 *)convert.buf, bytes_gotten / sizeof(Sint16), (bgmVolume * MusicVolume) / MAX_VOLUME,
                                        0);
 
                 if (convert.len > 0 && convert.buf)
@@ -459,16 +458,16 @@ void LoadMusic(void *userdata)
         musInfo.buffer = new Sint16[MIX_BUFFER_SAMPLES];
 
         musicStatus  = MUSIC_PLAYING;
-        masterVolume = MAX_VOLUME;
-        trackID      = trackBuffer;
+        MusicVolume = MAX_VOLUME;
+        CurrentMusicTrack      = trackBuffer;
         trackBuffer  = -1;
     }
 }
 
-void SetMusicTrack(char *filePath, byte trackID, bool loop)
+void SetMusicTrack(char *filePath, byte CurrentMusicTrack, bool loop)
 {
     LockAudioDevice();
-    TrackInfo *track = &musicTracks[trackID];
+    TrackInfo *track = &musicTracks[CurrentMusicTrack];
     StrCopy(track->fileName, "Data/Music/");
     StrAdd(track->fileName, filePath);
     track->trackLoop = loop;
@@ -508,7 +507,7 @@ void LoadSfx(char *filePath, byte sfxID)
         FileRead(sfx, info.fileSize);
         CloseFile();
 
-        //Un-encrypt sfx
+        // unencrypt sfx
         if (info.encrypted) {
             for (int i = 0; i < info.fileSize; ++i) sfx[i] ^= 0xFF;
         }

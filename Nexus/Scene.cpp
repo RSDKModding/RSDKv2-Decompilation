@@ -52,10 +52,10 @@ int Seconds       = 0;
 int Minutes       = 0;
 
 // Category and Scene IDs
-int activeStageList   = 0;
+int ActiveStageList   = 0;
 int StageListPosition = 0;
 char currentStageFolder[0x100];
-int actID = 0;
+int ActNumber = 0;
 
 char titleCardText[0x100];
 byte titleCardWord2 = 0;
@@ -110,8 +110,8 @@ void ProcessStage(void) {
             StageMode = STAGEMODE_NORMAL;
             break;
         case STAGEMODE_NORMAL:
-            if (PaletteMode)
-                --PaletteMode;
+            if (PaletteMode > 0)
+                PaletteMode--;
 
             LastXSize = -1;
             LastYSize = -1;
@@ -158,7 +158,7 @@ void ProcessStage(void) {
             break;
         case STAGEMODE_PAUSED:
             if (PaletteMode)
-                --PaletteMode;
+                PaletteMode--;
 
             LastXSize = -1;
             LastYSize = -1;
@@ -219,7 +219,7 @@ void LoadStageFiles(void) {
 
     if (!CheckCurrentStageFolder(StageListPosition)) {
 #if !RETRO_USE_ORIGINAL_CODE
-        PrintLog("Loading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
+        PrintLog("Loading Scene %s - %s", stageListNames[ActiveStageList], stageList[ActiveStageList][StageListPosition].name);
 #endif
         ReleaseStageSfx();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
@@ -281,7 +281,7 @@ void LoadStageFiles(void) {
                 strBuffer[fileBuffer2] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
-                LoadSfx(strBuffer, globalSFXCount + i);
+                LoadSfx(strBuffer, NoGlobalSFX + i);
                 SetFileInfo(&infoStore);
             }
             CloseFile();
@@ -298,7 +298,7 @@ void LoadStageFiles(void) {
         LoadStageBackground();
 #if !RETRO_USE_ORIGINAL_CODE
     } else {
-        PrintLog("Reloading Scene %s - %s", stageListNames[activeStageList], stageList[activeStageList][StageListPosition].name);
+        PrintLog("Reloading Scene %s - %s", stageListNames[ActiveStageList], stageList[ActiveStageList][StageListPosition].name);
     }
 #endif
 
@@ -320,12 +320,12 @@ int LoadActFile(const char *ext, int stageID, FileInfo *info) {
     char dest[0x40];
 
     StrCopy(dest, "Data/Stages/");
-    StrAdd(dest, stageList[activeStageList][stageID].folder);
+    StrAdd(dest, stageList[ActiveStageList][stageID].folder);
     StrAdd(dest, "/Act");
-    StrAdd(dest, stageList[activeStageList][stageID].id);
+    StrAdd(dest, stageList[ActiveStageList][stageID].id);
     StrAdd(dest, ext);
 
-    ConvertStringToInteger(stageList[activeStageList][stageID].id, &actID);
+    ConvertStringToInteger(stageList[ActiveStageList][stageID].id, &ActNumber);
 
     return LoadFile(dest, info);
 }
@@ -333,7 +333,7 @@ int LoadStageFile(const char *filePath, int stageID, FileInfo *info) {
     char dest[0x40];
 
     StrCopy(dest, "Data/Stages/");
-    StrAdd(dest, stageList[activeStageList][stageID].folder);
+    StrAdd(dest, stageList[ActiveStageList][stageID].folder);
     StrAdd(dest, "/");
     StrAdd(dest, filePath);
     return LoadFile(dest, info);
@@ -1067,13 +1067,16 @@ void SetPlayerScreenPositionCDStyle(Player *player) {
         player->screenXPos = EarthquakeX + playerXPos - XBoundary1;
         XScrollOffset      = XBoundary1 - EarthquakeX;
     } else {
-        XScrollOffset      = playerXPos + EarthquakeX - SCREEN_CENTERX - XScrollMove;
-        player->screenXPos = XScrollMove + SCREEN_CENTERX - EarthquakeX;
+        XScrollOffset      = playerXPos + EarthquakeX - XScrollMove - SCREEN_CENTERX;
+        player->screenXPos = XScrollMove - EarthquakeX + SCREEN_CENTERX;
         if (playerXPos - XScrollMove > XBoundary2 - SCREEN_CENTERX) {
-            player->screenXPos = playerXPos - (XBoundary2 - SCREEN_CENTERX) + EarthquakeX + SCREEN_CENTERX;
+            player->screenXPos = EarthquakeX + playerXPos - XBoundary2 + SCREEN_XSIZE;
             XScrollOffset      = XBoundary2 - SCREEN_XSIZE - EarthquakeX;
         }
     }
+
+    XScrollA = XScrollOffset;
+    XScrollB = (XScrollA + SCREEN_XSIZE);
 
     int yscrollA     = YScrollA;
     int yscrollB     = YScrollB;

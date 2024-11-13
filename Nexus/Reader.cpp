@@ -4,56 +4,52 @@
 char binFileName[0x400];
 
 char fileName[0x100];
-byte fileBuffer[0x2000];
-int fileSize;
-int vFileSize;
-int readPos;
-int readSize;
-int bufferPosition;
-int virtualFileOffset;
+byte FileBuffer[0x2000];
+int FileSize;
+int VFileSize;
+int ReadPos;
+int ReadSize;
+int BufferPosition;
+int VirtualFileOffset;
 byte isModdedFile = false;
 
-FileIO *cFileHandle = nullptr;
+FileIO *CFileHandle = nullptr;
 
-bool CheckBinFile(const char *filePath)
-{
+bool CheckBinFile(const char *filePath) {
     FileInfo info;
 
-    Engine.UseBinFile       = false;
+    Engine.UseBinFile         = false;
     Engine.usingDataFileStore = false;
 
-    cFileHandle = fOpen(filePath, "rb");
-    if (cFileHandle) {
+    CFileHandle = fOpen(filePath, "rb");
+    if (CFileHandle) {
         Engine.UseBinFile = true;
         StrCopy(binFileName, filePath);
-        fClose(cFileHandle);
-        cFileHandle = NULL;
+        fClose(CFileHandle);
+        CFileHandle = NULL;
         return true;
-    }
-    else {
+    } else {
         Engine.UseBinFile = false;
-        cFileHandle         = NULL;
+        CFileHandle       = NULL;
         return false;
     }
 
     return false;
 }
 
-inline bool ends_with(std::string const &value, std::string const &ending)
-{
+inline bool ends_with(std::string const &value, std::string const &ending) {
     if (ending.size() > value.size())
         return false;
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-bool LoadFile(const char *filePath, FileInfo *fileInfo)
-{
+bool LoadFile(const char *filePath, FileInfo *fileInfo) {
     MEM_ZEROP(fileInfo);
 
-    if (cFileHandle)
-        fClose(cFileHandle);
+    if (CFileHandle)
+        fClose(CFileHandle);
 
-    cFileHandle = NULL;
+    CFileHandle = NULL;
 
     char filePathBuf[0x100];
     StrCopy(filePathBuf, filePath);
@@ -68,7 +64,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     fileInfo->isMod = false;
     isModdedFile    = false;
 #endif
-    bool addPath    = true;
+    bool addPath = true;
     // Fixes any case differences
     char pathLower[0x100];
     memset(pathLower, 0, sizeof(char) * 0x100);
@@ -82,11 +78,11 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
-                Engine.forceFolder  = true;
-                Engine.UseBinFile = false;
-                fileInfo->isMod     = true;
-                isModdedFile        = true;
-                addPath             = false;
+                Engine.forceFolder = true;
+                Engine.UseBinFile  = false;
+                fileInfo->isMod    = true;
+                isModdedFile       = true;
+                addPath            = false;
                 break;
             }
         }
@@ -105,57 +101,55 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo)
     StrCopy(fileName, "");
 
     if (Engine.UseBinFile && !Engine.forceFolder) {
-        cFileHandle = fOpen(binFileName, "rb");
-        fSeek(cFileHandle, 0, SEEK_END);
-        fileSize       = (int)fTell(cFileHandle);
-        bufferPosition = 0;
-        readSize       = 0;
-        readPos        = 0;
+        CFileHandle = fOpen(binFileName, "rb");
+        fSeek(CFileHandle, 0, SEEK_END);
+        FileSize       = (int)fTell(CFileHandle);
+        BufferPosition = 0;
+        ReadSize       = 0;
+        ReadPos        = 0;
 
         StrCopy(fileInfo->fileName, filePath);
         StrCopy(fileName, filePath);
         if (!ParseVirtualFileSystem(fileInfo)) {
-            fClose(cFileHandle);
-            cFileHandle = NULL;
+            fClose(CFileHandle);
+            CFileHandle = NULL;
             PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
-        fileInfo->readPos           = readPos;
-        fileInfo->fileSize          = vFileSize;
-        fileInfo->virtualFileOffset = virtualFileOffset;
-        fileInfo->bufferPosition    = bufferPosition;
+        fileInfo->readPos           = ReadPos;
+        fileInfo->fileSize          = VFileSize;
+        fileInfo->virtualFileOffset = VirtualFileOffset;
+        fileInfo->bufferPosition    = BufferPosition;
         fileInfo->encrypted         = true;
-    }
-    else {
+    } else {
         StrCopy(fileInfo->fileName, filePathBuf);
         StrCopy(fileName, filePathBuf);
-        cFileHandle = fOpen(fileInfo->fileName, "rb");
-        if (!cFileHandle) {
+        CFileHandle = fOpen(fileInfo->fileName, "rb");
+        if (!CFileHandle) {
             PrintLog("Couldn't load file '%s'", filePathBuf);
             return false;
         }
 
-        virtualFileOffset = 0;
-        fSeek(cFileHandle, 0, SEEK_END);
-        fileInfo->fileSize = (int)fTell(cFileHandle);
-        fileSize           = fileInfo->fileSize;
-        fSeek(cFileHandle, 0, SEEK_SET);
-        readPos                     = 0;
-        fileInfo->readPos           = readPos;
+        VirtualFileOffset = 0;
+        fSeek(CFileHandle, 0, SEEK_END);
+        fileInfo->fileSize = (int)fTell(CFileHandle);
+        FileSize           = fileInfo->fileSize;
+        fSeek(CFileHandle, 0, SEEK_SET);
+        ReadPos                     = 0;
+        fileInfo->readPos           = ReadPos;
         fileInfo->virtualFileOffset = 0;
         fileInfo->bufferPosition    = 0;
         fileInfo->encrypted         = false;
     }
-    bufferPosition = 0;
-    readSize       = 0;
+    BufferPosition = 0;
+    ReadSize       = 0;
 
     PrintLog("Loaded File '%s'", filePathBuf);
 
     return true;
 }
 
-bool ParseVirtualFileSystem(FileInfo *fileInfo)
-{
+bool ParseVirtualFileSystem(FileInfo *fileInfo) {
     char filename[0x50];
     char fullFilename[0x50];
     char stringBuffer[0x50];
@@ -167,13 +161,12 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     byte fileBuffer = 0;
 
     int j             = 0;
-    virtualFileOffset = 0;
+    VirtualFileOffset = 0;
     for (int i = 0; fileInfo->fileName[i]; i++) {
         if (fileInfo->fileName[i] == '/') {
             fNamePos = i;
             j        = 0;
-        }
-        else {
+        } else {
             ++j;
         }
         fullFilename[i] = fileInfo->fileName[i];
@@ -183,11 +176,11 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     filename[j]            = 0;
     fullFilename[fNamePos] = 0;
 
-    fSeek(cFileHandle, 0, SEEK_SET);
+    fSeek(CFileHandle, 0, SEEK_SET);
     Engine.UseBinFile = false;
-    bufferPosition      = 0;
-    readSize            = 0;
-    readPos             = 0;
+    BufferPosition    = 0;
+    ReadSize          = 0;
+    ReadPos           = 0;
 
     FileRead(&fileBuffer, 1);
     headerSize = fileBuffer;
@@ -224,9 +217,8 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             // Grab info for next dir to know when we've found an error
             // Ignore dir name we dont care
             if (i == dirCount - 1) {
-                nextFileOffset = fileSize - headerSize; // There is no next dir, so just make this the EOF
-            }
-            else {
+                nextFileOffset = FileSize - headerSize; // There is no next dir, so just make this the EOF
+            } else {
                 FileRead(&fileBuffer, 1);
                 for (j = 0; j < fileBuffer; ++j) {
                     FileRead(&stringBuffer[j], 1);
@@ -245,8 +237,7 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
             }
 
             i = dirCount;
-        }
-        else {
+        } else {
             fileOffset = -1;
             FileRead(&fileBuffer, 1);
             FileRead(&fileBuffer, 1);
@@ -259,22 +250,21 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     if (fileOffset == -1) {
         Engine.UseBinFile = true;
         return false;
-    }
-    else {
-        fSeek(cFileHandle, fileOffset + headerSize, SEEK_SET);
-        bufferPosition    = 0;
-        readSize          = 0;
-        readPos           = 0;
-        virtualFileOffset = fileOffset + headerSize;
+    } else {
+        fSeek(CFileHandle, fileOffset + headerSize, SEEK_SET);
+        BufferPosition    = 0;
+        ReadSize          = 0;
+        ReadPos           = 0;
+        VirtualFileOffset = fileOffset + headerSize;
         i                 = 0;
         while (i < 1) {
             FileRead(&fileBuffer, 1);
-            ++virtualFileOffset;
+            ++VirtualFileOffset;
             j = 0;
             while (j < fileBuffer) {
                 FileRead(&stringBuffer[j], 1);
                 ++j;
-                ++virtualFileOffset;
+                ++VirtualFileOffset;
             }
             stringBuffer[j] = 0;
 
@@ -288,10 +278,9 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
                 j += fileBuffer << 16;
                 FileRead(&fileBuffer, 1);
                 j += fileBuffer << 24;
-                virtualFileOffset += 4;
-                vFileSize = j;
-            }
-            else {
+                VirtualFileOffset += 4;
+                VFileSize = j;
+            } else {
                 FileRead(&fileBuffer, 1);
                 j = fileBuffer;
                 FileRead(&fileBuffer, 1);
@@ -300,19 +289,19 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
                 j += fileBuffer << 16;
                 FileRead(&fileBuffer, 1);
                 j += fileBuffer << 24;
-                virtualFileOffset += 4;
-                virtualFileOffset += j;
+                VirtualFileOffset += 4;
+                VirtualFileOffset += j;
             }
 
             // No File has been found (next file would be in a new dir)
-            if (virtualFileOffset >= nextFileOffset + headerSize) {
+            if (VirtualFileOffset >= nextFileOffset + headerSize) {
                 Engine.UseBinFile = true;
                 return false;
             }
-            fSeek(cFileHandle, virtualFileOffset, SEEK_SET);
-            bufferPosition = 0;
-            readSize       = 0;
-            readPos        = virtualFileOffset;
+            fSeek(CFileHandle, VirtualFileOffset, SEEK_SET);
+            BufferPosition = 0;
+            ReadSize       = 0;
+            ReadPos        = VirtualFileOffset;
         }
         Engine.UseBinFile = true;
         return true;
@@ -321,96 +310,86 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo)
     return false;
 }
 
-void FileRead(void *dest, int size)
-{
+void FileRead(void *dest, int size) {
     byte *data = (byte *)dest;
 
-    if (readPos <= fileSize) {
+    if (ReadPos <= FileSize) {
         if (Engine.UseBinFile && !Engine.forceFolder) {
             while (size > 0) {
-                if (bufferPosition == readSize)
+                if (BufferPosition == ReadSize)
                     FillFileBuffer();
 
-                *data++ = fileBuffer[bufferPosition++] ^ 0xFF;
+                *data++ = FileBuffer[BufferPosition++] ^ 0xFF;
                 size--;
             }
-        }
-        else {
+        } else {
             while (size > 0) {
-                if (bufferPosition == readSize)
+                if (BufferPosition == ReadSize)
                     FillFileBuffer();
 
-                *data++ = fileBuffer[bufferPosition++];
+                *data++ = FileBuffer[BufferPosition++];
                 size--;
             }
         }
     }
 }
 
-void SetFileInfo(FileInfo *fileInfo)
-{
+void SetFileInfo(FileInfo *fileInfo) {
     Engine.forceFolder = false;
     if (!fileInfo->isMod) {
         Engine.UseBinFile = Engine.usingDataFileStore;
-    }
-    else {
+    } else {
         Engine.forceFolder = true;
     }
 
     isModdedFile = fileInfo->isMod;
     if (Engine.UseBinFile && !Engine.forceFolder) {
-        cFileHandle       = fOpen(binFileName, "rb");
-        virtualFileOffset = fileInfo->virtualFileOffset;
-        vFileSize         = fileInfo->fileSize;
-        fSeek(cFileHandle, 0, SEEK_END);
-        fileSize = (int)fTell(cFileHandle);
-        readPos  = fileInfo->readPos;
-        fSeek(cFileHandle, readPos, SEEK_SET);
+        CFileHandle       = fOpen(binFileName, "rb");
+        VirtualFileOffset = fileInfo->virtualFileOffset;
+        VFileSize         = fileInfo->fileSize;
+        fSeek(CFileHandle, 0, SEEK_END);
+        FileSize = (int)fTell(CFileHandle);
+        ReadPos  = fileInfo->readPos;
+        fSeek(CFileHandle, ReadPos, SEEK_SET);
         FillFileBuffer();
-        bufferPosition = fileInfo->bufferPosition;
-    }
-    else {
+        BufferPosition = fileInfo->bufferPosition;
+    } else {
         StrCopy(fileName, fileInfo->fileName);
-        cFileHandle       = fOpen(fileInfo->fileName, "rb");
-        virtualFileOffset = 0;
-        fileSize          = fileInfo->fileSize;
-        readPos           = fileInfo->readPos;
-        fSeek(cFileHandle, readPos, SEEK_SET);
+        CFileHandle       = fOpen(fileInfo->fileName, "rb");
+        VirtualFileOffset = 0;
+        FileSize          = fileInfo->fileSize;
+        ReadPos           = fileInfo->readPos;
+        fSeek(CFileHandle, ReadPos, SEEK_SET);
         FillFileBuffer();
-        bufferPosition = fileInfo->bufferPosition;
+        BufferPosition = fileInfo->bufferPosition;
     }
 }
 
-size_t GetFilePosition()
-{
+size_t GetFilePosition() {
     if (Engine.UseBinFile)
-        return bufferPosition + readPos - readSize - virtualFileOffset;
+        return BufferPosition + ReadPos - ReadSize - VirtualFileOffset;
     else
-        return bufferPosition + readPos - readSize;
+        return BufferPosition + ReadPos - ReadSize;
 }
 
-void SetFilePosition(int newPos)
-{
+void SetFilePosition(int newPos) {
     if (Engine.UseBinFile) {
-        readPos = virtualFileOffset + newPos;
+        ReadPos = VirtualFileOffset + newPos;
+    } else {
+        ReadPos = newPos;
     }
-    else {
-        readPos = newPos;
-    }
-    fSeek(cFileHandle, readPos, SEEK_SET);
+    fSeek(CFileHandle, ReadPos, SEEK_SET);
     FillFileBuffer();
 }
 
-bool ReachedEndOfFile()
-{
+bool ReachedEndOfFile() {
     if (Engine.UseBinFile)
-        return bufferPosition + readPos - readSize - virtualFileOffset >= vFileSize;
+        return BufferPosition + ReadPos - ReadSize - VirtualFileOffset >= VFileSize;
     else
-        return bufferPosition + readPos - readSize >= fileSize;
+        return BufferPosition + ReadPos - ReadSize >= FileSize;
 }
 
-bool LoadFile2(const char *filePath, FileInfo *fileInfo)
-{
+bool LoadFile2(const char *filePath, FileInfo *fileInfo) {
     if (fileInfo->cFileHandle)
         fClose(fileInfo->cFileHandle);
 
@@ -443,11 +422,11 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
             std::map<std::string, std::string>::const_iterator iter = modList[m].fileMap.find(pathLower);
             if (iter != modList[m].fileMap.cend()) {
                 StrCopy(filePathBuf, iter->second.c_str());
-                Engine.forceFolder   = true;
-                Engine.UseBinFile = false;
-                fileInfo->isMod      = true;
-                isModdedFile         = true;
-                addPath              = false;
+                Engine.forceFolder = true;
+                Engine.UseBinFile  = false;
+                fileInfo->isMod    = true;
+                isModdedFile       = true;
+                addPath            = false;
                 break;
             }
         }
@@ -469,7 +448,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fSeek(fileInfo->cFileHandle, 0, SEEK_END);
         fileInfo->fileSize       = (int)fTell(fileInfo->cFileHandle);
         fileInfo->bufferPosition = 0;
-        // readSize       = 0;
+        // ReadSize       = 0;
         fileInfo->readPos   = 0;
         fileInfo->encrypted = true;
 
@@ -485,8 +464,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos        = 0;
         fileInfo->bufferPosition = 0;
         fClose(fileInfo->cFileHandle);
-    }
-    else {
+    } else {
         StrCopy(fileInfo->fileName, filePathBuf);
         fileInfo->cFileHandle = fOpen(fileInfo->fileName, "rb");
         if (!fileInfo->cFileHandle) {
@@ -498,8 +476,8 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->vFileSize = (int)fTell(fileInfo->cFileHandle);
         fileInfo->fileSize  = fileInfo->vFileSize;
         fSeek(fileInfo->cFileHandle, 0, SEEK_SET);
-        readPos                     = 0;
-        fileInfo->readPos           = readPos;
+        ReadPos                     = 0;
+        fileInfo->readPos           = ReadPos;
         fileInfo->virtualFileOffset = 0;
         fileInfo->bufferPosition    = 0;
         fileInfo->fileBuffer        = (byte *)malloc(fileInfo->vFileSize);
@@ -507,7 +485,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
         fileInfo->readPos        = 0;
         fileInfo->bufferPosition = 0;
         fClose(fileInfo->cFileHandle);
-        fileInfo->encrypted         = false;
+        fileInfo->encrypted = false;
     }
     fileInfo->bufferPosition = 0;
 
@@ -516,8 +494,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo)
     return true;
 }
 
-bool ParseVirtualFileSystem2(FileInfo *fileInfo)
-{
+bool ParseVirtualFileSystem2(FileInfo *fileInfo) {
     char filename[0x50];
     char fullFilename[0x50];
     char stringBuffer[0x50];
@@ -534,8 +511,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
         if (fileInfo->fileName[i] == '/') {
             fNamePos = i;
             j        = 0;
-        }
-        else {
+        } else {
             ++j;
         }
         fullFilename[i] = fileInfo->fileName[i];
@@ -546,9 +522,9 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     fullFilename[fNamePos] = 0;
 
     fSeek(fileInfo->cFileHandle, 0, SEEK_SET);
-    Engine.UseBinFile      = false;
+    Engine.UseBinFile        = false;
     fileInfo->bufferPosition = 0;
-    // readSize             = 0;
+    // ReadSize             = 0;
     fileInfo->readPos = 0;
 
     FileRead2(fileInfo, &fileBuffer, 1, false);
@@ -586,9 +562,8 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
             // Grab info for next dir to know when we've found an error
             // Ignore dir name we dont care
             if (i == dirCount - 1) {
-                nextFileOffset = fileSize - headerSize; // There is no next dir, so just make this the EOF
-            }
-            else {
+                nextFileOffset = FileSize - headerSize; // There is no next dir, so just make this the EOF
+            } else {
                 FileRead2(fileInfo, &fileBuffer, 1, false);
                 for (j = 0; j < fileBuffer; ++j) {
                     FileRead2(fileInfo, &stringBuffer[j], 1, false);
@@ -605,8 +580,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
             }
 
             i = dirCount;
-        }
-        else {
+        } else {
             fileOffset = -1;
             FileRead2(fileInfo, &fileBuffer, 1, false);
             FileRead2(fileInfo, &fileBuffer, 1, false);
@@ -619,10 +593,9 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     if (fileOffset == -1) {
         Engine.UseBinFile = true;
         return false;
-    }
-    else {
+    } else {
         fSeek(fileInfo->cFileHandle, fileOffset + headerSize, SEEK_SET);
-        fileInfo->bufferPosition = 0;
+        fileInfo->bufferPosition    = 0;
         fileInfo->readPos           = 0;
         fileInfo->virtualFileOffset = fileOffset + headerSize;
         i                           = 0;
@@ -649,8 +622,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
                 j += fileBuffer << 24;
                 fileInfo->virtualFileOffset += 4;
                 fileInfo->vFileSize = j;
-            }
-            else {
+            } else {
                 FileRead2(fileInfo, &fileBuffer, 1, false);
                 j = fileBuffer;
                 FileRead2(fileInfo, &fileBuffer, 1, false);
@@ -670,7 +642,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
             }
             fSeek(fileInfo->cFileHandle, fileInfo->virtualFileOffset, SEEK_SET);
             fileInfo->bufferPosition = 0;
-            // readSize       = 0;
+            // ReadSize       = 0;
             fileInfo->readPos = fileInfo->virtualFileOffset;
         }
         Engine.UseBinFile = true;
@@ -680,8 +652,7 @@ bool ParseVirtualFileSystem2(FileInfo *fileInfo)
     return false;
 }
 
-size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer)
-{
+size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer) {
     byte *data = (byte *)dest;
     int rPos   = (int)GetFilePosition2(info);
     memset(data, 0, size);
@@ -693,8 +664,7 @@ size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer)
         info->readPos += size;
         info->bufferPosition = 0;
         return size;
-    }
-    else {
+    } else {
         if (rPos <= info->fileSize) {
             if (Engine.UseBinFile && !Engine.forceFolder) {
                 int rSize = 0;
@@ -713,8 +683,7 @@ size_t FileRead2(FileInfo *info, void *dest, int size, bool fromBuffer)
                 }
 
                 return result;
-            }
-            else {
+            } else {
                 int rSize = 0;
                 if (rPos + size <= info->fileSize)
                     rSize = size;

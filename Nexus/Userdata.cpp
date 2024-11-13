@@ -1,8 +1,8 @@
 #include "RetroEngine.hpp"
 
-int globalVariablesCount;
-int globalVariables[GLOBALVAR_COUNT];
-char globalVariableNames[GLOBALVAR_COUNT][0x20];
+int NO_GLOBALVARIABLES;
+int GlobalVariables[GLOBALVAR_COUNT];
+char GlobalVariableNames[GLOBALVAR_COUNT][0x20];
 
 char gamePath[0x100];
 
@@ -252,7 +252,7 @@ void InitUserdata()
 #endif
 }
 
-void writeSettings() {
+void WriteSettings() {
     IniParser ini;
 
     ini.SetComment("Dev", "DevMenuComment", "Enable this flag to activate dev menu via the ESC key");

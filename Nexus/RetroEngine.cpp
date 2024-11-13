@@ -67,7 +67,7 @@ bool processEvents() {
 
                     case SDLK_F1:
                         if (Engine.devMenu) {
-                            activeStageList   = 0;
+                            ActiveStageList   = 0;
                             StageListPosition = 0;
                             StageMode         = STAGEMODE_LOAD;
                             Engine.GameMode   = ENGINE_MAINGAME;
@@ -80,11 +80,11 @@ bool processEvents() {
                         if (Engine.devMenu) {
                             StageListPosition--;
                             while (StageListPosition < 0) {
-                                activeStageList--;
+                                ActiveStageList--;
 
-                                if (activeStageList < 0)
-                                    activeStageList = 3;
-                                StageListPosition = stageListCount[activeStageList] - 1;
+                                if (ActiveStageList < 0)
+                                    ActiveStageList = 3;
+                                StageListPosition = stageListCount[ActiveStageList] - 1;
                             }
                             StageMode       = STAGEMODE_LOAD;
                             Engine.GameMode = ENGINE_MAINGAME;
@@ -94,13 +94,13 @@ bool processEvents() {
                     case SDLK_F3:
                         if (Engine.devMenu) {
                             StageListPosition++;
-                            while (StageListPosition >= stageListCount[activeStageList]) {
-                                activeStageList++;
+                            while (StageListPosition >= stageListCount[ActiveStageList]) {
+                                ActiveStageList++;
 
                                 StageListPosition = 0;
 
-                                if (activeStageList >= 4)
-                                    activeStageList = 0;
+                                if (ActiveStageList >= 4)
+                                    ActiveStageList = 0;
                             }
                             StageMode       = STAGEMODE_LOAD;
                             Engine.GameMode = ENGINE_MAINGAME;
@@ -234,7 +234,7 @@ void RetroEngine::Init() {
     GameRunning  = false;
     if (LoadGameConfig("Data/Game/GameConfig.bin")) {
         if (InitRenderDevice()) {
-            if (InitAudioPlayback()) {
+            if (InitSoundDevice()) {
                 InitSystemMenu();
                 ClearScriptData();
                 initialised = true;
@@ -293,7 +293,7 @@ void RetroEngine::Run() {
 
     ReleaseSoundDevice();
     ReleaseRenderDevice();
-    writeSettings();
+    WriteSettings();
 #if RETRO_USE_MOD_LOADER
     SaveMods();
 #endif
@@ -313,16 +313,16 @@ bool RetroEngine::LoadGameConfig(const char *filePath) {
 
     if (LoadFile(filePath, &info)) {
         FileRead(&fileBuffer, 1);
-        FileRead(gameWindowText, fileBuffer);
-        gameWindowText[fileBuffer] = 0;
+        FileRead(GameWindowText, fileBuffer);
+        GameWindowText[fileBuffer] = 0;
 
         FileRead(&fileBuffer, 1);
         FileRead(&data, fileBuffer); // Load 'Data'
         data[fileBuffer] = 0;
 
         FileRead(&fileBuffer, 1);
-        FileRead(gameDescriptionText, fileBuffer);
-        gameDescriptionText[fileBuffer] = 0;
+        FileRead(GameDescriptionText, fileBuffer);
+        GameDescriptionText[fileBuffer] = 0;
 
         // Read Script Paths
         byte scriptCount = 0;
@@ -334,22 +334,22 @@ bool RetroEngine::LoadGameConfig(const char *filePath) {
 
         byte varCount = 0;
         FileRead(&varCount, 1);
-        globalVariablesCount = varCount;
+        NO_GLOBALVARIABLES = varCount;
         for (byte v = 0; v < varCount; ++v) {
             // Read Variable Name
             FileRead(&fileBuffer, 1);
-            FileRead(&globalVariableNames[v], fileBuffer);
-            globalVariableNames[v][fileBuffer] = 0;
+            FileRead(&GlobalVariableNames[v], fileBuffer);
+            GlobalVariableNames[v][fileBuffer] = 0;
 
             // Read Variable Value
             FileRead(&fileBuffer2, 1);
-            globalVariables[v] = fileBuffer2 << 24;
+            GlobalVariables[v] = fileBuffer2 << 24;
             FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2 << 16;
+            GlobalVariables[v] += fileBuffer2 << 16;
             FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2 << 8;
+            GlobalVariables[v] += fileBuffer2 << 8;
             FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2;
+            GlobalVariables[v] += fileBuffer2;
         }
 
         // Read SFX

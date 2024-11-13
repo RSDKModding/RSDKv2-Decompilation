@@ -164,10 +164,10 @@ extern int Seconds;
 extern int Minutes;
 
 // Category and Scene IDs
-extern int activeStageList;
+extern int ActiveStageList;
 extern int StageListPosition;
 extern char currentStageFolder[0x100];
-extern int actID;
+extern int ActNumber;
 
 extern char titleCardText[0x100];
 extern byte titleCardWord2;
@@ -200,11 +200,11 @@ void ResetBackgroundSettings();
 inline void ResetCurrentStageFolder() { strcpy(currentStageFolder, ""); }
 inline bool CheckCurrentStageFolder(int stage)
 {
-    if (strcmp(currentStageFolder, stageList[activeStageList][stage].folder) == 0) {
+    if (strcmp(currentStageFolder, stageList[ActiveStageList][stage].folder) == 0) {
         return true;
     }
     else {
-        strcpy(currentStageFolder, stageList[activeStageList][stage].folder);
+        strcpy(currentStageFolder, stageList[ActiveStageList][stage].folder);
         return false;
     }
 }

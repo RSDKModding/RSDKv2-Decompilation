@@ -52,16 +52,16 @@ struct FileInfo {
 extern char binFileName[0x400];
 
 extern char fileName[0x100];
-extern byte fileBuffer[0x2000];
-extern int fileSize;
-extern int vFileSize;
-extern int readPos;
-extern int readSize;
-extern int bufferPosition;
-extern int virtualFileOffset;
+extern byte FileBuffer[0x2000];
+extern int FileSize;
+extern int VFileSize;
+extern int ReadPos;
+extern int ReadSize;
+extern int BufferPosition;
+extern int VirtualFileOffset;
 extern byte isModdedFile;
 
-extern FileIO *cFileHandle;
+extern FileIO *CFileHandle;
 
 inline void CopyFilePath(char *dest, const char *src)
 {
@@ -81,10 +81,10 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo);
 inline bool CloseFile()
 {
     int result = 0;
-    if (cFileHandle)
-        result = fClose(cFileHandle);
+    if (CFileHandle)
+        result = fClose(CFileHandle);
 
-    cFileHandle = NULL;
+    CFileHandle = NULL;
     return result;
 }
 
@@ -94,25 +94,25 @@ bool ParseVirtualFileSystem(FileInfo *fileInfo);
 
 inline size_t FillFileBuffer()
 {
-    if (readPos + 0x2000 <= fileSize)
-        readSize = 0x2000;
+    if (ReadPos + 0x2000 <= FileSize)
+        ReadSize = 0x2000;
     else 
-        readSize = fileSize - readPos;
+        ReadSize = FileSize - ReadPos;
 
-    size_t result = fRead(fileBuffer, 1u, readSize, cFileHandle);
-    readPos += readSize;
-    bufferPosition = 0;
+    size_t result = fRead(FileBuffer, 1u, ReadSize, CFileHandle);
+    ReadPos += ReadSize;
+    BufferPosition = 0;
     return result;
 }
 
 inline void GetFileInfo(FileInfo *fileInfo)
 {
     StrCopy(fileInfo->fileName, fileName);
-    fileInfo->bufferPosition    = bufferPosition;
-    fileInfo->readPos           = readPos - readSize;
-    fileInfo->fileSize          = fileSize;
-    fileInfo->vFileSize         = vFileSize;
-    fileInfo->virtualFileOffset = virtualFileOffset;
+    fileInfo->bufferPosition    = BufferPosition;
+    fileInfo->readPos           = ReadPos - ReadSize;
+    fileInfo->fileSize          = FileSize;
+    fileInfo->vFileSize         = VFileSize;
+    fileInfo->virtualFileOffset = VirtualFileOffset;
     fileInfo->isMod             = isModdedFile;
 }
 void SetFileInfo(FileInfo *fileInfo);

@@ -37,9 +37,9 @@ void LoadPalette(const char *filePath, int startIndex, int endIndex) {
 
 void SetFade(byte r, byte g, byte b, ushort a, int start, int end) {
     PaletteMode = 1;
-    if (a > 255)
-        a = 255;
-    if (end < 256)
+    if (a > 0xFF)
+        a = 0xFF;
+    if (end <= 0xFF)
         ++end;
     for (int i = start; i < end; ++i) {
         byte red          = (ushort)(r * a + (0xFF - a) * TilePalette[i].r) >> 8;
@@ -64,8 +64,8 @@ void SetFade(byte r, byte g, byte b, ushort a, int start, int end) {
 
 void SetWaterColour(byte r, byte g, byte b, ushort a) {
     PaletteMode = 1;
-    if (a > 255)
-        a = 255;
+    if (a > 0xFF)
+        a = 0xFF;
     for (int i = 0; i < PALETTE_SIZE; ++i) {
         byte red          = (ushort)(r * a + (0xFF - a) * TilePalette[i].r) >> 8;
         byte green        = (ushort)(g * a + (0xFF - a) * TilePalette[i].g) >> 8;

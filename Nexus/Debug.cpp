@@ -25,10 +25,10 @@ void InitSystemMenu() {
         Engine.GameMode = ENGINE_MAINGAME;
         StageMode       = STAGEMODE_LOAD;
 #if !RETRO_USE_ORIGINAL_CODE
-        activeStageList   = Engine.startList_Game == 0xFF ? 0 : Engine.startList_Game;
+        ActiveStageList   = Engine.startList_Game == 0xFF ? 0 : Engine.startList_Game;
         StageListPosition = Engine.startStage_Game == 0xFF ? 0 : Engine.startStage_Game;
 #else
-        activeStageList   = 0;
+        ActiveStageList   = 0;
         StageListPosition = 0;
 #endif
     } else {
@@ -112,7 +112,7 @@ void ProcessSystemMenu() {
                     int visible = modList.size() > 18 ? 18 : modList.size();
                     for (int m = 0; m < visible; ++m) {
                         StrCopy(buffer, modList[m].name.c_str());
-                        StrAdd(buffer, ": ");
+                        StrAdd(buffer, " ");
                         StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
                         for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                         AddTextMenuEntry(&GameMenu[1], buffer);
@@ -137,7 +137,7 @@ void ProcessSystemMenu() {
                 ClearGraphicsData();
                 ClearAnimationData();
                 LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
-                activeStageList   = 0;
+                ActiveStageList   = 0;
                 StageMode         = STAGEMODE_LOAD;
                 Engine.GameMode   = ENGINE_MAINGAME;
                 StageListPosition = 0;
@@ -226,22 +226,22 @@ void ProcessSystemMenu() {
                 case 3: // Presentation
                     if (stageListCount[0] > 0)
                         nextMenu = true;
-                    activeStageList = 0;
+                    ActiveStageList = 0;
                     break;
                 case 5: // Regular
                     if (stageListCount[1] > 0)
                         nextMenu = true;
-                    activeStageList = 1;
+                    ActiveStageList = 1;
                     break;
                 case 7: // Special
                     if (stageListCount[3] > 0)
                         nextMenu = true;
-                    activeStageList = 3;
+                    ActiveStageList = 3;
                     break;
                 case 9: // Bonus
                     if (stageListCount[2] > 0)
                         nextMenu = true;
-                    activeStageList = 2;
+                    ActiveStageList = 2;
                     break;
                 default: break;
             }
@@ -311,7 +311,7 @@ void ProcessSystemMenu() {
                 AddTextMenuEntry(&GameMenu[0], " ");
                 AddTextMenuEntry(&GameMenu[0], "   BONUS");
                 GameMenu[0].alignment      = MENU_ALIGN_LEFT;
-                GameMenu[0].selection2     = (activeStageList << 1) + 3;
+                GameMenu[0].selection2     = (ActiveStageList << 1) + 3;
                 GameMenu[0].selection2     = GameMenu[0].selection2 == 7 ? 9 : GameMenu[0].selection2 == 9 ? 7 : GameMenu[0].selection2;
                 GameMenu[0].selectionCount = 2;
                 StageMode                  = DEVMENU_STAGELISTSEL;
@@ -345,7 +345,7 @@ void ProcessSystemMenu() {
             if (GameMenu[1].selection1 < modList.size() && (GKeyPress.A || GKeyPress.start || GKeyPress.left || GKeyPress.right)) {
                 modList[modOffset + GameMenu[1].selection1].active ^= 1;
                 StrCopy(buffer, modList[modOffset + GameMenu[1].selection1].name.c_str());
-                StrAdd(buffer, ": ");
+                StrAdd(buffer, " ");
                 StrAdd(buffer, (modList[modOffset + GameMenu[1].selection1].active ? "  Active" : "Inactive"));
                 for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                 EditTextMenuEntry(&GameMenu[1], buffer, GameMenu[1].selection1);
@@ -364,7 +364,7 @@ void ProcessSystemMenu() {
                 char buffer[0x100];
                 for (int m = 0; m < modList.size(); ++m) {
                     StrCopy(buffer, modList[m].name.c_str());
-                    StrAdd(buffer, ": ");
+                    StrAdd(buffer, " ");
                     StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
                     for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
                     AddTextMenuEntry(&GameMenu[1], buffer);

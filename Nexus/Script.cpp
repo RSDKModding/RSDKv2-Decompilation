@@ -286,16 +286,29 @@ const FunctionInfo functions[] = { FunctionInfo("End", 0),
                                    FunctionInfo("PlayStageSfx", 2),
                                    FunctionInfo("StopStageSfx", 1) };
 
-AliasInfo aliases[0x80] = {
-    AliasInfo("true", "1"),          AliasInfo("false", "0"),       AliasInfo("FX_SCALE", "0"),
-    AliasInfo("FX_ROTATE", "1"),     AliasInfo("FX_INK", "2"),      AliasInfo("PRESENTATION_STAGE", "0"),
-    AliasInfo("REGULAR_STAGE", "1"), AliasInfo("BONUS_STAGE", "2"), AliasInfo("SPECIAL_STAGE", "3"),
-    AliasInfo("MENU_1", "0"),        AliasInfo("MENU_2", "1"),      AliasInfo("C_TOUCH", "0"),
-    AliasInfo("C_BOX", "1"),         AliasInfo("C_PLATFORM", "2"),
+AliasInfo aliases[0x80] = { AliasInfo("true", "1"),
+                            AliasInfo("false", "0"),
+                            AliasInfo("FX_SCALE", "0"),
+                            AliasInfo("FX_ROTATE", "1"),
+                            AliasInfo("FX_INK", "2"),
+                            AliasInfo("PRESENTATION_STAGE", "0"),
+                            AliasInfo("REGULAR_STAGE", "1"),
+                            AliasInfo("BONUS_STAGE", "2"),
+                            AliasInfo("SPECIAL_STAGE", "3"),
+                            AliasInfo("MENU_1", "0"),
+                            AliasInfo("MENU_2", "1"),
+                            AliasInfo("C_TOUCH", "0"),
+                            AliasInfo("C_BOX", "1"),
+                            AliasInfo("C_PLATFORM", "2"),
 #if !RETRO_USE_ORIGINAL_CODE
-    AliasInfo("INK_NONE", "0"),      AliasInfo("INK_BLEND", "1"),   AliasInfo("INK_TINT", "2"),
-    AliasInfo("FX_TINT", "3"),       AliasInfo("FLIP_NONE", "0"),   AliasInfo("FLIP_X", "1"),
-    AliasInfo("FLIP_Y", "2"),        AliasInfo("FLIP_XY", "3"),
+                            AliasInfo("INK_NONE", "0"),      
+                            AliasInfo("INK_BLEND", "1"),   
+                            AliasInfo("INK_TINT", "2"),
+                            AliasInfo("FX_TINT", "3"),       
+                            AliasInfo("FLIP_NONE", "0"),   
+                            AliasInfo("FLIP_X", "1"),
+                            AliasInfo("FLIP_Y", "2"),        
+                            AliasInfo("FLIP_XY", "3"),
 #endif
 };
 
@@ -773,8 +786,8 @@ void ConvertFunctionText(char *text) {
                 }
             }
             // Eg: TempValue0 = Game.Variable
-            for (int v = 0; v < globalVariablesCount; ++v) {
-                if (StrComp(funcName, globalVariableNames[v])) {
+            for (int v = 0; v < NO_GLOBALVARIABLES; ++v) {
+                if (StrComp(funcName, GlobalVariableNames[v])) {
                     StrCopy(funcName, "Global");
                     strBuffer[0] = 0;
                     AppendIntegerToString(strBuffer, v);
@@ -1339,10 +1352,10 @@ void ClearScriptData() {
 }
 
 void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
-    bool GameRunning      = true;
+    bool running      = true;
     int scriptDataPtr = scriptCodePtr;
     jumpTableStackPos = 0;
-    while (GameRunning) {
+    while (running) {
         int opcode           = ScriptData[scriptDataPtr++];
         int opcodeSize       = functions[opcode].opcodeSize;
         int scriptCodeOffset = scriptDataPtr;
@@ -1496,16 +1509,16 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                     case VAR_KEYPRESSSTART: ScriptEng.operands[i] = GKeyPress.start; break;
                     case VAR_MENU1SELECTION: ScriptEng.operands[i] = GameMenu[0].selection1; break;
                     case VAR_MENU2SELECTION: ScriptEng.operands[i] = GameMenu[1].selection1; break;
-                    case VAR_STAGEACTIVELIST: ScriptEng.operands[i] = activeStageList; break;
+                    case VAR_STAGEACTIVELIST: ScriptEng.operands[i] = ActiveStageList; break;
                     case VAR_STAGELISTPOS: ScriptEng.operands[i] = StageListPosition; break;
-                    case VAR_GLOBAL: ScriptEng.operands[i] = globalVariables[arrayVal]; break;
                     case VAR_XSCROLLOFFSET: ScriptEng.operands[i] = XScrollOffset; break;
                     case VAR_YSCROLLOFFSET: ScriptEng.operands[i] = YScrollOffset; break;
+                    case VAR_GLOBAL: ScriptEng.operands[i] = GlobalVariables[arrayVal]; break;
                     case VAR_STAGETIMEENABLED: ScriptEng.operands[i] = TimeEnabled; break;
                     case VAR_STAGEMILLISECONDS: ScriptEng.operands[i] = MilliSeconds; break;
                     case VAR_STAGESECONDS: ScriptEng.operands[i] = Seconds; break;
                     case VAR_STAGEMINUTES: ScriptEng.operands[i] = Minutes; break;
-                    case VAR_STAGEACTNO: ScriptEng.operands[i] = actID; break;
+                    case VAR_STAGEACTNO: ScriptEng.operands[i] = ActNumber; break;
                     case VAR_OBJECTENTITYNO: ScriptEng.operands[i] = arrayVal; break;
                     case VAR_PLAYERTYPE: {
                         ScriptEng.operands[i] = PlayerList[PlayerNo].type;
@@ -1668,31 +1681,19 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                         break;
                     }
                     case VAR_PLAYERCOLLISIONLEFT: {
-                        Hitbox *hitbox =
-                            &PlayerCBoxes
-                                [PlayerScriptList[PlayerNo].animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
-                        ScriptEng.operands[i] = hitbox->left[0];
+                        ScriptEng.operands[i] = GetPlayerCBox(&PlayerScriptList[PlayerNo])->left[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONTOP: {
-                        Hitbox *hitbox =
-                            &PlayerCBoxes
-                                [PlayerScriptList[PlayerNo].animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
-                        ScriptEng.operands[i] = hitbox->top[0];
+                        ScriptEng.operands[i] = GetPlayerCBox(&PlayerScriptList[PlayerNo])->top[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONRIGHT: {
-                        Hitbox *hitbox =
-                            &PlayerCBoxes
-                                [PlayerScriptList[PlayerNo].animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
-                        ScriptEng.operands[i] = hitbox->right[0];
+                        ScriptEng.operands[i] = GetPlayerCBox(&PlayerScriptList[PlayerNo])->right[0];
                         break;
                     }
                     case VAR_PLAYERCOLLISIONBOTTOM: {
-                        Hitbox *hitbox =
-                            &PlayerCBoxes
-                                [PlayerScriptList[PlayerNo].animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
-                        ScriptEng.operands[i] = hitbox->bottom[0];
+                        ScriptEng.operands[i] = GetPlayerCBox(&PlayerScriptList[PlayerNo])->bottom[0];
                         break;
                     }
                     case VAR_PLAYERFLAILING: {
@@ -1709,10 +1710,6 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                     }
                     case VAR_PLAYEROBJECTINTERACTION: {
                         ScriptEng.operands[i] = PlayerList[PlayerNo].objectInteraction;
-                        break;
-                    }
-                    case VAR_PLAYERVISIBLE: {
-                        ScriptEng.operands[i] = PlayerList[PlayerNo].visible;
                         break;
                     }
                     case VAR_PLAYERROTATION: {
@@ -1736,11 +1733,15 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                         break;
                     }
                     case VAR_STAGEPAUSEENABLED: ScriptEng.operands[i] = PauseEnabled; break;
-                    case VAR_STAGELISTSIZE: ScriptEng.operands[i] = stageListCount[activeStageList]; break;
+                    case VAR_STAGELISTSIZE: ScriptEng.operands[i] = stageListCount[ActiveStageList]; break;
                     case VAR_SCREENCAMERAENABLED: ScriptEng.operands[i] = CameraEnabled; break;
                     case VAR_SCREENCAMERASTYLE: ScriptEng.operands[i] = CameraStyle; break;
-                    case VAR_MUSICVOLUME: ScriptEng.operands[i] = masterVolume; break;
-                    case VAR_MUSICCURRENTTRACK: ScriptEng.operands[i] = trackID; break;
+                    case VAR_MUSICVOLUME: ScriptEng.operands[i] = MusicVolume; break;
+                    case VAR_MUSICCURRENTTRACK: ScriptEng.operands[i] = CurrentMusicTrack; break;
+                    case VAR_PLAYERVISIBLE: {
+                        ScriptEng.operands[i] = PlayerList[PlayerNo].visible;
+                        break;
+                    }
                     case VAR_STAGENEWXBOUNDARY1: ScriptEng.operands[i] = NewXBoundary1; break;
                     case VAR_STAGENEWXBOUNDARY2: ScriptEng.operands[i] = NewXBoundary2; break;
                     case VAR_STAGENEWYBOUNDARY1: ScriptEng.operands[i] = NewYBoundary1; break;
@@ -1798,7 +1799,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
         // Functions
         switch (opcode) {
             default: break;
-            case FUNC_END: GameRunning = false; break;
+            case FUNC_END: running = false; break;
             case FUNC_EQUAL: ScriptEng.operands[0] = ScriptEng.operands[1]; break;
             case FUNC_ADD: ScriptEng.operands[0] += ScriptEng.operands[1]; break;
             case FUNC_SUB: ScriptEng.operands[0] -= ScriptEng.operands[1]; break;
@@ -2468,11 +2469,11 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                 break;
             case FUNC_PLAYSTAGESFX:
                 opcodeSize = 0;
-                PlaySfx(globalSFXCount + ScriptEng.operands[0], ScriptEng.operands[1]);
+                PlaySfx(NoGlobalSFX + ScriptEng.operands[0], ScriptEng.operands[1]);
                 break;
             case FUNC_STOPSTAGESFX:
                 opcodeSize = 0;
-                StopSfx(globalSFXCount + ScriptEng.operands[0]);
+                StopSfx(NoGlobalSFX + ScriptEng.operands[0]);
                 break;
         }
 
@@ -2626,16 +2627,16 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                     case VAR_KEYPRESSSTART: GKeyPress.start = ScriptEng.operands[i]; break;
                     case VAR_MENU1SELECTION: GameMenu[0].selection1 = ScriptEng.operands[i]; break;
                     case VAR_MENU2SELECTION: GameMenu[1].selection1 = ScriptEng.operands[i]; break;
-                    case VAR_STAGEACTIVELIST: activeStageList = ScriptEng.operands[i]; break;
+                    case VAR_STAGEACTIVELIST: ActiveStageList = ScriptEng.operands[i]; break;
                     case VAR_STAGELISTPOS: StageListPosition = ScriptEng.operands[i]; break;
                     case VAR_XSCROLLOFFSET: XScrollOffset = ScriptEng.operands[i]; break;
                     case VAR_YSCROLLOFFSET: YScrollOffset = ScriptEng.operands[i]; break;
-                    case VAR_GLOBAL: globalVariables[arrayVal] = ScriptEng.operands[i]; break;
+                    case VAR_GLOBAL: GlobalVariables[arrayVal] = ScriptEng.operands[i]; break;
                     case VAR_STAGETIMEENABLED: TimeEnabled = ScriptEng.operands[i]; break;
                     case VAR_STAGEMILLISECONDS: MilliSeconds = ScriptEng.operands[i]; break;
                     case VAR_STAGESECONDS: Seconds = ScriptEng.operands[i]; break;
                     case VAR_STAGEMINUTES: Minutes = ScriptEng.operands[i]; break;
-                    case VAR_STAGEACTNO: actID = ScriptEng.operands[i]; break;
+                    case VAR_STAGEACTNO: ActNumber = ScriptEng.operands[i]; break;
                     case VAR_OBJECTENTITYNO: break;
                     case VAR_PLAYERTYPE: {
                         PlayerList[PlayerNo].type = ScriptEng.operands[i];
@@ -2844,7 +2845,7 @@ void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {
                     case VAR_SCREENCAMERAENABLED: CameraEnabled = ScriptEng.operands[i]; break;
                     case VAR_SCREENCAMERASTYLE: CameraStyle = ScriptEng.operands[i]; break;
                     case VAR_MUSICVOLUME: SetMusicVolume(ScriptEng.operands[i]); break;
-                    case VAR_MUSICCURRENTTRACK: trackID = ScriptEng.operands[i]; break;
+                    case VAR_MUSICCURRENTTRACK: CurrentMusicTrack = ScriptEng.operands[i]; break;
                     case VAR_PLAYERVISIBLE: {
                         PlayerList[PlayerNo].visible = ScriptEng.operands[i];
                         break;

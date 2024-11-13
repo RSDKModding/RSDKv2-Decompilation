@@ -288,12 +288,12 @@ void RefreshEngine() {
 #if RETRO_USING_SDL2
     if (Engine.window) {
         char gameTitle[0x40];
-        sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
+        sprintf(gameTitle, "%s%s", Engine.GameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
         SDL_SetWindowTitle(Engine.window, gameTitle);
     }
 #elif RETRO_USING_SDL1
     char gameTitle[0x40];
-    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
+    sprintf(gameTitle, "%s%s", Engine.GameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
     SDL_WM_SetCaption(gameTitle, NULL);
 #endif
 

@@ -43,12 +43,15 @@ int InitRenderDevice();
 void FlipScreen();
 void ReleaseRenderDevice();
 
-inline void ClearGraphicsData()
-{
+void ClearScreen(byte index);
+
+inline void ClearGraphicsData() {
     for (int i = 0; i < SURFACE_MAX; ++i) StrCopy(gfxSurface[i].fileName, "");
     gfxDataPosition = 0;
+#if !RETRO_USE_ORIGINAL_CODE
+    MEM_ZERO(gfxSurface);
+#endif
 }
-void ClearScreen(byte index);
 
 void SetScreenSize(int width, int lineSize);
 
@@ -77,7 +80,7 @@ void DrawRotatedSprite(int direction, int XPos, int YPos, int pivotX, int pivotY
                        int sheetID);
 void DrawBlendedSprite(int XPos, int YPos, int width, int height, int sprX, int sprY, int sheetID);
 
-//Text Menus
+// Text Menus
 void DrawTextMenuEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight);
 void DrawBlendedTextMenuEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight);
 void DrawStageTextEntry(void *menu, int rowID, int XPos, int YPos, int textHighlight);

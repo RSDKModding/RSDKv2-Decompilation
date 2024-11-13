@@ -1,7 +1,8 @@
 #include "RetroEngine.hpp"
 
+
 int SCREEN_XSIZE   = 320;
-int SCREEN_CENTERX = SCREEN_XSIZE / 2;
+int SCREEN_CENTERX = (SCREEN_XSIZE / 2);
 
 byte BlendLookupTable[0x100 * 0x100];
 
@@ -19,7 +20,7 @@ byte GraphicData[GFXDATA_MAX];
 int InitRenderDevice() {
     char gameTitle[0x40];
 
-    sprintf(gameTitle, "%s%s", Engine.gameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
+    sprintf(gameTitle, "%s%s", Engine.GameWindowText, Engine.UseBinFile ? "" : " (Using Data Folder)");
 
     Engine.FrameBuffer = new byte[SCREEN_XSIZE * SCREEN_YSIZE];
     memset(Engine.FrameBuffer, 0, (SCREEN_XSIZE * SCREEN_YSIZE) * sizeof(byte));
@@ -556,7 +557,7 @@ void DrawHLineScrollLayer(int layerID) {
                     deform = *deformationData;
 
                 // Fix for SS5 mobile bug
-                if (StrComp(stageList[activeStageList][StageListPosition].name, "5") && activeStageList == STAGELIST_SPECIAL)
+                if (StrComp(stageList[ActiveStageList][StageListPosition].name, "5") && ActiveStageList == STAGELIST_SPECIAL)
                     deform >>= 4;
 
                 chunkX += deform;

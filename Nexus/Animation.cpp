@@ -25,7 +25,7 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
         FileRead(&fileBuffer, 1);
         FileRead(&fileBuffer, 1);
 
-        //Read & load each spritesheet
+        // Read & load each spritesheet
         for (int s = 0; s < 4; ++s) {
             FileRead(&fileBuffer, 1);
             if (fileBuffer) {
@@ -54,7 +54,7 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
         byte animCount = 0;
         FileRead(&animCount, 1);
 
-        //Read animations
+        // Read animations
         int frameID = playerID << 10;
         for (int a = 0; a < animCount; ++a) {
             SpriteAnimation *anim = &PlayerScriptList[playerID].animations[a];
@@ -85,7 +85,7 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
             }
         }
 
-        //Read Hitboxes
+        // Read Hitboxes
         FileRead(&fileBuffer, 1);
         int hitboxID = playerID << 3;
         for (int i = 0; i < fileBuffer; ++i) {
@@ -107,8 +107,5 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
 void ClearAnimationData()
 {
     for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(scriptFrames[f]);
-    //for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
-    //for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(PlayerCBoxes[h]);
-
     ScriptFramesNo   = 0;
 }

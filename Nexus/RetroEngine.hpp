@@ -193,8 +193,8 @@ public:
 
     bool LoadGameConfig(const char *Filepath);
 
-    char gameWindowText[0x40];
-    char gameDescriptionText[0x100];
+    char GameWindowText[0x40];
+    char GameDescriptionText[0x100];
 
     byte *FrameBuffer = nullptr;
 
