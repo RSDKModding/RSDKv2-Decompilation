@@ -54,7 +54,7 @@ int Minutes       = 0;
 // Category and Scene IDs
 int ActiveStageList   = 0;
 int StageListPosition = 0;
-char currentStageFolder[0x100];
+char CurrentStageFolder[0x100];
 int ActNumber = 0;
 
 char titleCardText[0x100];
@@ -64,23 +64,23 @@ byte activeTileLayers[4];
 byte tLayerMidPoint;
 TileLayer StageLayouts[LAYER_COUNT];
 
-int bgDeformationData0[DEFORM_COUNT];
-int bgDeformationData1[DEFORM_COUNT];
-int bgDeformationData2[DEFORM_COUNT];
-int bgDeformationData3[DEFORM_COUNT];
+int BGDeformationData1[DEFORM_COUNT];
+int BGDeformationData2[DEFORM_COUNT];
+int BGDeformationData3[DEFORM_COUNT];
+int BGDeformationData4[DEFORM_COUNT];
 
-int fgDeformationOffset  = 0;
-int fgDeformationOffsetW = 0;
-int bgDeformationOffset  = 0;
-int bgDeformationOffsetW = 0;
+int DeformationPos1  = 0;
+int DeformationPos2 = 0;
+int DeformationPos3  = 0;
+int DeformationPos4 = 0;
 
 LineScroll HParallax;
 LineScroll VParallax;
 
-Tiles128x128 tiles128x128;
+Tiles128x128 StageTiles;
 CollisionMasks TileCollisions[2];
 
-byte tilesetGFXData[TILESET_SIZE];
+byte TileGfx[TILESET_SIZE];
 
 void ProcessStage(void) {
     switch (StageMode) {
@@ -309,7 +309,7 @@ void LoadStageFiles(void) {
         ObjectEntityList[i].scale     = 512;
     }
     LoadActLayout();
-    ProcessStartupObjects();
+    ProcessStartupScripts();
 
     XScrollA = (PlayerList[0].XPos >> 16) - SCREEN_CENTERX;
     XScrollB = (PlayerList[0].XPos >> 16) - (SCREEN_CENTERX + SCREEN_XSIZE);
@@ -535,17 +535,17 @@ void Load128x128Mappings() {
             FileRead(&entry, 3);
             entry[0] -= (byte)((entry[0] >> 6) << 6);
 
-            tiles128x128.visualPlane[i] = (byte)(entry[0] >> 4);
+            StageTiles.visualPlane[i] = (byte)(entry[0] >> 4);
             entry[0] -= 16 * (entry[0] >> 4);
 
-            tiles128x128.direction[i] = (byte)(entry[0] >> 2);
+            StageTiles.direction[i] = (byte)(entry[0] >> 2);
             entry[0] -= 4 * (entry[0] >> 2);
 
-            tiles128x128.tileIndex[i]  = entry[1] + (entry[0] << 8);
-            tiles128x128.gfxDataPos[i] = tiles128x128.tileIndex[i] << 8;
+            StageTiles.tileIndex[i]  = entry[1] + (entry[0] << 8);
+            StageTiles.gfxDataPos[i] = StageTiles.tileIndex[i] << 8;
 
-            tiles128x128.collisionFlags[0][i] = entry[2] >> 4;
-            tiles128x128.collisionFlags[1][i] = entry[2] - ((entry[2] >> 4) << 4);
+            StageTiles.collisionFlags[0][i] = entry[2] >> 4;
+            StageTiles.collisionFlags[1][i] = entry[2] - ((entry[2] >> 4) << 4);
         }
         CloseFile();
     }
@@ -759,12 +759,12 @@ void LoadStageGIFFile(int stageID) {
             } while (c != 256);
         }
 
-        ReadGifPictureData(width, height, interlaced, tilesetGFXData, 0);
+        ReadGifPictureData(width, height, interlaced, TileGfx, 0);
 
-        byte transparent = tilesetGFXData[0];
+        byte transparent = TileGfx[0];
         for (int i = 0; i < 0x40000; ++i) {
-            if (tilesetGFXData[i] == transparent)
-                tilesetGFXData[i] = 0;
+            if (TileGfx[i] == transparent)
+                TileGfx[i] = 0;
         }
 
         CloseFile();
@@ -790,7 +790,7 @@ void LoadStageGFXFile(int stageID) {
             SetPaletteEntry(c, clr[0], clr[1], clr[2]);
         }
 
-        byte *gfxData = tilesetGFXData;
+        byte *gfxData = TileGfx;
         byte buf[3];
         while (true) {
             FileRead(&buf[0], 1);
@@ -807,10 +807,10 @@ void LoadStageGFXFile(int stageID) {
             }
         }
 
-        byte transparent = tilesetGFXData[0];
+        byte transparent = TileGfx[0];
         for (int i = 0; i < 0x40000; ++i) {
-            if (tilesetGFXData[i] == transparent)
-                tilesetGFXData[i] = 0;
+            if (TileGfx[i] == transparent)
+                TileGfx[i] = 0;
         }
 
         CloseFile();

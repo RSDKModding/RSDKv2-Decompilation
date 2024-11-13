@@ -509,15 +509,15 @@ void DrawHLineScrollLayer(int layerID) {
         yscrollOffset    = (yScroll + (layer->scrollPos >> 16)) % fullheight;
         layerheight      = fullheight >> 7;
         lineScroll       = layer->lineScroll;
-        deformationData  = &bgDeformationData2[(byte)(yscrollOffset + bgDeformationOffset)];
-        deformationDataW = &bgDeformationData3[(byte)(yscrollOffset + waterDrawPos + bgDeformationOffsetW)];
+        deformationData  = &BGDeformationData3[(byte)(yscrollOffset + DeformationPos3)];
+        deformationDataW = &BGDeformationData4[(byte)(yscrollOffset + waterDrawPos + DeformationPos4)];
     } else { // FG Layer
         LastXSize     = layer->xsize;
         yscrollOffset = YScrollOffset;
         lineScroll    = layer->lineScroll;
         for (int i = 0; i < PARALLAX_COUNT; ++i) HParallax.linePos[i] = XScrollOffset;
-        deformationData  = &bgDeformationData0[(byte)(yscrollOffset + fgDeformationOffset)];
-        deformationDataW = &bgDeformationData1[(byte)(yscrollOffset + waterDrawPos + fgDeformationOffsetW)];
+        deformationData  = &BGDeformationData1[(byte)(yscrollOffset + DeformationPos1)];
+        deformationDataW = &BGDeformationData2[(byte)(yscrollOffset + waterDrawPos + DeformationPos2)];
     }
 
     if (layer->type == LAYER_HSCROLL) {
@@ -587,12 +587,12 @@ void DrawHLineScrollLayer(int layerID) {
             int tilePxLineCnt = 0;
 
             // Draw the first tile to the left
-            if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
+            if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
                 tilePxLineCnt = TILE_SIZE - tilePxXPos;
                 lineRemain -= tilePxLineCnt;
-                switch (tiles128x128.direction[chunk]) {
+                switch (StageTiles.direction[chunk]) {
                     case FLIP_NONE:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetY + tiles128x128.gfxDataPos[chunk] + tilePxXPos];
+                        gfxDataPtr = &TileGfx[tileOffsetY + StageTiles.gfxDataPos[chunk] + tilePxXPos];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -602,7 +602,7 @@ void DrawHLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_X:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetYFlipX + tiles128x128.gfxDataPos[chunk] - tilePxXPos];
+                        gfxDataPtr = &TileGfx[tileOffsetYFlipX + StageTiles.gfxDataPos[chunk] - tilePxXPos];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -612,7 +612,7 @@ void DrawHLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_Y:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetYFlipY + tiles128x128.gfxDataPos[chunk] + tilePxXPos];
+                        gfxDataPtr = &TileGfx[tileOffsetYFlipY + StageTiles.gfxDataPos[chunk] + tilePxXPos];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -622,7 +622,7 @@ void DrawHLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_XY:
-                        gfxDataPtr = &tilesetGFXData[tileOffsetYFlipXY + tiles128x128.gfxDataPos[chunk] - tilePxXPos];
+                        gfxDataPtr = &TileGfx[tileOffsetYFlipXY + StageTiles.gfxDataPos[chunk] - tilePxXPos];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -652,10 +652,10 @@ void DrawHLineScrollLayer(int layerID) {
                 lineRemain -= TILE_SIZE;
 
                 // Loop Unrolling (faster but messier code)
-                if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
-                    switch (tiles128x128.direction[chunk]) {
+                if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
+                    switch (StageTiles.direction[chunk]) {
                         case FLIP_NONE:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetY];
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             ++pixelBufferPtr;
@@ -723,7 +723,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_X:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipX];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipX];
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             ++pixelBufferPtr;
@@ -791,7 +791,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_Y:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipY];
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             ++pixelBufferPtr;
@@ -859,7 +859,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_XY:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipXY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipXY];
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
                             ++pixelBufferPtr;
@@ -946,10 +946,10 @@ void DrawHLineScrollLayer(int layerID) {
 
                 tilePxLineCnt = lineRemain >= TILE_SIZE ? TILE_SIZE : lineRemain;
                 lineRemain -= tilePxLineCnt;
-                if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
-                    switch (tiles128x128.direction[chunk]) {
+                if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
+                    switch (StageTiles.direction[chunk]) {
                         case FLIP_NONE:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetY];
                             while (tilePxLineCnt--) {
                                 if (*gfxDataPtr > 0)
                                     *pixelBufferPtr = *gfxDataPtr;
@@ -959,7 +959,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_X:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipX];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipX];
                             while (tilePxLineCnt--) {
                                 if (*gfxDataPtr > 0)
                                     *pixelBufferPtr = *gfxDataPtr;
@@ -969,7 +969,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_Y:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipY];
                             while (tilePxLineCnt--) {
                                 if (*gfxDataPtr > 0)
                                     *pixelBufferPtr = *gfxDataPtr;
@@ -979,7 +979,7 @@ void DrawHLineScrollLayer(int layerID) {
                             break;
 
                         case FLIP_XY:
-                            gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetYFlipXY];
+                            gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetYFlipXY];
                             while (tilePxLineCnt--) {
                                 if (*gfxDataPtr > 0)
                                     *pixelBufferPtr = *gfxDataPtr;
@@ -1033,14 +1033,14 @@ void DrawVLineScrollLayer(int layerID) {
         xscrollOffset   = (xScroll + (layer->scrollPos >> 16)) % fullLayerwidth;
         layerwidth      = fullLayerwidth >> 7;
         lineScroll      = layer->lineScroll;
-        deformationData = &bgDeformationData2[(byte)(xscrollOffset + bgDeformationOffset)];
+        deformationData = &BGDeformationData3[(byte)(xscrollOffset + DeformationPos3)];
     } else { // FG Layer
         LastYSize            = layer->ysize;
         xscrollOffset        = XScrollOffset;
         lineScroll           = layer->lineScroll;
         VParallax.linePos[0] = YScrollOffset;
         VParallax.deform[0]  = true;
-        deformationData      = &bgDeformationData0[(byte)(XScrollOffset + fgDeformationOffset)];
+        deformationData      = &BGDeformationData1[(byte)(XScrollOffset + DeformationPos1)];
     }
 
     if (layer->type == LAYER_VSCROLL) {
@@ -1098,11 +1098,11 @@ void DrawVLineScrollLayer(int layerID) {
         int tilePxLineCnt = tileYPxRemain;
 
         // Draw the first tile to the left
-        if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
+        if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
             lineRemain -= tilePxLineCnt;
-            switch (tiles128x128.direction[chunk]) {
+            switch (StageTiles.direction[chunk]) {
                 case FLIP_NONE:
-                    gfxDataPtr = &tilesetGFXData[TILE_SIZE * tileY + tileX16 + tiles128x128.gfxDataPos[chunk]];
+                    gfxDataPtr = &TileGfx[TILE_SIZE * tileY + tileX16 + StageTiles.gfxDataPos[chunk]];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
@@ -1112,7 +1112,7 @@ void DrawVLineScrollLayer(int layerID) {
                     break;
 
                 case FLIP_X:
-                    gfxDataPtr = &tilesetGFXData[TILE_SIZE * tileY + tileOffsetXFlipX + tiles128x128.gfxDataPos[chunk]];
+                    gfxDataPtr = &TileGfx[TILE_SIZE * tileY + tileOffsetXFlipX + StageTiles.gfxDataPos[chunk]];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
@@ -1122,7 +1122,7 @@ void DrawVLineScrollLayer(int layerID) {
                     break;
 
                 case FLIP_Y:
-                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipY + tiles128x128.gfxDataPos[chunk] - TILE_SIZE * tileY];
+                    gfxDataPtr = &TileGfx[tileOffsetXFlipY + StageTiles.gfxDataPos[chunk] - TILE_SIZE * tileY];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
@@ -1132,7 +1132,7 @@ void DrawVLineScrollLayer(int layerID) {
                     break;
 
                 case FLIP_XY:
-                    gfxDataPtr = &tilesetGFXData[tileOffsetXFlipXY + tiles128x128.gfxDataPos[chunk] - TILE_SIZE * tileY];
+                    gfxDataPtr = &TileGfx[tileOffsetXFlipXY + StageTiles.gfxDataPos[chunk] - TILE_SIZE * tileY];
                     while (tilePxLineCnt--) {
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
@@ -1165,10 +1165,10 @@ void DrawVLineScrollLayer(int layerID) {
             lineRemain -= TILE_SIZE;
 
             // Loop Unrolling (faster but messier code)
-            if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
-                switch (tiles128x128.direction[chunk]) {
+            if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
+                switch (StageTiles.direction[chunk]) {
                     case FLIP_NONE:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileX16];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileX16];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
@@ -1250,7 +1250,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_X:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipX];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipX];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
@@ -1332,7 +1332,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_Y:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipY];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipY];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
@@ -1414,7 +1414,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_XY:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipXY];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipXY];
                         if (*gfxDataPtr > 0)
                             *pixelBufferPtr = *gfxDataPtr;
                         pixelBufferPtr += SCREEN_XSIZE;
@@ -1516,10 +1516,10 @@ void DrawVLineScrollLayer(int layerID) {
             tilePxLineCnt = lineRemain >= TILE_SIZE ? TILE_SIZE : lineRemain;
             lineRemain -= tilePxLineCnt;
 
-            if (tiles128x128.visualPlane[chunk] == (byte)aboveMidPoint) {
-                switch (tiles128x128.direction[chunk]) {
+            if (StageTiles.visualPlane[chunk] == (byte)aboveMidPoint) {
+                switch (StageTiles.direction[chunk]) {
                     case FLIP_NONE:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileX16];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileX16];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -1529,7 +1529,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_X:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipX];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipX];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -1539,7 +1539,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_Y:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipY];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipY];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;
@@ -1549,7 +1549,7 @@ void DrawVLineScrollLayer(int layerID) {
                         break;
 
                     case FLIP_XY:
-                        gfxDataPtr = &tilesetGFXData[tiles128x128.gfxDataPos[chunk] + tileOffsetXFlipXY];
+                        gfxDataPtr = &TileGfx[StageTiles.gfxDataPos[chunk] + tileOffsetXFlipXY];
                         while (tilePxLineCnt--) {
                             if (*gfxDataPtr > 0)
                                 *pixelBufferPtr = *gfxDataPtr;

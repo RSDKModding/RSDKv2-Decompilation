@@ -23,10 +23,10 @@ void FindFloorPosition(Player *player, CollisionSensor *sensor, int startY) {
             if (XPos > -1 && YPos > -1) {
                 int tile = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile += tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_LRB
-                    && tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_LRB
+                    && StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (XPos & tsm1) + (tileIndex << 4);
                             if (TileCollisions[player->collisionPlane].floorMasks[c] >= 0x40)
@@ -112,9 +112,9 @@ void FindLWallPosition(Player *player, CollisionSensor *sensor, int startX) {
             if (XPos > -1 && YPos > -1) {
                 int tile      = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile          = tile + tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (YPos & tsm1) + (tileIndex << 4);
                             if (TileCollisions[player->collisionPlane].lWallMasks[c] >= 0x40)
@@ -198,9 +198,9 @@ void FindRoofPosition(Player *player, CollisionSensor *sensor, int startY) {
             if (XPos > -1 && YPos > -1) {
                 int tile      = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile          = tile + tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (XPos & tsm1) + (tileIndex << 4);
                             if (TileCollisions[player->collisionPlane].roofMasks[c] <= -0x40)
@@ -281,9 +281,9 @@ void FindRWallPosition(Player *player, CollisionSensor *sensor, int startX) {
             if (XPos > -1 && YPos > -1) {
                 int tile      = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile          = tile + tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (YPos & tsm1) + (tileIndex << 4);
                             if (TileCollisions[player->collisionPlane].rWallMasks[c] <= -0x40)
@@ -368,10 +368,10 @@ void FloorCollision(Player *player, CollisionSensor *sensor) {
             if (XPos > -1 && YPos > -1) {
                 int tile = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile += tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_LRB
-                    && tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_LRB
+                    && StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (XPos & tsm1) + (tileIndex << 4);
                             if ((YPos & tsm1) <= TileCollisions[player->collisionPlane].floorMasks[c] + i - TILE_SIZE
@@ -453,10 +453,10 @@ void LWallCollision(Player *player, CollisionSensor *sensor) {
             if (XPos > -1 && YPos > -1) {
                 int tile = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile += tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
-                    && tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
+                    && StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (YPos & tsm1) + (tileIndex << 4);
                             if ((XPos & tsm1) <= TileCollisions[player->collisionPlane].lWallMasks[c] + i - TILE_SIZE)
@@ -524,10 +524,10 @@ void RoofCollision(Player *player, CollisionSensor *sensor) {
             if (XPos > -1 && YPos > -1) {
                 int tile = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile += tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
-                    && tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
+                    && StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (XPos & tsm1) + (tileIndex << 4);
                             if ((YPos & tsm1) >= TileCollisions[player->collisionPlane].roofMasks[c] + TILE_SIZE - i)
@@ -605,10 +605,10 @@ void RWallCollision(Player *player, CollisionSensor *sensor) {
             if (XPos > -1 && YPos > -1) {
                 int tile = StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6;
                 tile += tileX + (tileY << 3);
-                int tileIndex = tiles128x128.tileIndex[tile];
-                if (tiles128x128.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
-                    && tiles128x128.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
-                    switch (tiles128x128.direction[tile]) {
+                int tileIndex = StageTiles.tileIndex[tile];
+                if (StageTiles.collisionFlags[player->collisionPlane][tile] != SOLID_TOP
+                    && StageTiles.collisionFlags[player->collisionPlane][tile] < SOLID_NONE) {
+                    switch (StageTiles.direction[tile]) {
                         case FLIP_NONE: {
                             c = (YPos & tsm1) + (tileIndex << 4);
                             if ((XPos & tsm1) >= TileCollisions[player->collisionPlane].rWallMasks[c] + TILE_SIZE - i)
@@ -1332,9 +1332,9 @@ void ObjectFloorCollision(int xOffset, int yOffset, int cPath) {
         int chunkY    = YPos >> 7;
         int tileY     = (YPos & 0x7F) >> 4;
         int chunk     = (StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6) + tileX + (tileY << 3);
-        int tileIndex = tiles128x128.tileIndex[chunk];
-        if (tiles128x128.collisionFlags[cPath][chunk] != SOLID_LRB && tiles128x128.collisionFlags[cPath][chunk] != SOLID_NONE) {
-            switch (tiles128x128.direction[chunk]) {
+        int tileIndex = StageTiles.tileIndex[chunk];
+        if (StageTiles.collisionFlags[cPath][chunk] != SOLID_LRB && StageTiles.collisionFlags[cPath][chunk] != SOLID_NONE) {
+            switch (StageTiles.direction[chunk]) {
                 case 0: {
                     c = (XPos & 15) + (tileIndex << 4);
                     if ((YPos & 15) <= TileCollisions[cPath].floorMasks[c]) {
@@ -1394,9 +1394,9 @@ void ObjectFloorGrip(int xOffset, int yOffset, int cPath) {
             int chunkY    = YPos >> 7;
             int tileY     = (YPos & 0x7F) >> 4;
             int chunk     = (StageLayouts[0].tiles[chunkX + (chunkY << 8)] << 6) + tileX + (tileY << 3);
-            int tileIndex = tiles128x128.tileIndex[chunk];
-            if (tiles128x128.collisionFlags[cPath][chunk] != SOLID_LRB && tiles128x128.collisionFlags[cPath][chunk] != SOLID_NONE) {
-                switch (tiles128x128.direction[chunk]) {
+            int tileIndex = StageTiles.tileIndex[chunk];
+            if (StageTiles.collisionFlags[cPath][chunk] != SOLID_LRB && StageTiles.collisionFlags[cPath][chunk] != SOLID_NONE) {
+                switch (StageTiles.direction[chunk]) {
                     case 0: {
                         c = (XPos & 15) + (tileIndex << 4);
                         if (TileCollisions[cPath].floorMasks[c] >= 64) {

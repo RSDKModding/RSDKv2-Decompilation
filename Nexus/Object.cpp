@@ -9,7 +9,7 @@ int OBJECT_BORDER_X2       = 0;
 const int OBJECT_BORDER_Y1 = 0x100;
 const int OBJECT_BORDER_Y2 = SCREEN_YSIZE + 0x100;
 
-void ProcessStartupObjects() {
+void ProcessStartupScripts() {
     ScriptFramesNo = 0;
     ClearAnimationData();
     PlayerNo                   = 0;

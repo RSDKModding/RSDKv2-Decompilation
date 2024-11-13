@@ -138,7 +138,7 @@ bool processEvents() {
 
                     case SDLK_F5:
                         if (Engine.devMenu) {
-                            currentStageFolder[0] = 0; // reload all assets & scripts
+                            CurrentStageFolder[0] = 0; // reload all assets & scripts
                             StageMode             = STAGEMODE_LOAD;
                         }
                         break;

@@ -40,7 +40,7 @@ extern int OBJECT_BORDER_X2;
 extern const int OBJECT_BORDER_Y1;
 extern const int OBJECT_BORDER_Y2;
 
-void ProcessStartupObjects();
+void ProcessStartupScripts();
 void ProcessObjects();
 
 #endif // !OBJECT_H
