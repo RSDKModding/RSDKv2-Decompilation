@@ -27,7 +27,7 @@ Clone the repo, using:
 To handle dependencies, you'll need to install [Visual Studio Community](https://visualstudio.microsoft.com/downloads/) (make sure to install the `Desktop development with C++` package during the installation) and [vcpkg](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-cmd#1---set-up-vcpkg) (You only need to follow `1 - Set up vcpkg`).
 
 After installing those, run the following in Command Prompt (make sure to replace `[vcpkg root]` with the path to the vcpkg installation!):
-- `[vcpkg root]\vcpkg.exe install sdl2 libogg libvorbis libtheora --triplet=x64-windows-static` (If you're compiling a 32-bit build, replace `x64-windows-static` with `x86-windows-static`.)
+- `[vcpkg root]\vcpkg.exe install sdl2 libogg libvorbis --triplet=x64-windows-static` (If you're compiling a 32-bit build, replace `x64-windows-static` with `x86-windows-static`.)
 
 Finally, follow the [compilation steps below](#compiling) using `-DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_PREFIX_PATH=[vcpkg root]/installed/x64-windows-static/` as arguments for `cmake -B build`.
   - Make sure to replace each instance of `[vcpkg root]` with the path to the vcpkg installation!
@@ -38,10 +38,10 @@ Finally, follow the [compilation steps below](#compiling) using `-DCMAKE_TOOLCHA
 
 ### Linux
 Install the following dependencies: then follow the [compilation steps below](#compiling):
-- **pacman (Arch):** `sudo pacman -S base-devel cmake sdl2 libogg libvorbis libtheora`
-- **apt (Debian/Ubuntu):** `sudo apt install build-essential cmake libsdl2-dev libogg-dev libvorbis-dev libtheora-dev`
-- **rpm (Fedora):** `sudo dnf install make gcc cmake sdl2-devel libogg-devel libvorbis-devel zlib-devel libtheora-devel`
-- **apk (Alpine/PostmarketOS)** `sudo apk add build-base cmake sdl2-dev libogg-dev libvorbis-dev libtheora-dev`
+- **pacman (Arch):** `sudo pacman -S base-devel cmake sdl2 libogg libvorbis`
+- **apt (Debian/Ubuntu):** `sudo apt install build-essential cmake libsdl2-dev libogg-dev libvorbis-dev`
+- **rpm (Fedora):** `sudo dnf install make gcc cmake sdl2-devel libogg-devel libvorbis-devel zlib-devel`
+- **apk (Alpine/PostmarketOS)** `sudo apk add build-base cmake sdl2-dev libogg-dev libvorbis-dev`
 - Your favorite package manager here, [make a pull request](https://github.com/RSDKModding/RSDKv2-Decompilation/fork)
 
 ## Compiling
@@ -71,7 +71,7 @@ Follow the installation instructions in the readme of each branch.
 Because these branches are unofficial, we can't provide support for them and they may not be up-to-date.
 
 ## Other Platforms
-Currently the only supported platforms are the ones listed above, however the backend uses libogg, libvorbis, libtheora & SDL2 to power it, so the codebase is very multiplatform.
+Currently the only supported platforms are the ones listed above, however the backend uses libogg, libvorbis, & SDL2 to power it, so the codebase is very multiplatform.
 If you're able to, you can clone this repo and port it to a platform not on the list.
 
 # Contact:
