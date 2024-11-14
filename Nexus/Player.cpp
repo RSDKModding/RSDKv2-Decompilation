@@ -79,6 +79,9 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
             if (characterID == p) {
                 GetFileInfo(&info);
                 CloseFile();
+#if RETRO_USE_MOD_LOADER
+                strcpy(PlayerScriptList[playerID].scriptPath, PlayerScriptList[p].scriptPath);
+#endif
                 LoadPlayerAnimation(strBuf, playerID);
                 SetFileInfo(&info);
             }
