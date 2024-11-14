@@ -1,28 +1,30 @@
 ﻿#include "RetroEngine.hpp"
 
-int currentVideoFrame = 0;
-int videoFrameCount   = 0;
-int videoWidth        = 0;
-int videoHeight       = 0;
-int videoSurface      = 0;
-int videoFilePos      = 0;
-bool videoPlaying     = false;
+int CurrentVideoFrame = 0;
+int VideoFrameCount   = 0;
+int VideoWidth        = 0;
+int VideoHeight       = 0;
+int VideoSurface      = 0;
+int VideoFilePos      = 0;
+bool VideoPlaying     = false;
 
-void UpdateVideoFrame()
-{
-    if (videoPlaying) {
-        if (currentVideoFrame < videoFrameCount) {
-            GFXSurface *surface = &gfxSurface[videoSurface];
+void UpdateVideoFrame() {
+    if (VideoPlaying) {
+        if (VideoFrameCount <= CurrentVideoFrame) {
+            VideoPlaying = false;
+            CloseFile();
+        } else {
+            GFXSurface *surface = &GfxSurface[VideoSurface];
             byte fileBuffer     = 0;
             ushort fileBuffer2  = 0;
             FileRead(&fileBuffer, 1);
-            videoFilePos += fileBuffer;
+            VideoFilePos += fileBuffer;
             FileRead(&fileBuffer, 1);
-            videoFilePos += fileBuffer << 8;
+            VideoFilePos += fileBuffer << 8;
             FileRead(&fileBuffer, 1);
-            videoFilePos += fileBuffer << 16;
+            VideoFilePos += fileBuffer << 16;
             FileRead(&fileBuffer, 1);
-            videoFilePos += fileBuffer << 24;
+            VideoFilePos += fileBuffer << 24;
 
             byte clr[3];
             for (int i = 0; i < 0x80; ++i) {
@@ -49,14 +51,10 @@ void UpdateVideoFrame()
                     FileRead(&fileBuffer, 1);
                 } while (c != 0x100);
             }
-            ReadGifPictureData(surface->width, surface->height, interlaced, graphicData, surface->dataPosition);
+            ReadGifPictureData(surface->width, surface->height, interlaced, GraphicData, surface->dataPosition);
 
-            SetFilePosition(videoFilePos);
-            ++currentVideoFrame;
-        }
-        else {
-            videoPlaying = false;
-            CloseFile();
+            SetFilePosition(VideoFilePos);
+            ++CurrentVideoFrame;
         }
     }
 }

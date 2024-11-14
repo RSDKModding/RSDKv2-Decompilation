@@ -43,8 +43,8 @@ struct InputButton {
     inline bool down() { return (press || hold); }
 };
 
-extern InputData keyPress;
-extern InputData keyDown;
+extern InputData GKeyPress;
+extern InputData GKeyDown;
 
 extern bool anyPress;
 
@@ -87,7 +87,7 @@ extern byte keyState[SDLK_LAST];
 extern SDL_Joystick *controller;
 #endif
 
-void ProcessInput();
+void ReadInputDevice();
 #endif
 
 void CheckKeyPress(InputData *input, byte Flags);

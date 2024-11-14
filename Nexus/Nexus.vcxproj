@@ -199,6 +199,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="ModAPI.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Palette.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="Drawing.hpp" />
     <ClInclude Include="Ini.hpp" />
+    <ClInclude Include="ModAPI.hpp" />
     <ClInclude Include="Reader.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sprite.hpp" />

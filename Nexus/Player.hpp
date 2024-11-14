@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define PLAYER_COUNT (0x2) 
+#define PLAYER_COUNT (0x2)
 
 enum PlayerAni {
     ANI_STOPPED,
@@ -27,12 +27,17 @@ enum PlayerAni {
     ANI_FLAILINGRIGHT,
     ANI_SLIDING,
     ANI_FINISHPOSE = 23,
-    ANI_CORKSCREW = 34,
-    ANI_HANGING = 43,
+    ANI_CORKSCREW  = 34,
+    ANI_HANGING    = 43,
 };
 
-struct PlayerMovementStats
-{
+enum PlayerControlModes {
+    CONTROLMODE_NONE     = -1,
+    CONTROLMODE_NORMAL   = 0,
+    CONTROLMODE_SIDEKICK = 1,
+};
+
+struct PlayerMovementStats {
     int topSpeed;
     int acceleration;
     int deceleration;
@@ -104,18 +109,17 @@ struct PlayerScript {
     byte startJumpSpeed;
 };
 
-
-extern Player playerList[PLAYER_COUNT];
-extern PlayerScript playerScriptList[PLAYER_COUNT];
-extern int activePlayer;
+extern Player PlayerList[PLAYER_COUNT];
+extern PlayerScript PlayerScriptList[PLAYER_COUNT];
+extern int PlayerNo;
 extern int activePlayerCount;
 
-extern ushort upBuffer;
-extern ushort downBuffer;
-extern ushort leftBuffer;
-extern ushort rightBuffer;
-extern ushort jumpPressBuffer;
-extern ushort jumpHoldBuffer;
+extern ushort DelayUp;
+extern ushort DelayDown;
+extern ushort DelayLeft;
+extern ushort DelayRight;
+extern ushort DelayJumpPress;
+extern ushort DelayJumpHold;
 
 void LoadPlayerFromList(byte characterID, byte playerID);
 
@@ -126,12 +130,12 @@ void ProcessPlayerControl(Player *player);
 
 void SetMovementStats(PlayerMovementStats *stats);
 
-void DefaultAirMovement(Player *player);
-void DefaultGravityFalse(Player *player);
-void DefaultGravityTrue(Player *player);
-void DefaultGroundMovement(Player *player);
-void DefaultJumpAction(Player *player);
-void DefaultRollingMovement(Player *player);
+void ProcessDefaultAirMovement(Player *player);
+void ProcessDefaultGravityFalse(Player *player);
+void ProcessDefaultGravityTrue(Player *player);
+void ProcessDefaultGroundMovement(Player *player);
+void ProcessDefaultJumpAction(Player *player);
+void ProcessDefaultRollingMovement(Player *player);
 void ProcessDebugMode(Player *player);
 
 void ProcessPlayerAnimation(Player *player);

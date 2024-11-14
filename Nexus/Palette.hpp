@@ -11,24 +11,24 @@ struct Colour {
 };
 
 // Palettes (as RGB888 Colours)
-extern uint palette32[PALETTE_SIZE];
-extern uint palette32W[PALETTE_SIZE];
-extern uint palette32F[PALETTE_SIZE];
-extern uint palette32WF[PALETTE_SIZE];
+extern uint TilePalette32[PALETTE_SIZE];
+extern uint TilePaletteW32[PALETTE_SIZE];
+extern uint TilePalette32F[PALETTE_SIZE];
+extern uint TilePaletteW32F[PALETTE_SIZE];
 
 // Palettes (as RGB565 Colours)
-extern ushort palette16[PALETTE_SIZE];
-extern ushort palette16W[PALETTE_SIZE];
-extern ushort palette16F[PALETTE_SIZE];
-extern ushort palette16WF[PALETTE_SIZE];
+extern ushort TilePalette16[PALETTE_SIZE];
+extern ushort TilePaletteW16[PALETTE_SIZE];
+extern ushort TilePalette16F[PALETTE_SIZE];
+extern ushort TilePaletteW16F[PALETTE_SIZE];
 
-// Palettes (as RGB888 Colours)
-extern Colour palette8[PALETTE_SIZE];
-extern Colour palette8W[PALETTE_SIZE];
-extern Colour palette8F[PALETTE_SIZE];
-extern Colour palette8WF[PALETTE_SIZE];
+// Water Flash Palettes (as RGB888 Colours)
+extern Colour TilePalette[PALETTE_SIZE];
+extern Colour TilePaletteW[PALETTE_SIZE];
+extern Colour TilePaletteF[PALETTE_SIZE];
+extern Colour TilePaletteWF[PALETTE_SIZE];
 
-extern int fadeMode;
+extern int PaletteMode;
 
 #define RGB888_TO_RGB565(r, g, b) ((b) >> 3) | (((g) >> 2) << 5) | (((r) >> 3) << 11)
 
@@ -36,42 +36,39 @@ extern int fadeMode;
 
 void LoadPalette(const char *filePath, int startIndex, int endIndex);
 
-inline void SetPaletteEntry(byte index, byte r, byte g, byte b)
-{
-    palette32[index]  = PACK_RGB888(r, g, b);
-    palette16[index]  = RGB888_TO_RGB565(r, g, b);
-    palette8[index].r = r;
-    palette8[index].g = g;
-    palette8[index].b = b;
+inline void SetPaletteEntry(byte index, byte r, byte g, byte b) {
+    TilePalette32[index] = PACK_RGB888(r, g, b);
+    TilePalette16[index] = RGB888_TO_RGB565(r, g, b);
+    TilePalette[index].r = r;
+    TilePalette[index].g = g;
+    TilePalette[index].b = b;
 }
 
-inline void RotatePalette(byte startIndex, byte endIndex, bool right)
-{
+inline void RotatePalette(byte startIndex, byte endIndex, bool right) {
     if (right) {
-        Colour startClr8  = palette8[endIndex];
-        ushort startClr16 = palette16[endIndex];
-        uint startClr32   = palette32[endIndex];
+        Colour startClr8  = TilePalette[endIndex];
+        ushort startClr16 = TilePalette16[endIndex];
+        uint startClr32   = TilePalette32[endIndex];
         for (int i = endIndex; i > startIndex; --i) {
-            palette8[i] = palette8[i - 1];
-            palette16[i] = palette16[i - 1];
-            palette32[i] = palette32[i - 1];
+            TilePalette[i]   = TilePalette[i - 1];
+            TilePalette16[i] = TilePalette16[i - 1];
+            TilePalette32[i] = TilePalette32[i - 1];
         }
-        palette8[startIndex]  = startClr8;
-        palette16[startIndex] = startClr16;
-        palette32[startIndex] = startClr32;
-    }
-    else {
-        Colour startClr8    = palette8[startIndex];
-        ushort startClr16   = palette16[startIndex];
-        uint startClr32   = palette32[startIndex];
+        TilePalette[startIndex]   = startClr8;
+        TilePalette16[startIndex] = startClr16;
+        TilePalette32[startIndex] = startClr32;
+    } else {
+        Colour startClr8  = TilePalette[startIndex];
+        ushort startClr16 = TilePalette16[startIndex];
+        uint startClr32   = TilePalette32[startIndex];
         for (int i = startIndex; i < endIndex; ++i) {
-            palette8[i] = palette8[i + 1];
-            palette16[i] = palette16[i + 1];
-            palette32[i] = palette32[i + 1];
+            TilePalette[i]   = TilePalette[i + 1];
+            TilePalette16[i] = TilePalette16[i + 1];
+            TilePalette32[i] = TilePalette32[i + 1];
         }
-        palette8[endIndex] = startClr8;
-        palette16[endIndex] = startClr16;
-        palette32[endIndex] = startClr32;
+        TilePalette[endIndex]   = startClr8;
+        TilePalette16[endIndex] = startClr16;
+        TilePalette32[endIndex] = startClr32;
     }
 }
 

@@ -2,11 +2,8 @@
 #define SCRIPT_H
 
 #define SCRIPTDATA_COUNT (0x40000)
-#define JUMPTABLE_COUNT (0x4000)
-#define FUNCTION_COUNT (0x200)
-
+#define JUMPTABLE_COUNT  (0x4000)
 #define JUMPSTACK_COUNT (0x400)
-#define FUNCSTACK_COUNT (0x400)
 
 struct ScriptPtr {
     int scriptCodePtr;
@@ -20,7 +17,7 @@ struct ObjectScript {
     ScriptPtr subPlayerInteraction;
     ScriptPtr subDraw;
     ScriptPtr subStartup;
-    SpriteFrame* frameStartPtr;
+    SpriteFrame *frameStartPtr;
 };
 
 struct ScriptEngine {
@@ -32,27 +29,24 @@ struct ScriptEngine {
 
 enum ScriptSubs { SUB_MAIN = 0, SUB_PLAYERINTERACTION = 1, SUB_DRAW = 2, SUB_SETUP = 3, SUB_PLAYERMAIN = 4, SUB_PLAYERSTATE = 5 };
 
-extern ObjectScript objectScriptList[OBJECT_COUNT];
-extern ScriptPtr functionScriptList[FUNCTION_COUNT];
+extern ObjectScript ObjectScriptList[OBJECT_COUNT];
 
-extern int scriptData[SCRIPTDATA_COUNT];
-extern int jumpTableData[JUMPTABLE_COUNT];
+extern int ScriptData[SCRIPTDATA_COUNT];
+extern int JumpTableData[JUMPTABLE_COUNT];
 
-extern int jumpTableStack[JUMPSTACK_COUNT];
-extern int functionStack[FUNCSTACK_COUNT];
+extern int JumpTableStack[JUMPSTACK_COUNT];
 
-extern int jumpTableStackPos;
-extern int functionStackPos;
+extern int JumpTableStackPos;
 
-extern ScriptEngine scriptEng;
-extern char scriptText[0x100];
+extern ScriptEngine ScriptEng;
+extern char ScriptText[0x100];
 
-extern int scriptDataPos;
+extern int ScriptDataPos;
 extern int scriptDataOffset;
-extern int jumpTableDataPos;
-extern int jumpTableDataOffset;
+extern int JumpTableDataPos;
+extern int JumpTableOffset;
 
-extern int aliasCount;
+extern int NO_ALIASES;
 extern int lineID;
 
 void CheckAliasText(char *text);

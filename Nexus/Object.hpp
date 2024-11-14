@@ -31,16 +31,16 @@ enum ObjectPriority {
     PRIORITY_ALWAYS,
 };
 
-extern int objectLoop;
+extern int ObjectLoop;
 extern int curObjectType;
-extern Entity objectEntityList[ENTITY_COUNT];
+extern Entity ObjectEntityList[ENTITY_COUNT];
 
 extern int OBJECT_BORDER_X1;
 extern int OBJECT_BORDER_X2;
 extern const int OBJECT_BORDER_Y1;
 extern const int OBJECT_BORDER_Y2;
 
-void ProcessStartupObjects();
+void ProcessStartupScripts();
 void ProcessObjects();
 
 #endif // !OBJECT_H

@@ -36,16 +36,21 @@ struct CollisionSensor
     bool collided;
 };
 
-extern int collisionLeft;
-extern int collisionTop;
-extern int collisionRight;
-extern int collisionBottom;
+extern int CollisionLeft;
+extern int CollisionTop;
+extern int CollisionRight;
+extern int CollisionBottom;
 
 extern CollisionSensor sensors[6];
 
-inline Hitbox *getPlayerHitbox(PlayerScript *script)
+inline Hitbox *GetPlayerCBox(PlayerScript *script)
 {
-    return &hitboxList[script->animations[playerList[activePlayer].animation].frames[playerList[activePlayer].frame].hitboxID];
+    return &PlayerCBoxes[script->animations[PlayerList[PlayerNo].animation].frames[PlayerList[PlayerNo].frame].hitboxID];
+}
+
+inline Hitbox *GetPlayerCBoxInstance(Player *player, PlayerScript *script)
+{
+    return &PlayerCBoxes[script->animations[player->animation].frames[player->frame].hitboxID];
 }
 
 void FindFloorPosition(Player *player, CollisionSensor *sensor, int startYPos);
@@ -63,7 +68,7 @@ void ProcessTracedCollision(Player *player);
 
 void ProcessPlayerTileCollisions(Player *player);
 
-void TouchCollision(int left, int top, int right, int bottom);
+void BasicCollision(int left, int top, int right, int bottom);
 void BoxCollision(int left, int top, int right, int bottom);
 void PlatformCollision(int left, int top, int right, int bottom);
 

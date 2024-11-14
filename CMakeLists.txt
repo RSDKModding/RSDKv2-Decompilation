@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.10)
 
 project(RetroEngine)
 
@@ -27,6 +27,7 @@ set(RETRO_FILES
 	Nexus/fcaseopen.c
 	Nexus/main.cpp
 	Nexus/Math.cpp
+    	Nexus/ModAPI.cpp
 	Nexus/Object.cpp
 	Nexus/Palette.cpp
 	Nexus/Player.cpp

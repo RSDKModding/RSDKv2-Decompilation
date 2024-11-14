@@ -1,10 +1,10 @@
 #include "RetroEngine.hpp"
 
-SpriteFrame scriptFrames[SPRITEFRAME_COUNT];
-int scriptFrameCount = 0;
+SpriteFrame ScriptFrames[SPRITEFRAME_COUNT];
+int ScriptFramesNo = 0;
 
 SpriteFrame animFrames[SPRITEFRAME_COUNT];
-Hitbox hitboxList[HITBOX_COUNT];
+Hitbox PlayerCBoxes[HITBOX_COUNT];
 
 void LoadPlayerAnimation(const char *filePath, int playerID)
 {
@@ -25,7 +25,7 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
         FileRead(&fileBuffer, 1);
         FileRead(&fileBuffer, 1);
 
-        //Read & load each spritesheet
+        // Read & load each spritesheet
         for (int s = 0; s < 4; ++s) {
             FileRead(&fileBuffer, 1);
             if (fileBuffer) {
@@ -54,10 +54,10 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
         byte animCount = 0;
         FileRead(&animCount, 1);
 
-        //Read animations
+        // Read animations
         int frameID = playerID << 10;
         for (int a = 0; a < animCount; ++a) {
-            SpriteAnimation *anim = &playerScriptList[playerID].animations[a];
+            SpriteAnimation *anim = &PlayerScriptList[playerID].animations[a];
             FileRead(&anim->frameCount, 1);
             FileRead(&anim->speed, 1);
             FileRead(&anim->loopPoint, 1);
@@ -85,11 +85,11 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
             }
         }
 
-        //Read Hitboxes
+        // Read Hitboxes
         FileRead(&fileBuffer, 1);
         int hitboxID = playerID << 3;
         for (int i = 0; i < fileBuffer; ++i) {
-            Hitbox *hitbox = &hitboxList[hitboxID++];
+            Hitbox *hitbox = &PlayerCBoxes[hitboxID++];
             for (int d = 0; d < HITBOX_DIR_COUNT; ++d) {
                 FileRead(&hitbox->left[d], 1);
                 FileRead(&hitbox->top[d], 1);
@@ -97,18 +97,15 @@ void LoadPlayerAnimation(const char *filePath, int playerID)
                 FileRead(&hitbox->bottom[d], 1);
             }
         }
-        playerScriptList[playerID].startWalkSpeed  = playerScriptList[playerID].animations[ANI_WALKING].speed - 20;
-        playerScriptList[playerID].startRunSpeed   = playerScriptList[playerID].animations[ANI_RUNNING].speed;
-        playerScriptList[playerID].startJumpSpeed  = playerScriptList[playerID].animations[ANI_JUMPING].speed - 48;
+        PlayerScriptList[playerID].startWalkSpeed  = PlayerScriptList[playerID].animations[ANI_WALKING].speed - 20;
+        PlayerScriptList[playerID].startRunSpeed   = PlayerScriptList[playerID].animations[ANI_RUNNING].speed;
+        PlayerScriptList[playerID].startJumpSpeed  = PlayerScriptList[playerID].animations[ANI_JUMPING].speed - 48;
 
         CloseFile();
     }
 }
 void ClearAnimationData()
 {
-    for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(scriptFrames[f]);
-    //for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(animFrames[f]);
-    //for (int h = 0; h < HITBOX_COUNT; ++h) MEM_ZERO(hitboxList[h]);
-
-    scriptFrameCount   = 0;
+    for (int f = 0; f < SPRITEFRAME_COUNT; ++f) MEM_ZERO(ScriptFrames[f]);
+    ScriptFramesNo   = 0;
 }

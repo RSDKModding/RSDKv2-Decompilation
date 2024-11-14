@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-inline void printLog(const char *msg, ...)
+inline void PrintLog(const char *msg, ...)
 {
     if (engineDebugMode) {
         char buffer[0x100];

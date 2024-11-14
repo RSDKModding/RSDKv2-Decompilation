@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <vector>
 
-InputData keyPress = InputData();
-InputData keyDown  = InputData();
+InputData GKeyPress = InputData();
+InputData GKeyDown  = InputData();
 
 bool anyPress = false;
 
@@ -38,8 +38,7 @@ SDL_Joystick *controller = nullptr;
 #define normalize(val, minVal, maxVal) ((float)(val) - (float)(minVal)) / ((float)(maxVal) - (float)(minVal))
 
 #if RETRO_USING_SDL2
-bool getControllerButton(byte buttonID)
-{
+bool getControllerButton(byte buttonID) {
     bool pressed = false;
 
     for (int i = 0; i < controllers.size(); ++i) {
@@ -48,8 +47,7 @@ bool getControllerButton(byte buttonID)
         if (SDL_GameControllerGetButton(controller, (SDL_GameControllerButton)buttonID)) {
             pressed |= true;
             continue;
-        }
-        else {
+        } else {
             switch (buttonID) {
                 default: break;
                 case SDL_CONTROLLER_BUTTON_DPAD_UP: {
@@ -194,8 +192,7 @@ bool getControllerButton(byte buttonID)
 }
 #endif
 
-void controllerInit(byte controllerID)
-{
+void controllerInit(byte controllerID) {
     SDL_GameController *controller = SDL_GameControllerOpen(controllerID);
     if (controller) {
         controllers.push_back(controller);
@@ -203,8 +200,7 @@ void controllerInit(byte controllerID)
     }
 }
 
-void controllerClose(byte controllerID)
-{
+void controllerClose(byte controllerID) {
     SDL_GameController *controller = SDL_GameControllerFromInstanceID(controllerID);
     if (controller) {
         SDL_GameControllerClose(controller);
@@ -216,8 +212,7 @@ void controllerClose(byte controllerID)
     }
 }
 
-void ProcessInput()
-{
+void ReadInputDevice() {
 #if RETRO_USING_SDL2
     int length           = 0;
     const byte *keyState = SDL_GetKeyboardState(&length);
@@ -228,19 +223,16 @@ void ProcessInput()
                 inputDevice[i].setHeld();
                 if (!inputDevice[INPUT_ANY].hold)
                     inputDevice[INPUT_ANY].setHeld();
-            }
-            else if (inputDevice[i].hold)
+            } else if (inputDevice[i].hold)
                 inputDevice[i].setReleased();
         }
-    }
-    else if (inputType == 1) {
+    } else if (inputType == 1) {
         for (int i = 0; i < INPUT_ANY; i++) {
             if (getControllerButton(inputDevice[i].contMappings)) {
                 inputDevice[i].setHeld();
                 if (!inputDevice[INPUT_ANY].hold)
                     inputDevice[INPUT_ANY].setHeld();
-            }
-            else if (inputDevice[i].hold)
+            } else if (inputDevice[i].hold)
                 inputDevice[i].setReleased();
         }
     }
@@ -277,8 +269,7 @@ void ProcessInput()
         if (mouseHideTimer == 120) {
             SDL_ShowCursor(false);
         }
-    }
-    else {
+    } else {
         if (mouseHideTimer >= 120)
             SDL_ShowCursor(true);
         mouseHideTimer = 0;
@@ -294,12 +285,10 @@ void ProcessInput()
         // There's a problem opening the joystick
         if (controller == NULL) {
             // Uh oh
-        }
-        else {
+        } else {
             inputType = 1;
         }
-    }
-    else {
+    } else {
         if (controller) {
             // Close the joystick
             SDL_JoystickClose(controller);
@@ -314,19 +303,16 @@ void ProcessInput()
                 inputDevice[i].setHeld();
                 inputDevice[INPUT_ANY].setHeld();
                 continue;
-            }
-            else if (inputDevice[i].hold)
+            } else if (inputDevice[i].hold)
                 inputDevice[i].setReleased();
         }
-    }
-    else if (inputType == 1 && controller) {
+    } else if (inputType == 1 && controller) {
         for (int i = 0; i < INPUT_MAX; i++) {
             if (SDL_JoystickGetButton(controller, inputDevice[i].contMappings)) {
                 inputDevice[i].setHeld();
                 inputDevice[INPUT_ANY].setHeld();
                 continue;
-            }
-            else if (inputDevice[i].hold)
+            } else if (inputDevice[i].hold)
                 inputDevice[i].setReleased();
         }
     }
@@ -358,8 +344,7 @@ void ProcessInput()
 }
 #endif
 
-void CheckKeyPress(InputData *input, byte flags)
-{
+void CheckKeyPress(InputData *input, byte flags) {
     if (flags & 0x1)
         input->up = inputDevice[INPUT_UP].press;
     if (flags & 0x2)
@@ -380,8 +365,7 @@ void CheckKeyPress(InputData *input, byte flags)
         anyPress = inputDevice[INPUT_ANY].press;
 }
 
-void CheckKeyDown(InputData *input, byte flags)
-{
+void CheckKeyDown(InputData *input, byte flags) {
     if (flags & 0x1)
         input->up = inputDevice[INPUT_UP].hold;
     if (flags & 0x2)

@@ -59,11 +59,11 @@ enum MusicStatuses {
     MUSIC_READY   = 4,
 };
 
-extern int globalSFXCount;
-extern int stageSFXCount;
+extern int NoGlobalSFX;
+extern int NoStageSFX;
 
-extern int masterVolume;
-extern int trackID;
+extern int MusicVolume;
+extern int CurrentMusicTrack;
 extern int sfxVolume;
 extern int bgmVolume;
 extern bool audioEnabled;
@@ -82,7 +82,7 @@ extern MusicPlaybackInfo musInfo;
 extern SDL_AudioSpec audioDeviceFormat;
 #endif
 
-int InitAudioPlayback();
+int InitSoundDevice();
 void LoadGlobalSfx();
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
@@ -166,7 +166,7 @@ inline void SetMusicVolume(int volume)
         volume = 0;
     if (volume > MAX_VOLUME)
         volume = MAX_VOLUME;
-    masterVolume = volume;
+    MusicVolume = volume;
 }
 
 inline void PauseSound()
@@ -189,7 +189,7 @@ inline void StopAllSfx()
 inline void ReleaseGlobalSfx()
 {
     StopAllSfx();
-    for (int i = globalSFXCount - 1; i >= 0; --i) {
+    for (int i = NoGlobalSFX - 1; i >= 0; --i) {
         if (sfxList[i].loaded) {
             StrCopy(sfxList[i].name, "");
             free(sfxList[i].buffer);
@@ -197,11 +197,11 @@ inline void ReleaseGlobalSfx()
             sfxList[i].loaded = false;
         }
     }
-    globalSFXCount = 0;
+    NoGlobalSFX = 0;
 }
 inline void ReleaseStageSfx()
 {
-    for (int i = stageSFXCount + globalSFXCount; i >= globalSFXCount; --i) {
+    for (int i = NoStageSFX + NoGlobalSFX; i >= NoGlobalSFX; --i) {
         if (sfxList[i].loaded) {
             StrCopy(sfxList[i].name, "");
             free(sfxList[i].buffer);
@@ -209,10 +209,10 @@ inline void ReleaseStageSfx()
             sfxList[i].loaded = false;
         }
     }
-    stageSFXCount = 0;
+    NoStageSFX = 0;
 }
 
-inline void ReleaseAudioDevice()
+inline void ReleaseSoundDevice()
 {
     StopMusic();
     StopAllSfx();

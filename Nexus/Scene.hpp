@@ -120,91 +120,91 @@ extern int stageListCount[STAGELIST_MAX];
 extern char stageListNames[STAGELIST_MAX][0x20];
 extern SceneInfo stageList[STAGELIST_MAX][0x100];
 
-extern int stageMode;
+extern int StageMode;
 
-extern int cameraStyle;
-extern int cameraEnabled;
+extern int CameraStyle;
+extern int CameraEnabled;
 extern int cameraAdjustY;
-extern int xScrollOffset;
-extern int yScrollOffset;
-extern int yScrollA;
-extern int yScrollB;
-extern int xScrollA;
-extern int xScrollB;
-extern int yScrollMove;
-extern int earthquakeX;
-extern int earthquakeY;
-extern int cameraLag;
+extern int XScrollOffset;
+extern int YScrollOffset;
+extern int YScrollA;
+extern int YScrollB;
+extern int XScrollA;
+extern int XScrollB;
+extern int YScrollMove;
+extern int EarthquakeX;
+extern int EarthquakeY;
+extern int XScrollMove;
 
-extern int xBoundary1;
-extern int newXBoundary1;
-extern int yBoundary1;
-extern int newYBoundary1;
-extern int xBoundary2;
-extern int yBoundary2;
-extern int waterLevel;
+extern int XBoundary1;
+extern int NewXBoundary1;
+extern int YBoundary1;
+extern int NewYBoundary1;
+extern int XBoundary2;
+extern int YBoundary2;
+extern int WaterLevel;
 extern int waterDrawPos;
-extern int newXBoundary2;
-extern int newYBoundary2;
+extern int NewXBoundary2;
+extern int NewYBoundary2;
 
 extern int SCREEN_SCROLL_LEFT;
 extern int SCREEN_SCROLL_RIGHT;
 #define SCREEN_SCROLL_UP   ((SCREEN_YSIZE / 2) - 16)
 #define SCREEN_SCROLL_DOWN ((SCREEN_YSIZE / 2) + 16)
 
-extern int lastXSize;
-extern int lastYSize;
+extern int LastXSize;
+extern int LastYSize;
 
-extern bool pauseEnabled;
-extern bool timeEnabled;
+extern bool PauseEnabled;
+extern bool TimeEnabled;
 extern bool debugMode;
-extern int frameCounter;
-extern int stageMilliseconds;
-extern int stageSeconds;
-extern int stageMinutes;
+extern int FrameCounter;
+extern int MilliSeconds;
+extern int Seconds;
+extern int Minutes;
 
 // Category and Scene IDs
-extern int activeStageList;
-extern int stageListPosition;
-extern char currentStageFolder[0x100];
-extern int actID;
+extern int ActiveStageList;
+extern int StageListPosition;
+extern char CurrentStageFolder[0x100];
+extern int ActNumber;
 
 extern char titleCardText[0x100];
 extern byte titleCardWord2;
 
 extern byte activeTileLayers[4];
 extern byte tLayerMidPoint;
-extern TileLayer stageLayouts[LAYER_COUNT];
+extern TileLayer StageLayouts[LAYER_COUNT];
 
-extern int bgDeformationData0[DEFORM_COUNT];
-extern int bgDeformationData1[DEFORM_COUNT];
-extern int bgDeformationData2[DEFORM_COUNT];
-extern int bgDeformationData3[DEFORM_COUNT];
+extern int BGDeformationData1[DEFORM_COUNT];
+extern int BGDeformationData2[DEFORM_COUNT];
+extern int BGDeformationData3[DEFORM_COUNT];
+extern int BGDeformationData4[DEFORM_COUNT];
 
-extern int fgDeformationOffset;
-extern int fgDeformationOffsetW;
-extern int bgDeformationOffset;
-extern int bgDeformationOffsetW;
+extern int DeformationPos1;
+extern int DeformationPos2;
+extern int DeformationPos3;
+extern int DeformationPos4;
 
-extern LineScroll hParallax;
-extern LineScroll vParallax;
+extern LineScroll HParallax;
+extern LineScroll VParallax;
 
-extern Tiles128x128 tiles128x128;
-extern CollisionMasks collisionMasks[2];
+extern Tiles128x128 StageTiles;
+extern CollisionMasks TileCollisions[2];
 
-extern byte tilesetGFXData[TILESET_SIZE];
+extern byte TileGfx[TILESET_SIZE];
 
 void ProcessStage();
 
 void ResetBackgroundSettings();
-inline void ResetCurrentStageFolder() { strcpy(currentStageFolder, ""); }
+inline void ResetCurrentStageFolder() { strcpy(CurrentStageFolder, ""); }
 inline bool CheckCurrentStageFolder(int stage)
 {
-    if (strcmp(currentStageFolder, stageList[activeStageList][stage].folder) == 0) {
+    if (strcmp(CurrentStageFolder, stageList[ActiveStageList][stage].folder) == 0) {
         return true;
     }
     else {
-        strcpy(currentStageFolder, stageList[activeStageList][stage].folder);
+        strcpy(CurrentStageFolder, stageList[ActiveStageList][stage].folder);
         return false;
     }
 }
@@ -215,19 +215,10 @@ int LoadStageFile(const char *filePath, int stageID, FileInfo *info);
 
 void LoadActLayout();
 void LoadStageBackground();
-void LoadStageChunks();
+void Load128x128Mappings();
 void LoadStageCollisions();
 void LoadStageGIFFile(int stageID);
 void LoadStageGFXFile(int stageID);
-
-inline void Copy16x16Tile(ushort dest, ushort src)
-{
-    byte *destPtr = &tilesetGFXData[TILELAYER_CHUNK_W * dest];
-    byte *srcPtr  = &tilesetGFXData[TILELAYER_CHUNK_W * src];
-    int cnt       = TILE_DATASIZE;
-    while (cnt--) *destPtr++ = *srcPtr++;
-}
-
 void SetPlayerScreenPosition(Player *player);
 void SetPlayerScreenPositionCDStyle(Player *player);
 void SetPlayerLockedScreenPosition(Player *player);

@@ -1,13 +1,13 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-extern int currentVideoFrame;
-extern int videoFrameCount;
-extern int videoWidth;
-extern int videoHeight;
-extern int videoSurface;
-extern int videoFilePos;
-extern bool videoPlaying;
+extern int CurrentVideoFrame;
+extern int VideoFrameCount;
+extern int VideoWidth;
+extern int VideoHeight;
+extern int VideoSurface;
+extern int VideoFilePos;
+extern bool VideoPlaying;
 
 void UpdateVideoFrame();
 
