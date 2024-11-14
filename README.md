@@ -33,7 +33,7 @@ Finally, follow the [compilation steps below](#compiling) using `-DCMAKE_TOOLCHA
   - Make sure to replace each instance of `[vcpkg root]` with the path to the vcpkg installation!
   - If you're compiling a 32-bit build, replace each instance of `x64-windows-static` with `x86-windows-static`.
 
-## Mac
+### Mac
 * Clone the repo, follow the instructions in the [depencencies readme for Mac](./dependencies/mac/dependencies.txt) to setup dependencies, then build via the Xcode project.
 
 ### Linux
