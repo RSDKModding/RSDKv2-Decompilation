@@ -6,6 +6,3 @@ download libogg and unzip it in "./libogg/", then build the static library
 
 libvorbis: https://xiph.org/downloads/ (libvorbis)
 download libvorbis and unzip it in "./libvorbis/", then build the VS2010 static library (win32/VS2010/vorbis_static.sln)
-
-libtheora: https://xiph.org/downloads/ (libtheora)
-download libtheora and unzip it in "./libtheora/", then build the VS2008 static library (win32/VS2008/libtheora_static.sln)
