@@ -22,7 +22,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install dependencies
-        run: vcpkg install glew sdl2 libogg libvorbis --triplet=x86-windows-static
+        run: vcpkg install sdl2 libogg libvorbis --triplet=x86-windows-static
       - name: Build RSDKv2
         run: |
           cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}}
@@ -44,7 +44,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install dependencies
-        run: vcpkg install glew sdl2 libogg libvorbis --triplet=x64-windows-static
+        run: vcpkg install sdl2 libogg libvorbis --triplet=x64-windows-static
       - name: Build RSDKv2
         run: |
           cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}}
@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libglew-dev libglfw3-dev libsdl2-dev libogg-dev libvorbis-dev
+          sudo apt-get install libsdl2-dev libogg-dev libvorbis-dev
       - name: Build RSDKv2
         run: |
           cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}}
