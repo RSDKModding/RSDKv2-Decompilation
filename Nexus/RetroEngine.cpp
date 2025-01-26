@@ -250,15 +250,19 @@ void RetroEngine::Init() {
 }
 
 void RetroEngine::Run() {
+#if !RETRO_USE_ORIGINAL_CODE
     unsigned long long targetFreq = SDL_GetPerformanceFrequency() / Engine.refreshRate;
     unsigned long long curTicks   = 0;
+    unsigned long long prevTicks  = 0;
+#endif
 
     while (GameRunning) {
 #if !RETRO_USE_ORIGINAL_CODE
         if (!vsync) {
-            if (SDL_GetPerformanceCounter() < curTicks + targetFreq)
-                continue;
             curTicks = SDL_GetPerformanceCounter();
+            if (curTicks < prevTicks + targetFreq)
+                continue;
+            prevTicks = curTicks;
         }
 #endif
         GameRunning = processEvents();
