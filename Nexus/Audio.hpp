@@ -129,7 +129,6 @@ inline void freeMusInfo()
         ov_clear(&musInfo.vorbisFile);
         musInfo.buffer    = nullptr;
         musInfo.trackLoop = false;
-        musInfo.loopPoint = 0;
         musInfo.loaded    = false;
         musicStatus       = MUSIC_STOPPED;
 
