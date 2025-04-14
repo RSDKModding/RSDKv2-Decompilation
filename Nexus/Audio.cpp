@@ -232,7 +232,7 @@ void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
                 if (bytes_read == 0) {
                     // We've reached the end of the file
                     if (musInfo.trackLoop) {
-                        ov_pcm_seek(&musInfo.vorbisFile, musInfo.loopPoint);
+                        ov_pcm_seek(&musInfo.vorbisFile, 0);
                         continue;
                     }
                     else {
