@@ -4,10 +4,29 @@ int ObjectLoop    = 0;
 int curObjectType = 0;
 Entity ObjectEntityList[ENTITY_COUNT];
 
+#if RETRO_USE_MOD_LOADER
+char typeNames[OBJECT_COUNT][0x40];
+#endif
+
 int OBJECT_BORDER_X1       = 0x80;
 int OBJECT_BORDER_X2       = 0;
 const int OBJECT_BORDER_Y1 = 0x100;
 const int OBJECT_BORDER_Y2 = SCREEN_YSIZE + 0x100;
+
+#if RETRO_USE_MOD_LOADER
+void SetObjectTypeName(const char *objectName, int objectID)
+{
+    int objNameID  = 0;
+    int typeNameID = 0;
+    while (objectName[objNameID]) {
+        if (objectName[objNameID] != ' ')
+            typeNames[objectID][typeNameID++] = objectName[objNameID];
+        ++objNameID;
+    }
+    typeNames[objectID][typeNameID] = 0;
+    PrintLog("Set Object (%d) name to: %s", objectID, objectName);
+}
+#endif
 
 void ProcessStartupScripts() {
     ScriptFramesNo = 0;

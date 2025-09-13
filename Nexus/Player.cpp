@@ -67,6 +67,9 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
 
         // Players
         FileRead(&count, 1);
+#if RETRO_USE_MOD_LOADER
+        playerNames.resize(count);
+#endif
         for (int p = 0; p < count; ++p) {
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen); // player anim file
@@ -88,6 +91,10 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen); // player name
             strBuf[strLen] = '\0';
+
+#if RETRO_USE_MOD_LOADER
+            playerNames[p] = strBuf; // Add the player's name to the playerNames vector
+#endif
         }
         CloseFile();
     }

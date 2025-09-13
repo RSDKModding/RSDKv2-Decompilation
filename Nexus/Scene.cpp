@@ -229,8 +229,97 @@ void LoadStageFiles(void) {
         bool loadGlobals = false;
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
             FileRead(&loadGlobals, 1);
+#if RETRO_USE_MOD_LOADER
+            for (int i = 96; i < 128; ++i) {
+                byte clr[3];
+                FileRead(&clr, 3);
+            }
+
+            byte stageScriptCount = 0;
+            FileRead(&stageScriptCount, 1);
+            for (byte i = 0; i < stageScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+            }
+
+            FileRead(&fileBuffer2, 1);
+            NoStageSFX = fileBuffer2;
+            for (int i = 0; i < NoStageSFX; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+                SetSfxName(strBuffer, i, false);
+            }
+#endif
             CloseFile();
         }
+#if RETRO_USE_MOD_LOADER
+        int scriptNameID = scriptID;
+        if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+
+            byte globalScriptCount = 0;
+            FileRead(&globalScriptCount, 1);
+            for (byte i = 0; i < globalScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+
+                int strNamePos  = 0;
+                int typeNamePos = 0;
+                byte mode       = 0;
+                while (strBuffer[strNamePos]) {
+                    if (strBuffer[strNamePos] == '.' && mode == 1)
+                        mode = 2;
+                    else if ((strBuffer[strNamePos] == '/' || strBuffer[strNamePos] == '\\') && !mode)
+                        mode = 1;
+                    else if (mode == 1)
+                        strBuffer[typeNamePos++] = strBuffer[strNamePos];
+                    ++strNamePos;
+                }
+                strBuffer[typeNamePos] = 0;
+                SetObjectTypeName(strBuffer, scriptNameID++);
+            }
+            CloseFile();
+        }
+
+        if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
+            FileRead(&loadGlobals, 1);
+            for (int i = 96; i < 128; ++i) {
+                byte clr[3];
+                FileRead(&clr, 3);
+            }
+            byte stageScriptCount = 0;
+            FileRead(&stageScriptCount, 1);
+            for (byte i = 0; i < stageScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+
+                int strNamePos  = 0;
+                int typeNamePos = 0;
+                byte mode       = 0;
+                while (strBuffer[strNamePos]) {
+                    if (strBuffer[strNamePos] == '.' && mode == 1)
+                        mode = 2;
+                    else if ((strBuffer[strNamePos] == '/' || strBuffer[strNamePos] == '\\') && !mode)
+                        mode = 1;
+                    else if (mode == 1)
+                        strBuffer[typeNamePos++] = strBuffer[strNamePos];
+                    ++strNamePos;
+                }
+                strBuffer[typeNamePos] = 0;
+                SetObjectTypeName(strBuffer, scriptNameID + i);
+            }
+            CloseFile();
+        }
+#endif
         if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
             FileRead(&fileBuffer, 1);
             FileRead(&strBuffer, fileBuffer);

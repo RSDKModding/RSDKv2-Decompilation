@@ -762,6 +762,7 @@ void ConvertFunctionText(char *text) {
             }
             funcName[funcNamePos]       = 0;
             strBuffer[scriptTextByteID] = 0;
+
             // Eg: TempValue0 = FX_SCALE
             for (int a = 0; a < NO_ALIASES; ++a) {
                 if (StrComp(funcName, aliases[a].name)) {
@@ -770,6 +771,7 @@ void ConvertFunctionText(char *text) {
                         CopyAliasStr(strBuffer, aliases[a].value, 1);
                 }
             }
+
             // Eg: TempValue0 = Game.Variable
             for (int v = 0; v < NO_GLOBALVARIABLES; ++v) {
                 if (StrComp(funcName, GlobalVariableNames[v])) {
@@ -778,6 +780,99 @@ void ConvertFunctionText(char *text) {
                     AppendIntegerToString(strBuffer, v);
                 }
             }
+
+#if RETRO_USE_MOD_LOADER
+            // Eg: TempValue0 = TypeName[Player]
+            if (StrComp(funcName, "TypeName")) {
+                funcName[0]  = '0';
+                funcName[1] = 0;
+
+                int o = 0;
+                for (; o < OBJECT_COUNT; ++o) {
+                    if (StrComp(strBuffer, typeNames[o])) {
+                        funcName[0] = 0;
+                        AppendIntegerToString(funcName, o);
+                        break;
+                    }
+                }
+
+                if (o == OBJECT_COUNT)
+                    PrintLog("WARNING: Unknown typename \"%s\", on line %d", strBuffer, lineID);
+            }
+
+            // Eg: TempValue0 = SfxName[Jump]
+            if (StrComp(funcName, "SfxName")) {
+                funcName[0] = '0';
+                funcName[1] = 0;
+
+                int s = 0;
+                for (; s < NoGlobalSFX; ++s) {
+                    if (StrComp(strBuffer, globalSfxNames[s])) {
+                        funcName[0] = 0;
+                        AppendIntegerToString(funcName, s);
+                        break;
+                    }
+                }
+
+                if (s == NoGlobalSFX) {
+                    s = 0;
+                    for (; s < NoStageSFX; ++s) {
+                        if (StrComp(strBuffer, stageSfxNames[s])) {
+                            funcName[0] = 0;
+                            AppendIntegerToString(funcName, s);
+                            break;
+                        }
+                    }
+
+                    if (s == NoStageSFX)
+                        PrintLog("WARNING: Unknown SfxName \"%s\"", strBuffer);
+                }
+            }
+
+            // Eg: TempValue0 = PlayerName[SONIC]
+            if (StrComp(funcName, "PlayerName")) {
+                funcName[0] = '0';
+                funcName[1] = 0;
+
+                int p = 0;
+                for (; p < playerNames.size(); ++p) {
+                    if (StrComp(strBuffer, playerNames[p].data())) {
+                        funcName[0] = 0;
+                        AppendIntegerToString(funcName, p);
+                        break;
+                    }
+                }
+
+                if (p == playerNames.size())
+                    PrintLog("WARNING: Unknown PlayerName \"%s\"", strBuffer);
+            }
+
+            // Eg: TempValue0 = StageName[R - PALMTREE PANIC ZONE 1 A]
+            if (StrComp(funcName, "StageName")) {
+                funcName[0] = '0';
+                funcName[1] = 0;
+
+                int s       = -1;
+                if (StrLength(strBuffer) >= 2) {
+                    char list = strBuffer[0];
+                    switch (list) {
+                        case 'P': list = STAGELIST_PRESENTATION; break;
+                        case 'R': list = STAGELIST_REGULAR; break;
+                        case 'S': list = STAGELIST_SPECIAL; break;
+                        case 'B': list = STAGELIST_BONUS; break;
+                    }
+                    s = GetSceneID(list, &strBuffer[2]);
+                }
+
+                if (s == -1) {
+                    PrintLog("WARNING: Unknown StageName \"%s\", on line %d", strBuffer, lineID);
+                    s = 0;
+                }
+                funcName[0] = 0;
+                AppendIntegerToString(funcName, s);
+            }
+#endif
+
             if (ConvertStringToInteger(funcName, &value)) {
                 ScriptData[ScriptDataPos++] = SCRIPTVAR_INTCONST;
                 ScriptData[ScriptDataPos++] = value;
@@ -1327,7 +1422,15 @@ void ClearScriptData() {
         scriptInfo->subStartup.jumpTablePtr            = JUMPTABLE_COUNT - 1;
         scriptInfo->frameStartPtr                      = ScriptFrames;
         scriptInfo->spriteSheetID                      = 0;
+#if RETRO_USE_MOD_LOADER
+        typeNames[o][0]                                = 0;
+#endif
     }
+    
+#if RETRO_USE_MOD_LOADER
+    SetObjectTypeName((char *)"Blank Object", 0);
+    SetObjectTypeName((char *)"Player", 1);
+#endif
 }
 
 void ProcessScript(int scriptCodePtr, int jumpTablePtr, byte scriptSub) {

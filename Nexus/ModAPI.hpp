@@ -20,6 +20,8 @@ extern std::vector<ModInfo> modList;
 extern int activeMod;
 extern char modsPath[0x100];
 
+extern std::vector<std::string> playerNames;
+
 inline void SetActiveMod(int id) { activeMod = id; }
 
 void InitMods();
@@ -28,6 +30,8 @@ void ScanModFolder(ModInfo *info);
 void SaveMods();
 
 void RefreshEngine();
+
+int GetSceneID(byte listID, const char *sceneName);
 
 #endif
 
