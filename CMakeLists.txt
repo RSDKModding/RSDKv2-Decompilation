@@ -17,6 +17,7 @@ set(RETRO_NAME "Nexus")
 set(RETRO_OUTPUT_NAME ${RETRO_NAME} CACHE STRING "The exported name of the executable.")
 
 set(RETRO_FILES
+	dependencies/all/tinyxml2/tinyxml2.cpp
 	Nexus/Animation.cpp
 	Nexus/Audio.cpp
 	Nexus/Collision.cpp
@@ -116,6 +117,7 @@ endif()
 
 target_include_directories(RetroEngine PRIVATE
     Nexus/
+    dependencies/all/tinyxml2/
 )
 
 if(DEFINED DEP_PATH)
