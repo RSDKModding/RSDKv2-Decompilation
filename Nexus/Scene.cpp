@@ -278,7 +278,6 @@ void LoadStageFiles(void) {
 
             byte globalScriptCount = 0;
             FileRead(&globalScriptCount, 1);
-//            globalScrCount = globalScriptCount;
             for (byte i = 0; i < globalScriptCount; ++i) {
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
@@ -380,7 +379,12 @@ void LoadStageFiles(void) {
 
             byte stageScriptCount = 0;
             FileRead(&stageScriptCount, 1);
+#if !RETRO_USE_MOD_LOADER
             for (byte i = 0; i < stageScriptCount; ++i) {
+#else
+            int& i = scriptNameID;
+            for (i = 0; i < stageScriptCount; ++i) {
+#endif
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
                 strBuffer[fileBuffer2] = 0;
@@ -388,9 +392,6 @@ void LoadStageFiles(void) {
                 CloseFile();
                 ParseScriptFile(strBuffer, scriptID + i);
                 SetFileInfo(&infoStore);
-#if RETRO_USE_MOD_LOADER
-                scriptNameID = i + 2;
-#endif
             }
 
             FileRead(&fileBuffer2, 1);
@@ -407,8 +408,9 @@ void LoadStageFiles(void) {
             CloseFile();
 
 #if RETRO_USE_MOD_LOADER
+            scriptNameID += scriptID; PrintLog("FBWEHVBGHJWEBVGHJEBGWH val=%d", scriptNameID);
             for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
-                ParseScriptFile(modScriptPaths[i], scriptNameID++);
+                ParseScriptFile(modScriptPaths[i], scriptNameID + i);
             }
 #endif
         }
