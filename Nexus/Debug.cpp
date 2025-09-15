@@ -21,6 +21,9 @@ void InitSystemMenu() {
         ClearGraphicsData();
         for (int i = 0; i < PLAYER_COUNT; ++i) PlayerScriptList[i].scriptPath[0] = 0;
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+#if RETRO_USE_MOD_LOADER
+        Engine.LoadXMLPalettes();
+#endif
         LoadPlayerFromList(0, 0);
         Engine.GameMode = ENGINE_MAINGAME;
         StageMode       = STAGEMODE_LOAD;
@@ -35,6 +38,9 @@ void InitSystemMenu() {
         Engine.GameMode = ENGINE_SYSMENU;
         ClearGraphicsData();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+#if RETRO_USE_MOD_LOADER
+        Engine.LoadXMLPalettes();
+#endif
         TextMenuSurfaceNo = 0;
         LoadGIFFile("Data/Game/SystemText.gif", 0);
         StageMode = DEVMENU_MAIN;
@@ -137,6 +143,9 @@ void ProcessSystemMenu() {
                 ClearGraphicsData();
                 ClearAnimationData();
                 LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+#if RETRO_USE_MOD_LOADER
+                Engine.LoadXMLPalettes();
+#endif
                 ActiveStageList   = 0;
                 StageMode         = STAGEMODE_LOAD;
                 Engine.GameMode   = ENGINE_MAINGAME;

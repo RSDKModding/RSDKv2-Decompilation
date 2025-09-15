@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <tinyxml2.h>
 
 struct ModInfo {
     std::string name;
@@ -20,6 +21,14 @@ extern std::vector<ModInfo> modList;
 extern int activeMod;
 extern char modsPath[0x100];
 
+extern char modTypeNames[OBJECT_COUNT][0x40];
+extern char modScriptPaths[OBJECT_COUNT][0x40];
+extern byte modScriptFlags[OBJECT_COUNT];
+extern byte modObjCount;
+
+extern byte playerCount;
+extern std::vector<std::string> modPlayerAnimations;
+extern std::vector<std::string> modPlayerScripts;
 extern std::vector<std::string> playerNames;
 
 inline void SetActiveMod(int id) { activeMod = id; }

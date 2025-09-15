@@ -82,6 +82,11 @@ CollisionMasks TileCollisions[2];
 
 byte TileGfx[TILESET_SIZE];
 
+#if RETRO_USE_MOD_LOADER
+bool loadGlobals = false; // stored here so I can use it later
+int globalScrCount     = 0;
+#endif
+
 void ProcessStage(void) {
     switch (StageMode) {
         case STAGEMODE_LOAD:
@@ -223,10 +228,17 @@ void LoadStageFiles(void) {
 #endif
         ReleaseStageSfx();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+#if RETRO_USE_MOD_LOADER
+        Engine.LoadXMLPalettes();
+#endif
         ClearScriptData();
         for (int i = SPRITESHEETS_MAX; i > 0; i--) RemoveGraphicsFile((char *)"", i - 1);
 
+#if RETRO_USE_MOD_LOADER
+        loadGlobals = false;
+#else
         bool loadGlobals = false;
+#endif
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
             FileRead(&loadGlobals, 1);
 #if RETRO_USE_MOD_LOADER
@@ -266,6 +278,7 @@ void LoadStageFiles(void) {
 
             byte globalScriptCount = 0;
             FileRead(&globalScriptCount, 1);
+//            globalScrCount = globalScriptCount;
             for (byte i = 0; i < globalScriptCount; ++i) {
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
@@ -287,6 +300,10 @@ void LoadStageFiles(void) {
                 SetObjectTypeName(strBuffer, scriptNameID++);
             }
             CloseFile();
+
+            for (byte i = 0; i < modObjCount && loadGlobals && modScriptFlags[i]; ++i) {
+                SetObjectTypeName(modTypeNames[i], (scriptNameID++) + i);
+            }
         }
 
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
@@ -315,10 +332,15 @@ void LoadStageFiles(void) {
                     ++strNamePos;
                 }
                 strBuffer[typeNamePos] = 0;
-                SetObjectTypeName(strBuffer, scriptNameID + i);
+                SetObjectTypeName(strBuffer, scriptNameID++);
             }
             CloseFile();
+
+            for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
+                SetObjectTypeName(modTypeNames[i], (scriptNameID++) + i);
+            }
         }
+        scriptNameID = scriptID;
 #endif
         if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
             FileRead(&fileBuffer, 1);
@@ -340,6 +362,12 @@ void LoadStageFiles(void) {
                 SetFileInfo(&infoStore);
             }
             CloseFile();
+
+#if RETRO_USE_MOD_LOADER
+            for (byte i = 0; i < modObjCount && loadGlobals && modScriptFlags[i]; ++i) {
+                ParseScriptFile(modScriptPaths[i], scriptID++);
+            }
+#endif
         }
 
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
@@ -360,6 +388,9 @@ void LoadStageFiles(void) {
                 CloseFile();
                 ParseScriptFile(strBuffer, scriptID + i);
                 SetFileInfo(&infoStore);
+#if RETRO_USE_MOD_LOADER
+                scriptNameID = i + 2;
+#endif
             }
 
             FileRead(&fileBuffer2, 1);
@@ -374,6 +405,12 @@ void LoadStageFiles(void) {
                 SetFileInfo(&infoStore);
             }
             CloseFile();
+
+#if RETRO_USE_MOD_LOADER
+            for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
+                ParseScriptFile(modScriptPaths[i], scriptNameID++);
+            }
+#endif
         }
         FileInfo info;
         for (int p = 0; p < PLAYER_COUNT; ++p) {
@@ -485,10 +522,23 @@ void LoadActLayout() {
         int objectCount = fileBuffer;
         FileRead(&fileBuffer, 1);
         objectCount    = (objectCount << 8) + fileBuffer;
+
+#if RETRO_USE_MOD_LOADER
+        int offsetCount = 0;
+//        for (int m = 0; m < modObjCount; ++m)
+//            if (modScriptFlags[m])
+//                ++offsetCount;
+#endif
+
         Entity *object = &ObjectEntityList[32];
         for (int i = 0; i < objectCount; ++i) {
             FileRead(&fileBuffer, 1);
             object->type = fileBuffer;
+
+#if RETRO_USE_MOD_LOADER
+            if (loadGlobals && offsetCount && object->type)
+                object->type += offsetCount; // offset it by our mod count
+#endif
 
             FileRead(&fileBuffer, 1);
             object->propertyValue = fileBuffer;

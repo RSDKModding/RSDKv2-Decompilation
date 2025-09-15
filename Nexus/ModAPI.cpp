@@ -5,6 +5,14 @@ std::vector<ModInfo> modList;
 int activeMod = -1;
 char modsPath[0x100];
 
+char modTypeNames[OBJECT_COUNT][0x40];
+char modScriptPaths[OBJECT_COUNT][0x40];
+byte modScriptFlags[OBJECT_COUNT];
+byte modObjCount = 0;
+
+byte playerCount = 0;
+std::vector<std::string> modPlayerAnimations;
+std::vector<std::string> modPlayerScripts;
 std::vector<std::string> playerNames;
 
 #include <filesystem>

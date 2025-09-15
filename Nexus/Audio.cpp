@@ -149,6 +149,10 @@ void LoadGlobalSfx()
         }
 
         CloseFile();
+
+#if RETRO_USE_MOD_LOADER
+        Engine.LoadXMLSoundFX();
+#endif
     }
 
     nextChannelPos = 0;
@@ -427,7 +431,6 @@ void SetSfxName(const char *sfxName, int sfxID, bool global)
         ++sfxNamePos;
     }
     sfxNamePtr[sfxPtrPos] = 0;
-    StrCopy((char *)sfxName, sfxNamePtr);
     PrintLog("Set %s SFX (%d) name to: %s", (global ? "Global" : "Stage"), sfxID, sfxNamePtr);
 }
 #endif
