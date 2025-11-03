@@ -12,34 +12,34 @@ if(RETRO_ORIGINAL_CODE)
     set(RETRO_MOD_LOADER OFF)
 endif()
 
-set(RETRO_NAME "Nexus")
+set(RETRO_NAME "RSDKv2")
 
 set(RETRO_OUTPUT_NAME ${RETRO_NAME} CACHE STRING "The exported name of the executable.")
 
 set(RETRO_FILES
-	Nexus/Animation.cpp
-	Nexus/Audio.cpp
-	Nexus/Collision.cpp
-	Nexus/Debug.cpp
-	Nexus/Drawing.cpp
-	Nexus/Ini.cpp
-	Nexus/Input.cpp
-	Nexus/fcaseopen.c
-	Nexus/main.cpp
-	Nexus/Math.cpp
-	Nexus/ModAPI.cpp
-	Nexus/Object.cpp
-	Nexus/Palette.cpp
-	Nexus/Player.cpp
-	Nexus/Reader.cpp
-	Nexus/RetroEngine.cpp
-	Nexus/Scene.cpp
-	Nexus/Script.cpp
-	Nexus/Sprite.cpp
-	Nexus/String.cpp
-	Nexus/Text.cpp
-	Nexus/Userdata.cpp
-	Nexus/Video.cpp
+	RSDKv2/Animation.cpp
+	RSDKv2/Audio.cpp
+	RSDKv2/Collision.cpp
+	RSDKv2/Debug.cpp
+	RSDKv2/Drawing.cpp
+	RSDKv2/Ini.cpp
+	RSDKv2/Input.cpp
+	RSDKv2/fcaseopen.c
+	RSDKv2/main.cpp
+	RSDKv2/Math.cpp
+	RSDKv2/ModAPI.cpp
+	RSDKv2/Object.cpp
+	RSDKv2/Palette.cpp
+	RSDKv2/Player.cpp
+	RSDKv2/Reader.cpp
+	RSDKv2/RetroEngine.cpp
+	RSDKv2/Scene.cpp
+	RSDKv2/Script.cpp
+	RSDKv2/Sprite.cpp
+	RSDKv2/String.cpp
+	RSDKv2/Text.cpp
+	RSDKv2/Userdata.cpp
+	RSDKv2/Video.cpp
 )
 
 if(NOT PLATFORM)
@@ -115,7 +115,7 @@ if(COMPILE_VORBIS)
 endif()
 
 target_include_directories(RetroEngine PRIVATE
-    Nexus/
+    RSDKv2/
 )
 
 if(DEFINED DEP_PATH)

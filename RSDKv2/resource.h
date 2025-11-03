@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Nexus.rc
+// Used by RSDKv2.rc
 //
 #define IDI_ICON1                       101
 
