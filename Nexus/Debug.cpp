@@ -108,6 +108,8 @@ void ProcessSystemMenu() {
                     AddTextMenuEntry(&GameMenu[0], "MOD LIST");
                     SetupTextMenu(&GameMenu[1], 0);
 
+                    InitMods();
+
                     char buffer[0x100];
                     int visible = modList.size() > 18 ? 18 : modList.size();
                     for (int m = 0; m < visible; ++m) {
@@ -328,13 +330,47 @@ void ProcessSystemMenu() {
             if (GKeyPress.up)
                 --GameMenu[1].selection1;
 
-            if (GameMenu[1].selection1 >= GameMenu[1].rowCount)
+            if (GKeyPress.left || GKeyPress.right) {
+                int offset = modOffset;
+                if (GKeyPress.left && modOffset - 18 >= 0) {
+                    modOffset -= 18;
+                }
+                else if (GKeyPress.right && modOffset + 18 < modList.size()) {
+                    modOffset += 18;
+                }
+
+                if (offset != modOffset) {
+                    SetupTextMenu(&GameMenu[0], 0);
+                    AddTextMenuEntry(&GameMenu[0], "MOD LIST");
+                    SetupTextMenu(&GameMenu[1], 0);
+
+                    char buffer[0x100];
+                    int visible = (modList.size() - modOffset) > 18 ? (modOffset + 18) : modList.size();
+                    for (int m = modOffset; m < visible; ++m) {
+                        StrCopy(buffer, modList[m].name.c_str());
+                        StrAdd(buffer, " ");
+                        StrAdd(buffer, modList[m].active ? "  Active" : "Inactive");
+                        for (int c = 0; c < StrLength(buffer); ++c) buffer[c] = toupper(buffer[c]);
+                        AddTextMenuEntry(&GameMenu[1], buffer);
+                    }
+
+                    GameMenu[1].alignment      = MENU_ALIGN_RIGHT;
+                    GameMenu[1].selectionCount = 3;
+                    GameMenu[1].selection1     = 0;
+
+                    GameMenu[0].alignment      = MENU_ALIGN_CENTER;
+                    GameMenu[0].selectionCount = 1;
+                    StageMode                  = DEVMENU_MODMENU;
+                }
+            }
+
+            if (GameMenu[1].selection1 == GameMenu[1].rowCount)
                 GameMenu[1].selection1 = 0;
             if (GameMenu[1].selection1 < 0)
                 GameMenu[1].selection1 = GameMenu[1].rowCount - 1;
 
             char buffer[0x100];
-            if (GameMenu[1].selection1 < modList.size() && (GKeyPress.A || GKeyPress.start || GKeyPress.left || GKeyPress.right)) {
+            if (GameMenu[1].selection1 < modList.size() && (GKeyPress.A || GKeyPress.start)) {
                 modList[modOffset + GameMenu[1].selection1].active ^= 1;
                 StrCopy(buffer, modList[modOffset + GameMenu[1].selection1].name.c_str());
                 StrAdd(buffer, " ");
