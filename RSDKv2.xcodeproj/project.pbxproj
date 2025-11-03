@@ -103,7 +103,7 @@
 		C92834CF2615E66D00D51CCE /* Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Animation.cpp; sourceTree = "<group>"; };
 		C92834D02615E66D00D51CCE /* Drawing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Drawing.cpp; sourceTree = "<group>"; };
 		C92834D12615E66D00D51CCE /* Video.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Video.cpp; sourceTree = "<group>"; };
-		C962191925898A9300B47AB3 /* Nexus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nexus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C962191925898A9300B47AB3 /* RSDKv2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RSDKv2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C962193625898B0A00B47AB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = dependencies/mac/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		C96219832589B10600B47AB3 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = dependencies/mac/SDL2.framework; sourceTree = "<group>"; };
 		C96219892589B3D900B47AB3 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = dependencies/mac/ogg/macosx/Ogg.framework; sourceTree = "<group>"; };
@@ -136,7 +136,7 @@
 		C962191025898A9300B47AB3 = {
 			isa = PBXGroup;
 			children = (
-				C962191B25898A9300B47AB3 /* Nexus */,
+				C962191B25898A9300B47AB3 /* RSDKv2 */,
 				C962191A25898A9300B47AB3 /* Products */,
 				C96219822589B10600B47AB3 /* Frameworks */,
 			);
@@ -145,19 +145,19 @@
 		C962191A25898A9300B47AB3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C962191925898A9300B47AB3 /* Nexus.app */,
+				C962191925898A9300B47AB3 /* RSDKv2.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C962191B25898A9300B47AB3 /* Nexus */ = {
+		C962191B25898A9300B47AB3 /* RSDKv2 */ = {
 			isa = PBXGroup;
 			children = (
 				C962194025898B6E00B47AB3 /* Header Files */,
 				C962193F25898B6700B47AB3 /* Source Files */,
 				C962193625898B0A00B47AB3 /* Assets.xcassets */,
 			);
-			path = Nexus;
+			path = RSDKv2;
 			sourceTree = "<group>";
 		};
 		C962193F25898B6700B47AB3 /* Source Files */ = {
@@ -270,9 +270,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C962191825898A9300B47AB3 /* Nexus */ = {
+		C962191825898A9300B47AB3 /* RSDKv2 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C962193325898A9400B47AB3 /* Build configuration list for PBXNativeTarget "Nexus" */;
+			buildConfigurationList = C962193325898A9400B47AB3 /* Build configuration list for PBXNativeTarget "RSDKv2" */;
 			buildPhases = (
 				C962191525898A9300B47AB3 /* Sources */,
 				C962191625898A9300B47AB3 /* Frameworks */,
@@ -283,9 +283,9 @@
 			);
 			dependencies = (
 			);
-			name = Nexus;
-			productName = Nexus;
-			productReference = C962191925898A9300B47AB3 /* Nexus.app */;
+			name = RSDKv2;
+			productName = RSDKv2;
+			productReference = C962191925898A9300B47AB3 /* RSDKv2.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -302,7 +302,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C962191425898A9300B47AB3 /* Build configuration list for PBXProject "Nexus" */;
+			buildConfigurationList = C962191425898A9300B47AB3 /* Build configuration list for PBXProject "RSDKv2" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -315,7 +315,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C962191825898A9300B47AB3 /* Nexus */,
+				C962191825898A9300B47AB3 /* RSDKv2 */,
 			);
 		};
 /* End PBXProject section */
@@ -483,7 +483,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/dependencies/mac/Nexus.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/dependencies/mac/RSDKv2.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -501,7 +501,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "RSDK.Nexus";
+				PRODUCT_BUNDLE_IDENTIFIER = "RSDK.RSDKv2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -511,7 +511,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/dependencies/mac/Nexus.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "$(SRCROOT)/dependencies/mac/RSDKv2.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -529,7 +529,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "RSDK.Nexus";
+				PRODUCT_BUNDLE_IDENTIFIER = "RSDK.RSDKv2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -538,7 +538,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C962191425898A9300B47AB3 /* Build configuration list for PBXProject "Nexus" */ = {
+		C962191425898A9300B47AB3 /* Build configuration list for PBXProject "RSDKv2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C962193125898A9400B47AB3 /* Debug */,
@@ -547,7 +547,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C962193325898A9400B47AB3 /* Build configuration list for PBXNativeTarget "Nexus" */ = {
+		C962193325898A9400B47AB3 /* Build configuration list for PBXNativeTarget "RSDKv2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C962193425898A9400B47AB3 /* Debug */,
