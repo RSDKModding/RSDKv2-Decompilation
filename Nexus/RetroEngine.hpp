@@ -25,6 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
+#if RETRO_USE_MOD_LOADER
+#include <regex>
+#endif
 
 // ================
 // STANDARD TYPES
@@ -192,6 +195,15 @@ public:
     void Run();
 
     bool LoadGameConfig(const char *Filepath);
+#if RETRO_USE_MOD_LOADER
+    void LoadXMLWindowText();
+    void LoadXMLVariables();
+    void LoadXMLPalettes();
+    void LoadXMLObjects();
+    void LoadXMLSoundFX();
+    void LoadXMLPlayers(TextMenu *menu);
+    void LoadXMLStages(TextMenu *menu, int listNo);
+#endif
 
     char GameWindowText[0x40];
     char GameDescriptionText[0x100];

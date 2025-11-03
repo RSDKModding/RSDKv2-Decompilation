@@ -67,6 +67,9 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
 
         // Players
         FileRead(&count, 1);
+#if RETRO_USE_MOD_LOADER
+        int xmlPlr = true;
+#endif
         for (int p = 0; p < count; ++p) {
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen); // player anim file
@@ -81,6 +84,7 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
                 CloseFile();
 #if RETRO_USE_MOD_LOADER
                 strcpy(PlayerScriptList[playerID].scriptPath, PlayerScriptList[p].scriptPath);
+                xmlPlr = false;
 #endif
                 LoadPlayerAnimation(strBuf, playerID);
                 SetFileInfo(&info);
@@ -88,6 +92,16 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
             FileRead(&strLen, 1);
             FileRead(&strBuf, strLen); // player name
             strBuf[strLen] = '\0';
+
+#if RETRO_USE_MOD_LOADER
+            playerNames[p] = strBuf;
+            
+            if (xmlPlr) {
+                StrCopy(PlayerScriptList[playerID].scriptPath, modPlayerScripts[characterID].data());
+                LoadPlayerAnimation(modPlayerAnimations[characterID].data(), playerID);
+                PrintLog("player stats 2: anim=\"%s\" scr=\"%s\" name=\"%s\"", "smthn", PlayerScriptList[playerID].scriptPath, playerNames[characterID].data());
+            }
+#endif
         }
         CloseFile();
     }
