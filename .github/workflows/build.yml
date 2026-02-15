@@ -1,6 +1,14 @@
 name: Build RSDKv2
+
 on:
   push:
+    paths:
+      - android/**
+      - dependencies/**
+      - RSDKv2/**
+      - platforms/**
+      - .github/workflows/build.yml
+      - CMakeLists.txt
     branches:
       - master
 
@@ -78,7 +86,7 @@ jobs:
       - name: Move artifacts
         run: |
           mkdir artifacts
-          mv ./build/Nexus* ./artifacts
+          mv ./build/RSDKv2* ./artifacts
           tar -czvf linux.tar.gz -C ./artifacts .
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

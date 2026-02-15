@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "Nexus.ico"
+IDI_ICON1               ICON                    "RSDKv2.ico"
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ BEGIN
             VALUE "CompanyName", "Sonic Nexus (2008) By Christian 'The Taxman' Whitehead, Decompilation by Rubberduckycooly"
             VALUE "FileDescription", "Retro-Sonic Engine"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "Nexus.exe"
+            VALUE "InternalName", "RSDKv2.exe"
             VALUE "OriginalFilename", "RSonic.exe"
             VALUE "ProductName", "Retro-Sonic Engine"
             VALUE "ProductVersion", "1.0.0.1"

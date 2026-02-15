@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C962191825898A9300B47AB3"
-               BuildableName = "Nexus.app"
-               BlueprintName = "Nexus"
-               ReferencedContainer = "container:Nexus.xcodeproj">
+               BuildableName = "RSDKv2.app"
+               BlueprintName = "RSDKv2"
+               ReferencedContainer = "container:RSDKv2.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C962191825898A9300B47AB3"
-            BuildableName = "Nexus.app"
-            BlueprintName = "Nexus"
-            ReferencedContainer = "container:Nexus.xcodeproj">
+            BuildableName = "RSDKv2.app"
+            BlueprintName = "RSDKv2"
+            ReferencedContainer = "container:RSDKv2.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -68,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C962191825898A9300B47AB3"
-            BuildableName = "Nexus.app"
-            BlueprintName = "Nexus"
-            ReferencedContainer = "container:Nexus.xcodeproj">
+            BuildableName = "RSDKv2.app"
+            BlueprintName = "RSDKv2"
+            ReferencedContainer = "container:RSDKv2.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
