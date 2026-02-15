@@ -99,7 +99,6 @@ void LoadPlayerFromList(byte characterID, byte playerID) {
             if (xmlPlr) {
                 StrCopy(PlayerScriptList[playerID].scriptPath, modPlayerScripts[characterID].data());
                 LoadPlayerAnimation(modPlayerAnimations[characterID].data(), playerID);
-                PrintLog("player stats 2: anim=\"%s\" scr=\"%s\" name=\"%s\"", "smthn", PlayerScriptList[playerID].scriptPath, playerNames[characterID].data());
             }
 #endif
         }

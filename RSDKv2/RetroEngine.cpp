@@ -909,6 +909,10 @@ bool RetroEngine::LoadGameConfig(const char *filePath) {
         LoadXMLObjects();
         LoadXMLPlayers(NULL);
         LoadXMLStages(NULL, 0);
+
+        SetGlobalVariableByName("Options.DevMenuFlag", devMenu ? 1 : 0);
+        SetGlobalVariableByName("Engine.PlatformId", RETRO_PLATFORM);
+        SetGlobalVariableByName("Engine.Standalone", 1);
 #endif
 
 #if !RETRO_USE_ORIGINAL_CODE

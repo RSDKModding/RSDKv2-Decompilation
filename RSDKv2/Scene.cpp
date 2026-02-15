@@ -83,8 +83,8 @@ CollisionMasks TileCollisions[2];
 byte TileGfx[TILESET_SIZE];
 
 #if RETRO_USE_MOD_LOADER
-bool loadGlobals = false; // stored here so I can use it later
-int globalScrCount     = 0;
+bool loadGlobals   = false; // stored here so I can use it later
+int globalScrCount = 0;
 #endif
 
 void ProcessStage(void) {
@@ -98,6 +98,9 @@ void ProcessStage(void) {
             MilliSeconds  = 0;
             Seconds       = 0;
             Minutes       = 0;
+#if RETRO_USE_MOD_LOADER
+            for (int m = 0; m < modList.size(); ++m) ScanModFolder(&modList[m]);
+#endif
             LoadStageFiles();
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 PlayerList[i].visible           = true;
@@ -339,7 +342,6 @@ void LoadStageFiles(void) {
                 SetObjectTypeName(modTypeNames[i], (scriptNameID++) + i);
             }
         }
-        scriptNameID = scriptID;
 #endif
         if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
             FileRead(&fileBuffer, 1);
@@ -382,15 +384,14 @@ void LoadStageFiles(void) {
 #if !RETRO_USE_MOD_LOADER
             for (byte i = 0; i < stageScriptCount; ++i) {
 #else
-            int& i = scriptNameID;
-            for (i = 0; i < stageScriptCount; ++i) {
+            for (scriptNameID = 0; scriptNameID < stageScriptCount; ++scriptNameID) {
 #endif
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
                 strBuffer[fileBuffer2] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
-                ParseScriptFile(strBuffer, scriptID + i);
+                ParseScriptFile(strBuffer, scriptID + scriptNameID);
                 SetFileInfo(&infoStore);
             }
 
@@ -408,7 +409,7 @@ void LoadStageFiles(void) {
             CloseFile();
 
 #if RETRO_USE_MOD_LOADER
-            scriptNameID += scriptID; PrintLog("FBWEHVBGHJWEBVGHJEBGWH val=%d", scriptNameID);
+            scriptNameID += scriptID;
             for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
                 ParseScriptFile(modScriptPaths[i], scriptNameID + i);
             }
@@ -525,22 +526,10 @@ void LoadActLayout() {
         FileRead(&fileBuffer, 1);
         objectCount    = (objectCount << 8) + fileBuffer;
 
-#if RETRO_USE_MOD_LOADER
-        int offsetCount = 0;
-//        for (int m = 0; m < modObjCount; ++m)
-//            if (modScriptFlags[m])
-//                ++offsetCount;
-#endif
-
         Entity *object = &ObjectEntityList[32];
         for (int i = 0; i < objectCount; ++i) {
             FileRead(&fileBuffer, 1);
             object->type = fileBuffer;
-
-#if RETRO_USE_MOD_LOADER
-            if (loadGlobals && offsetCount && object->type)
-                object->type += offsetCount; // offset it by our mod count
-#endif
 
             FileRead(&fileBuffer, 1);
             object->propertyValue = fileBuffer;
