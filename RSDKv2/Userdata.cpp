@@ -247,7 +247,7 @@ void InitUserdata()
 
         int nummaps = SDL_GameControllerAddMappingsFromFile(buffer);
         if (nummaps >= 0)
-            PrintLog("loaded %d controller mappings from '%s'\n", buffer, nummaps);
+            PrintLog("loaded %d controller mappings from '%s'\n", nummaps, buffer);
     }
 #endif
 }
