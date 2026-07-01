@@ -68,7 +68,6 @@ The following cmake arguments are available when compiling:
 ## Unofficial Branches
 Follow the installation instructions in the readme of each branch.
 * For the **Nintendo Switch**, go to [LittlePlanetCD's fork](https://github.com/LittlePlanetCD/Sonic-Nexus-Switch).
-* For **WebAssembly**, go to [Jdsle's fork](https://github.com/Jdsle/RSDKv2-Decompilation/tree/web).
 
 Because these branches are unofficial, we can't provide support for them and they may not be up-to-date.
 
