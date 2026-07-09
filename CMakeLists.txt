@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(RetroEngine)
 
-option(FORCE_CASE_INSENSITIVE "Forces case insensivity." OFF)
+option(RETRO_FORCE_CASE_INSENSITIVE "Forces case insensivity." OFF)
 option(RETRO_MOD_LOADER "Enables or disables the mod loader." ON)
 option(RETRO_USE_ORIGINAL_CODE "Removes any change that differs from the original code, a playable game can't be built this way." OFF)
 
@@ -17,6 +17,7 @@ set(RETRO_NAME "RSDKv2")
 set(RETRO_OUTPUT_NAME ${RETRO_NAME} CACHE STRING "The exported name of the executable.")
 
 set(RETRO_FILES
+	dependencies/all/tinyxml2/tinyxml2.cpp
 	RSDKv2/Animation.cpp
 	RSDKv2/Audio.cpp
 	RSDKv2/Collision.cpp
@@ -116,6 +117,7 @@ endif()
 
 target_include_directories(RetroEngine PRIVATE
     RSDKv2/
+    dependencies/all/tinyxml2/
 )
 
 if(DEFINED DEP_PATH)
@@ -127,6 +129,6 @@ endif()
 
 target_compile_definitions(RetroEngine PRIVATE
     RETRO_USE_MOD_LOADER=$<BOOL:${RETRO_USE_MOD_LOADER}>
-    FORCE_CASE_INSENSITIVE=$<BOOL:${FORCE_CASE_INSENSITIVE}>
+    FORCE_CASE_INSENSITIVE=$<BOOL:${RETRO_FORCE_CASE_INSENSITIVE}>
     RETRO_USE_ORIGINAL_CODE=$<BOOL:${RETRO_USE_ORIGINAL_CODE}>
 )

@@ -137,6 +137,12 @@ inline void freeMusInfo()
 }
 #endif
 
+#if RETRO_USE_MOD_LOADER
+extern char globalSfxNames[SFX_COUNT][0x40];
+extern char stageSfxNames[SFX_COUNT][0x40];
+void SetSfxName(const char *sfxName, int sfxID, bool global);
+#endif
+
 void LoadMusic(void *userdata);
 void SetMusicTrack(char *filePath, byte trackID, bool loop);
 bool PlayMusic(int track);

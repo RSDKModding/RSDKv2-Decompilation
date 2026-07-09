@@ -35,6 +35,10 @@ extern int ObjectLoop;
 extern int curObjectType;
 extern Entity ObjectEntityList[ENTITY_COUNT];
 
+#if RETRO_USE_MOD_LOADER
+extern char typeNames[OBJECT_COUNT][0x40];
+#endif
+
 extern int OBJECT_BORDER_X1;
 extern int OBJECT_BORDER_X2;
 extern const int OBJECT_BORDER_Y1;
@@ -42,5 +46,9 @@ extern const int OBJECT_BORDER_Y2;
 
 void ProcessStartupScripts();
 void ProcessObjects();
+
+#if RETRO_USE_MOD_LOADER
+void SetObjectTypeName(const char *objectName, int objectID);
+#endif
 
 #endif // !OBJECT_H

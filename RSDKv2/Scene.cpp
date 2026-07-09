@@ -82,6 +82,11 @@ CollisionMasks TileCollisions[2];
 
 byte TileGfx[TILESET_SIZE];
 
+#if RETRO_USE_MOD_LOADER
+bool loadGlobals   = false; // stored here so I can use it later
+int globalScrCount = 0;
+#endif
+
 void ProcessStage(void) {
     switch (StageMode) {
         case STAGEMODE_LOAD:
@@ -93,6 +98,9 @@ void ProcessStage(void) {
             MilliSeconds  = 0;
             Seconds       = 0;
             Minutes       = 0;
+#if RETRO_USE_MOD_LOADER
+            for (int m = 0; m < modList.size(); ++m) ScanModFolder(&modList[m]);
+#endif
             LoadStageFiles();
             for (int i = 0; i < PLAYER_COUNT; ++i) {
                 PlayerList[i].visible           = true;
@@ -223,14 +231,118 @@ void LoadStageFiles(void) {
 #endif
         ReleaseStageSfx();
         LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+#if RETRO_USE_MOD_LOADER
+        Engine.LoadXMLPalettes();
+#endif
         ClearScriptData();
         for (int i = SPRITESHEETS_MAX; i > 0; i--) RemoveGraphicsFile((char *)"", i - 1);
 
+#if RETRO_USE_MOD_LOADER
+        loadGlobals = false;
+#else
         bool loadGlobals = false;
+#endif
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
             FileRead(&loadGlobals, 1);
+#if RETRO_USE_MOD_LOADER
+            for (int i = 96; i < 128; ++i) {
+                byte clr[3];
+                FileRead(&clr, 3);
+            }
+
+            byte stageScriptCount = 0;
+            FileRead(&stageScriptCount, 1);
+            for (byte i = 0; i < stageScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+            }
+
+            FileRead(&fileBuffer2, 1);
+            NoStageSFX = fileBuffer2;
+            for (int i = 0; i < NoStageSFX; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+                SetSfxName(strBuffer, i, false);
+            }
+#endif
             CloseFile();
         }
+#if RETRO_USE_MOD_LOADER
+        int scriptNameID = scriptID;
+        if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+            FileRead(&fileBuffer, 1);
+            FileRead(&strBuffer, fileBuffer);
+
+            byte globalScriptCount = 0;
+            FileRead(&globalScriptCount, 1);
+            for (byte i = 0; i < globalScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+
+                int strNamePos  = 0;
+                int typeNamePos = 0;
+                byte mode       = 0;
+                while (strBuffer[strNamePos]) {
+                    if (strBuffer[strNamePos] == '.' && mode == 1)
+                        mode = 2;
+                    else if ((strBuffer[strNamePos] == '/' || strBuffer[strNamePos] == '\\') && !mode)
+                        mode = 1;
+                    else if (mode == 1)
+                        strBuffer[typeNamePos++] = strBuffer[strNamePos];
+                    ++strNamePos;
+                }
+                strBuffer[typeNamePos] = 0;
+                SetObjectTypeName(strBuffer, scriptNameID++);
+            }
+            CloseFile();
+
+            for (byte i = 0; i < modObjCount && loadGlobals && modScriptFlags[i]; ++i) {
+                SetObjectTypeName(modTypeNames[i], (scriptNameID++) + i);
+            }
+        }
+
+        if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
+            FileRead(&loadGlobals, 1);
+            for (int i = 96; i < 128; ++i) {
+                byte clr[3];
+                FileRead(&clr, 3);
+            }
+            byte stageScriptCount = 0;
+            FileRead(&stageScriptCount, 1);
+            for (byte i = 0; i < stageScriptCount; ++i) {
+                FileRead(&fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2);
+                strBuffer[fileBuffer2] = 0;
+
+                int strNamePos  = 0;
+                int typeNamePos = 0;
+                byte mode       = 0;
+                while (strBuffer[strNamePos]) {
+                    if (strBuffer[strNamePos] == '.' && mode == 1)
+                        mode = 2;
+                    else if ((strBuffer[strNamePos] == '/' || strBuffer[strNamePos] == '\\') && !mode)
+                        mode = 1;
+                    else if (mode == 1)
+                        strBuffer[typeNamePos++] = strBuffer[strNamePos];
+                    ++strNamePos;
+                }
+                strBuffer[typeNamePos] = 0;
+                SetObjectTypeName(strBuffer, scriptNameID++);
+            }
+            CloseFile();
+
+            for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
+                SetObjectTypeName(modTypeNames[i], (scriptNameID++) + i);
+            }
+        }
+#endif
         if (loadGlobals && LoadFile("Data/Game/GameConfig.bin", &info)) {
             FileRead(&fileBuffer, 1);
             FileRead(&strBuffer, fileBuffer);
@@ -251,6 +363,12 @@ void LoadStageFiles(void) {
                 SetFileInfo(&infoStore);
             }
             CloseFile();
+
+#if RETRO_USE_MOD_LOADER
+            for (byte i = 0; i < modObjCount && loadGlobals && modScriptFlags[i]; ++i) {
+                ParseScriptFile(modScriptPaths[i], scriptID++);
+            }
+#endif
         }
 
         if (LoadStageFile("StageConfig.bin", StageListPosition, &info)) {
@@ -263,13 +381,17 @@ void LoadStageFiles(void) {
 
             byte stageScriptCount = 0;
             FileRead(&stageScriptCount, 1);
+#if !RETRO_USE_MOD_LOADER
             for (byte i = 0; i < stageScriptCount; ++i) {
+#else
+            for (scriptNameID = 0; scriptNameID < stageScriptCount; ++scriptNameID) {
+#endif
                 FileRead(&fileBuffer2, 1);
                 FileRead(strBuffer, fileBuffer2);
                 strBuffer[fileBuffer2] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
-                ParseScriptFile(strBuffer, scriptID + i);
+                ParseScriptFile(strBuffer, scriptID + scriptNameID);
                 SetFileInfo(&infoStore);
             }
 
@@ -285,6 +407,13 @@ void LoadStageFiles(void) {
                 SetFileInfo(&infoStore);
             }
             CloseFile();
+
+#if RETRO_USE_MOD_LOADER
+            scriptNameID += scriptID;
+            for (byte i = 0; i < modObjCount && loadGlobals && !modScriptFlags[i]; ++i) {
+                ParseScriptFile(modScriptPaths[i], scriptNameID + i);
+            }
+#endif
         }
         FileInfo info;
         for (int p = 0; p < PLAYER_COUNT; ++p) {
@@ -396,6 +525,7 @@ void LoadActLayout() {
         int objectCount = fileBuffer;
         FileRead(&fileBuffer, 1);
         objectCount    = (objectCount << 8) + fileBuffer;
+
         Entity *object = &ObjectEntityList[32];
         for (int i = 0; i < objectCount; ++i) {
             FileRead(&fileBuffer, 1);
