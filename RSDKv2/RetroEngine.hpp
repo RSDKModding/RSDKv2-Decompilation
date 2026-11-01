@@ -101,7 +101,6 @@ typedef unsigned int uint;
 #define RETRO_USING_SDL2 (1)
 #endif
 
-
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (0)
