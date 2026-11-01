@@ -91,8 +91,15 @@ typedef unsigned int uint;
 #endif
 
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS || RETRO_PLATFORM == RETRO_UWP
+#if RETRO_SDL_VERSION == 1
 #define RETRO_USING_SDL1 (0)
+#endif
+
+#if RETRO_SDL_VERSION == 2
 #define RETRO_USING_SDL2 (1)
+#endif
+
+
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (0)
