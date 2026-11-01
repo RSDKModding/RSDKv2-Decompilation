@@ -92,10 +92,12 @@ typedef unsigned int uint;
 
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS || RETRO_PLATFORM == RETRO_UWP
 #if RETRO_SDL_VERSION == 1
-#define RETRO_USING_SDL1 (0)
+#define RETRO_USING_SDL1 (1)
+#define RETRO_USING_SDL2 (0)
 #endif
 
 #if RETRO_SDL_VERSION == 2
+#define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (1)
 #endif
 
